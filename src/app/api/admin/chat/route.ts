@@ -8,6 +8,7 @@ import { ObjectId } from "mongodb";
 // For demo purposes, we'll create a simple polling-based API
 
 export const dynamic = 'force-dynamic';
+export const runtime = "edge";
 
 let connections: Map<string, { userId: string, adminInfo: any }> = new Map();
 

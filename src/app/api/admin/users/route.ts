@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const runtime = "edge";
 
 // Get all users and pending actions
 export async function GET(request: Request) {
