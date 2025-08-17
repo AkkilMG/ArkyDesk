@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-export const runtime = "edge";
 
 export async function GET(request: Request) {
   return NextResponse.json({success: false, message: `Only POST Method is available!`}, {
