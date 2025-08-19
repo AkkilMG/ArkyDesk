@@ -4,16 +4,16 @@ compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
 # Environment variables for development
-[env.development.vars]
-NODE_ENV = "development"
+# [env.development.vars]
+# NODE_ENV = "development"
 
 # Environment variables for preview
-[env.preview.vars]
-NODE_ENV = "production"
+# [env.preview.vars]
+# NODE_ENV = "production"
 
 # Environment variables for production
 [env.production.vars]
-NODE_ENV = "production"
+# NODE_ENV = "production"
 
 # Variables that can be set in all environments (non-sensitive)
 [vars]
