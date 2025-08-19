@@ -9,6 +9,7 @@ import { ObjectId } from "mongodb";
 
 export const dynamic = 'force-dynamic';
 
+export const runtime = "edge";
 
 let connections: Map<string, { userId: string, adminInfo: any }> = new Map();
 

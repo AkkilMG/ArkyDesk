@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 
+export const runtime = "edge";
 
 // Approve or reject user action requests
 export async function PUT(request: Request) {
