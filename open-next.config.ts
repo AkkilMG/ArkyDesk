@@ -11,7 +11,14 @@ const config: OpenNextConfig = {
       queue: 'dummy',
     },
   },
-  edgeExternals: ['node:crypto'], // ✅ required
+  // 👇 mark Next.js compiled deps as external so esbuild doesn’t choke
+  edgeExternals: [
+    "next/dist/compiled/node-fetch",
+    "next/dist/compiled/ws",
+    "next/dist/compiled/@ampproject/toolbox-optimizer",
+    "next/dist/compiled/edge-runtime",
+    "node:crypto", // still required for some Next APIs
+  ],
   middleware: {
     external: true,
     override: {
