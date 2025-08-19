@@ -16,8 +16,6 @@ function getMongoEnv() {
   return {mongodbDb, mongodbUri};
 }
 
-const { mongodbDb, mongodbUri } = getMongoEnv();
-
 const nodeEnv = (() => {
   return process.env.NODE_ENV || 'development';
 })();
@@ -27,18 +25,28 @@ declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (nodeEnv === 'development') {
-  if (!global._mongoClientPromise) {
+function initializeClient() {
+  const { mongodbUri } = getMongoEnv();
+  
+  if (nodeEnv === 'development') {
+    if (!global._mongoClientPromise) {
+      client = new MongoClient(mongodbUri);
+      global._mongoClientPromise = client.connect();
+    }
+    clientPromise = global._mongoClientPromise;
+  } else {
     client = new MongoClient(mongodbUri);
-    global._mongoClientPromise = client.connect();
+    clientPromise = client.connect();
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(mongodbUri);
-  clientPromise = client.connect();
 }
 
 export async function getMongoClient() {
+  // Initialize client only when needed
+  if (!clientPromise) {
+    initializeClient();
+  }
+  
+  const { mongodbDb } = getMongoEnv();
   const client = await clientPromise;
   return client.db(mongodbDb);
 }
