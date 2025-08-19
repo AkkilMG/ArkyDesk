@@ -2,11 +2,7 @@ name = "arkydesk"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# This serves your Next.js static files
 pages_build_output_dir = ".vercel/output/static"
 
-# This tells Pages to use the OpenNext worker for API + middleware
-# OpenNext generates `.vercel/output/functions/_worker.js`
-# [[pages_functions]]
-[[functions]]
+[[pages_functions]]
 directory = ".vercel/output/functions"
