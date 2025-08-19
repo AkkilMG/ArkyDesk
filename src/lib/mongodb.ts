@@ -7,20 +7,30 @@ const dbName = process.env.MONGODB_DB as string;
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your Mongo URI to .env.local');
+function getMongoEnv() {
+  const mongodbUri = process.env.MONGODB_URI;
+  if (!mongodbUri) {
+    throw new Error('Please add your Mongo URI to .env.local');
+  }
+  const mongodbDb = process.env.MONGODB_DB;
+  if (!mongodbDb) {
+    throw new Error('Please add your Mongo DB Name to .env.local');
+  }
+  return {mongodbDb, mongodbUri};
 }
 
-if (!process.env.MONGODB_DB) {
-  throw new Error('Please add your Mongo DB Name to .env.local');
-}
+const { mongodbDb, mongodbUri } = getMongoEnv();
+
+const nodeEnv = (() => {
+  return process.env.NODE_ENV || 'development';
+})();
 
 declare global {
   // Prevent multiple instances of MongoClient during hot reloading in dev
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (process.env.NODE_ENV === 'development') {
+if (nodeEnv === 'development') {
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri);
     global._mongoClientPromise = client.connect();
