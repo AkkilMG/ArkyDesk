@@ -1,9 +1,6 @@
 // lib/mongodb.ts
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI as string;
-const dbName = process.env.MONGODB_DB as string;
-
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
@@ -32,16 +29,16 @@ declare global {
 
 if (nodeEnv === 'development') {
   if (!global._mongoClientPromise) {
-    client = new MongoClient(uri);
+    client = new MongoClient(mongodbUri);
     global._mongoClientPromise = client.connect();
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  client = new MongoClient(uri);
+  client = new MongoClient(mongodbUri);
   clientPromise = client.connect();
 }
 
 export async function getMongoClient() {
   const client = await clientPromise;
-  return client.db(dbName);
+  return client.db(mongodbDb);
 }
