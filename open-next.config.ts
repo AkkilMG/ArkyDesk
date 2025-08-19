@@ -11,6 +11,7 @@ const config: OpenNextConfig = {
       queue: 'dummy',
     },
   },
+  edgeExternals: ['node:crypto'], // ✅ required
   middleware: {
     external: true,
     override: {
