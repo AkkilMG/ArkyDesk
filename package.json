@@ -7,11 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "npm run pages:build && wrangler pages dev",
-    "deploy": "npm run pages:build && wrangler pages deploy"
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    
+    "xpages:build": "npx @cloudflare/next-on-pages",
+    "xpreview": "npm run pages:build && wrangler pages dev",
+    "xdeploy": "npm run pages:build && wrangler pages deploy"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.6.5",
     "@types/nodemailer": "^6.4.16",
     "axios": "^1.8.4",
     "crypto-js": "^4.2.0",
