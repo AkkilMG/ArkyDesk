@@ -1,6 +1,6 @@
 import { decrypt, encrypt, encryptCode } from "@/lib/crypto";
 import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
+import { decryptSession, updateSession } from "@/lib/session";
 import { ObjectId } from "mongodb";
 import { cookies } from "next/headers";
 import { NextResponse } from 'next/server';
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       });
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
-      var data = await decrypt(decryptedSession.token);
+      const data = await decrypt(decryptedSession.token);
       const db = await getMongoClient();
       const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
       if (!check) {
@@ -30,6 +30,8 @@ export async function GET(request: Request) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
+      // Slide session expiry on each verify call
+      await updateSession();
       return NextResponse.json({ success: true, admin: check.admin ? check.admin : false }, {
         status: 200,
         headers: { 'Content-Type': 'application/json' }

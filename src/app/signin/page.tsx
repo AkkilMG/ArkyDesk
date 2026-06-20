@@ -24,6 +24,7 @@ export default function Signin() {
     });
     const [video, setVideo] = useState(0);
     const [activeTab, setActiveTab] = useState<"signin" | "guest">("signin");
+    const [checkingSession, setCheckingSession] = useState(true);
     const router = useRouter();
     
     async function handleAdmin() {
@@ -41,12 +42,14 @@ export default function Signin() {
                 } else {
                     router.push("/dashboard");
                 }
+                return;
             } else {
                 console.error('Verify failed:', data.message);
             }
         } catch (error) {
             console.error('Error verify out:', error);
         }
+        setCheckingSession(false);
     }
 
     useEffect(() => {
@@ -55,12 +58,56 @@ export default function Signin() {
         };
         if (typeof document !== 'undefined' && document.cookie) {
             handleAdmin();
+        } else {
+            setCheckingSession(false);
+        }
+        // Show upgrade success message if redirected from signup
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('upgraded') === '1') {
+                setSuccessMessage('Your guest account has been upgraded successfully! Sign in with your new password.');
+            }
         }
         window.addEventListener('load', handleRefresh);
         return () => {
             window.removeEventListener('load', handleRefresh);
         };
     }, []);
+
+    if (checkingSession) {
+        return (
+            <main className="flex flex-col">
+                <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
+                    <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
+                        <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
+                    </div>
+                </header>
+                <div className="flex flex-row flex-grow">
+                    <div className="hidden lg:block lg:w-1/3">
+                        <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+                            <Shimmer className="w-full h-full" />
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 min-h-screen lg:min-h-0 pb-10">
+                        <div className="w-full max-w-md space-y-6">
+                            <Shimmer className="h-8 w-48 rounded" variant="card" />
+                            <div className="flex gap-3">
+                                <Shimmer className="h-12 flex-1 rounded-xl" variant="card" />
+                                <Shimmer className="h-12 flex-1 rounded-xl" variant="card" />
+                            </div>
+                            <div className="space-y-4">
+                                <Shimmer className="h-4 w-16 rounded" variant="list" />
+                                <Shimmer className="h-14 w-full rounded-lg" variant="card" />
+                                <Shimmer className="h-4 w-16 rounded" variant="list" />
+                                <Shimmer className="h-14 w-full rounded-lg" variant="card" />
+                                <Shimmer className="h-14 w-full rounded-3xl" variant="card" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        );
+    }
 
     const handleChange = (event: any) => {
         setFormData({
@@ -225,7 +272,7 @@ export default function Signin() {
                             <a href={`https://dribbble.com/${owner[video]}`} className="font-bold text-center text-white" style={{ position: 'absolute', bottom: 0, width: '100%', marginBottom: '20px' }}>@{owner[video]}</a>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 h-screen lg:h-auto pb-10">
+                    <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 min-h-screen lg:min-h-0 pb-10">
                         <div className="w-full max-w-md">
                             <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign in to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='Arkynox' /></h2>
 
@@ -242,14 +289,14 @@ export default function Signin() {
                                     onClick={() => setActiveTab("guest")}
                                     className={`flex-1 h-12 rounded-xl font-bold transition-colors duration-200 flex items-center justify-center ${activeTab === "guest" ? "bg-[#0D0C22] text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"}`}
                                 >
-                                    Guest SignIn
+                                    Guest Access
                                 </button>
                             </div>
 
                             {activeTab === "signin" ? (
-                                <form action={submit}>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 font-bold text-gray-700 text-sl"> Email </label>
+                                    <form action={submit} aria-label="Sign in form">
+                                        <div className="mb-4">
+                                            <label className="block mb-2 font-bold text-gray-700 text-sl" htmlFor="email"> Email </label>
                                         <input value={formData.email} onChange={handleChange} id="email" type="email" 
                                         className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2" />
                                     </div>
@@ -260,17 +307,18 @@ export default function Signin() {
                                                 type="button"
                                                 onClick={(e) => setShowForgotModal(true)}
                                                 className="font-sans text-sm font-normal text-blue-600 hover:text-blue-800 underline cursor-pointer transition-colors"
+                                                aria-label="Forgot password"
                                             >
                                                 Forgot Password?
                                             </button>
                                         </span>
                                         <input value={formData.password} onChange={handleChange} id="password" type="password" 
-                                        className="w-full px-3 py-2 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" />
+                                        className="w-full px-3 py-2 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" aria-label="Password" />
                                     </div>
-                                    { error && (<div className="mb-6">
+                                    { error && (<div className="mb-6" role="alert">
                                         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                             <div className="flex items-center">
-                                                <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                                 <span className="text-sm font-medium text-red-700">{error}</span>
@@ -278,10 +326,10 @@ export default function Signin() {
                                         </div>
                                     </div> )}
                                     
-                                    { successMessage && (<div className="mb-6">
+                                    { successMessage && (<div className="mb-6" role="alert">
                                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                             <div className="flex items-center">
-                                                <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                                 <span className="text-sm font-medium text-green-700">{successMessage}</span>
@@ -295,12 +343,10 @@ export default function Signin() {
                                             className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
                                         >
                                             {isLoading ? (
-                                                <>
-                                                            <div className="inline-block -ml-1 mr-3">
-                                                                <Shimmer className="h-5 w-5 bg-white/80 rounded-full" shape="circle" />
-                                                            </div>
-                                                            Signing In...
-                                                </>
+                                                <span className="flex items-center justify-center gap-2">
+                                                    <Shimmer className="h-5 w-5 rounded-full" shape="circle" variant="button" />
+                                                    Signing In...
+                                                </span>
                                             ) : (
                                                 'Sign In'
                                             )}
@@ -327,7 +373,7 @@ export default function Signin() {
                                         </div>
                                     </div>
                                     <div className="mb-4">
-                                        <label className="block mb-2 font-bold text-gray-700 text-sl">Guest name</label>
+                                        <label className="block mb-2 font-bold text-gray-700 text-sl" htmlFor="guest-name">Guest name</label>
                                         <input
                                             id="name"
                                             value={guestForm.name}
@@ -335,10 +381,11 @@ export default function Signin() {
                                             type="text"
                                             placeholder="Enter your display name"
                                             className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"
+                                            aria-label="Guest name"
                                         />
                                     </div>
                                     <div className="mb-6">
-                                        <label className="block mb-2 font-bold text-gray-700 text-sl">Guest email</label>
+                                        <label className="block mb-2 font-bold text-gray-700 text-sl" htmlFor="guest-email">Guest email</label>
                                         <input
                                             id="email"
                                             value={guestForm.email}
@@ -346,13 +393,14 @@ export default function Signin() {
                                             type="email"
                                             placeholder="name@example.com"
                                             className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"
+                                            aria-label="Guest email"
                                         />
                                     </div>
                                     {guestError && (
-                                        <div className="mb-6">
+                                        <div className="mb-6" role="alert">
                                             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                                 <div className="flex items-center">
-                                                    <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                     <span className="text-sm font-medium text-red-700">{guestError}</span>
@@ -361,10 +409,10 @@ export default function Signin() {
                                         </div>
                                     )}
                                     {guestMessage && (
-                                        <div className="mb-6">
+                                        <div className="mb-6" role="alert">
                                             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                                 <div className="flex items-center">
-                                                    <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                     <span className="text-sm font-medium text-green-700">{guestMessage}</span>
@@ -380,12 +428,10 @@ export default function Signin() {
                                             className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
                                         >
                                             {guestLoading ? (
-                                                <>
-                                                    <div className="inline-block -ml-1 mr-3">
-                                                        <Shimmer className="h-5 w-5 bg-white/80 rounded-full" shape="circle" />
-                                                    </div>
+                                                <span className="flex items-center justify-center gap-2">
+                                                    <Shimmer className="h-5 w-5 rounded-full" shape="circle" variant="button" />
                                                     Starting guest session...
-                                                </>
+                                                </span>
                                             ) : (
                                                 'Continue as Guest'
                                             )}
@@ -399,7 +445,7 @@ export default function Signin() {
 
                 {/* Forgot Password Modal */}
                 {showForgotModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Reset password">
                         <div className="fixed inset-0 bg-black bg-opacity-50" onClick={(e) => setShowForgotModal(false)} />
                         
                         <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md">
@@ -481,12 +527,10 @@ export default function Signin() {
                                         className="flex-1 px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                                     >
                                         {isLoading ? (
-                                            <>
-                                                    <div className="inline-block -ml-1 mr-2">
-                                                        <Shimmer className="h-4 w-4 bg-white/80 rounded-full inline-block" shape="circle" />
-                                                    </div>
+                                            <span className="flex items-center justify-center gap-2">
+                                                <Shimmer className="h-4 w-4 rounded-full" shape="circle" variant="button" />
                                                 Sending...
-                                            </>
+                                            </span>
                                         ) : (
                                             'Send Reset Link'
                                         )}

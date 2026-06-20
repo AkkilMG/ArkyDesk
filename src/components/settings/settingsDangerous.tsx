@@ -116,7 +116,7 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                 {!showDeleteConfirm ? (
                     <button 
                         onClick={handleDeleteRequest}
-                        className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 sm:py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                     >
                         Request Account Deletion
                     </button>
@@ -135,14 +135,14 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                         <div className="flex gap-3">
                             <button 
                                 onClick={handleDeleteCancel}
-                                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded"
+                                className="px-4 py-3 sm:py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded"
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleDeleteConfirm}
                                 disabled={isLoading || deleteConfirmText !== 'DELETE'}
-                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-red-300 rounded"
+                                className="px-4 py-3 sm:py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-red-300 rounded"
                             >
                                 {isLoading ? 'Deleting...' : 'Confirm Deletion'}
                             </button>

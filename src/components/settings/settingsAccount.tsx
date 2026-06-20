@@ -127,7 +127,7 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
                     {!isChangingPassword && (
                         <button 
                             onClick={handlePasswordChange}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800 px-3 py-2"
                         >
                             Change Password
                         </button>
@@ -229,14 +229,14 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
                             <button 
                                 type="button"
                                 onClick={handlePasswordCancel}
-                                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded"
+                                className="px-4 py-3 sm:py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded"
                             >
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
                                 disabled={isLoading}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded"
+                                className="px-4 py-3 sm:py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded"
                             >
                                 {isLoading ? 'Changing...' : 'Change Password'}
                             </button>

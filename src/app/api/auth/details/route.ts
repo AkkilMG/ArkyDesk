@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       });
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
-      var data = await decrypt(decryptedSession.token);
+      const data = await decrypt(decryptedSession.token);
       const db = await getMongoClient();
       const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
       if (!check) {

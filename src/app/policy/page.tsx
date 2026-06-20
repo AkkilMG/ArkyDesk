@@ -11,43 +11,43 @@ export default function PolicyIndex() {
     const policies = [
         {
             title: 'Privacy Policy',
-            description: 'How we collect, use, and protect your personal information',
+            description: 'How we collect, use, and protect your personal information — compliant with 25+ global privacy laws including GDPR, DPDP Act (India), LGPD, and more',
             href: '/policy/privacy-policy',
             icon: '🔒',
             category: 'Privacy & Security',
-            lastUpdated: 'August 15, 2025'
+            lastUpdated: 'June 20, 2026'
         },
         {
             title: 'Terms and Conditions',
-            description: 'Legal terms governing the use of our support services',
+            description: 'Legal terms governing the use of our support services with multi-jurisdiction coverage',
             href: '/policy/terms-and-condition',
             icon: '📋',
             category: 'Legal',
-            lastUpdated: 'August 15, 2025'
+            lastUpdated: 'June 20, 2026'
         },
         {
             title: 'Service Level Agreement',
-            description: 'Our commitments for service availability and response times',
+            description: 'Our commitments for service availability, response times, and regional support coverage',
             href: '/policy/sla',
             icon: '⚡',
             category: 'Service Standards',
-            lastUpdated: 'August 15, 2025'
+            lastUpdated: 'June 20, 2026'
         },
         {
             title: 'Acceptable Use Policy',
-            description: 'Guidelines for appropriate use of our support system',
+            description: 'Guidelines for appropriate use aligned with cybercrime laws across 25+ jurisdictions',
             href: '/policy/acceptable-use',
             icon: '✅',
             category: 'Usage Guidelines',
-            lastUpdated: 'August 15, 2025'
+            lastUpdated: 'June 20, 2026'
         },
         {
             title: 'Data Retention Policy',
-            description: 'How long we keep your data and our disposal procedures',
+            description: 'Country-specific data retention periods and disposal procedures per local laws',
             href: '/policy/data-retention',
             icon: '🗂️',
             category: 'Privacy & Security',
-            lastUpdated: 'August 15, 2025'
+            lastUpdated: 'June 20, 2026'
         }
     ];
 
@@ -66,19 +66,62 @@ export default function PolicyIndex() {
                     </p>
                 </div>
 
+                {/* How Policies Work Together - Visual Diagram */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">📐 How Our Policies Work Together</h2>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 text-xs">
+                        <div className="bg-blue-50 border-2 border-blue-300 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                            <div className="text-lg mb-1">🔒</div>
+                            <div className="font-bold text-blue-800">Privacy Policy</div>
+                            <div className="text-blue-600">Your data, your rights</div>
+                        </div>
+                        <div className="text-gray-400 text-2xl font-bold">+</div>
+                        <div className="bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                            <div className="text-lg mb-1">📋</div>
+                            <div className="font-bold text-slate-800">Terms & Conditions</div>
+                            <div className="text-slate-600">Rules of using our service</div>
+                        </div>
+                        <div className="text-gray-400 text-2xl font-bold">+</div>
+                        <div className="bg-green-50 border-2 border-green-300 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                            <div className="text-lg mb-1">✅</div>
+                            <div className="font-bold text-green-800">Acceptable Use</div>
+                            <div className="text-green-600">What's OK / not OK</div>
+                        </div>
+                        <div className="text-gray-400 text-2xl font-bold">+</div>
+                        <div className="bg-amber-50 border-2 border-amber-300 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                            <div className="text-lg mb-1">🗂️</div>
+                            <div className="font-bold text-amber-800">Data Retention</div>
+                            <div className="text-amber-600">How long we keep data</div>
+                        </div>
+                        <div className="text-gray-400 text-2xl font-bold">+</div>
+                        <div className="bg-purple-50 border-2 border-purple-300 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                            <div className="text-lg mb-1">⚡</div>
+                            <div className="font-bold text-purple-800">SLA</div>
+                            <div className="text-purple-600">Service promises</div>
+                        </div>
+                    </div>
+                    <div className="text-center mt-3 text-xs text-gray-500">
+                        Together, these 5 policies create a complete framework for transparent, secure, and lawful support services across 25+ countries
+                    </div>
+                </div>
+
                 {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                     <div className="bg-white rounded-lg shadow-md p-6 text-center">
                         <div className="text-3xl font-bold text-blue-600 mb-2">{policies.length}</div>
                         <div className="text-gray-600">Active Policies</div>
                     </div>
                     <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                        <div className="text-3xl font-bold text-green-600 mb-2">99.9%</div>
-                        <div className="text-gray-600">Uptime SLA</div>
+                        <div className="text-3xl font-bold text-green-600 mb-2">25+</div>
+                        <div className="text-gray-600">Jurisdictions Covered</div>
                     </div>
                     <div className="bg-white rounded-lg shadow-md p-6 text-center">
                         <div className="text-3xl font-bold text-purple-600 mb-2">GDPR</div>
                         <div className="text-gray-600">Compliant</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                        <div className="text-3xl font-bold text-orange-600 mb-2">DPDP</div>
+                        <div className="text-gray-600">India Compliant</div>
                     </div>
                 </div>
 
@@ -150,9 +193,12 @@ export default function PolicyIndex() {
                         <div>
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Compliance</h3>
                             <p className="text-gray-600 text-sm leading-relaxed">
-                                Our policies are designed to comply with applicable laws including GDPR, 
-                                CCPA, and other privacy regulations. We maintain regular compliance 
-                                assessments and audits.
+                                Our policies are designed to comply with applicable laws including GDPR (EU), 
+                                UK GDPR, DPDP Act (India), LGPD (Brazil), APPI (Japan), POPIA (South Africa),
+                                CCPA/CPRA (California), KVKK (Turkey), PIPA (South Korea), PDPA (Thailand),
+                                PDP Law (Indonesia), Data Protection Act 2019 (Kenya), NDPR (Nigeria),
+                                PDPA (Sri Lanka), 152-FZ (Russia), and other applicable privacy regulations
+                                across 25+ jurisdictions. We maintain regular compliance assessments and audits.
                             </p>
                         </div>
                         <div>

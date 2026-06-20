@@ -73,14 +73,14 @@ export default function SettingsSideBar({
     return isMobile ? (
       <div className="w-full border-b md:border-b-0 md:w-1/4 p-4 shadow-md bg-white">
         <h2 className="pl-6 pt-4 pb-4 md:pt-10 mb-2 md:mb-6 text-xl font-bold">Settings</h2>
-        <ul className="flex justify-around md:flex-col sm:pl-4 space-y-0 md:space-y-4 text-gray-700 cursor-pointer">
-          <li className={`${profile ? "text-blue-600 font-semibold" : "hover:text-gray-900"} w-full text-center md:text-left py-2`} onClick={(e) => handleClick(0)}> 
+        <ul className="flex justify-center gap-4 sm:gap-0 sm:justify-around md:flex-col sm:pl-4 space-y-0 md:space-y-4 text-gray-700 cursor-pointer">
+          <li className={`${profile ? "text-blue-600 font-semibold" : "hover:text-gray-900"} w-full text-center md:text-left py-3 sm:py-2`} onClick={(e) => handleClick(0)}> 
             Profile
           </li>
-          <li className={`${account ? "text-blue-600 font-semibold" : "hover:text-gray-900"} w-full text-center md:text-left py-2`} onClick={(e) => handleClick(1)}>
+          <li className={`${account ? "text-blue-600 font-semibold" : "hover:text-gray-900"} w-full text-center md:text-left py-3 sm:py-2`} onClick={(e) => handleClick(1)}>
             Account
           </li>
-          <li className={`${dangerous ? "text-red-600 font-semibold" : "hover:text-red-600"} w-full text-center md:text-left py-2 md:mt-6 md:border-t md:pt-4`} onClick={(e) => handleClick(2)}>
+          <li className={`${dangerous ? "text-red-600 font-semibold" : "hover:text-red-600"} w-full text-center md:text-left py-3 sm:py-2 md:mt-6 md:border-t md:pt-4`} onClick={(e) => handleClick(2)}>
             Danger Zone
           </li>
         </ul>
@@ -96,7 +96,7 @@ export default function SettingsSideBar({
             Account
           </li>
           <li className="mt-6 font-bold cursor-default text-gray-500 border-t pt-4">Danger Zone</li>
-          <li className={`${dangerous ? "text-red-600 font-semibold border-r-2 border-red-600 pr-4" : "hover:text-red-600"} py-1`} onClick={(e) => handleClick(2)}>
+          <li className={`${dangerous ? "text-red-600 font-semibold border-r-2 border-red-600 pr-4" : "hover:text-red-600"} py-3 sm:py-2`} onClick={(e) => handleClick(2)}>
             Delete Account
           </li>
         </ul>

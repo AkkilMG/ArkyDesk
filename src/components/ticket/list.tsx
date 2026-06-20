@@ -53,7 +53,7 @@ export default function TicketsLists({
     return (
             <div className="flex flex-col space-y-4">
                     <div className="flex items-center space-x-2">
-                        <button className="sm:hidden focus:outline-none p-2 px-3 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                        <button className="sm:hidden focus:outline-none p-3 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                             <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="Menu Toggle" className="h-6 w-6" />
                         </button>
                         <div className="relative flex-1">
@@ -66,7 +66,7 @@ export default function TicketsLists({
                             />
                             <img src="/icons/search.svg" alt="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         </div>
-                        <button className="p-2 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover">
+                        <button className="p-2.5 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover">
                             <img src="/icons/filter.svg" alt="filter" className="w-6 h-6" />
                         </button>
                     </div>
@@ -75,7 +75,7 @@ export default function TicketsLists({
                     <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2">
                         <button 
                             onClick={(e) => setFilter("all")}
-                            className={`font-medium py-2 px-2 sm:px-4 rounded-full border-2 transition-smooth btn-hover whitespace-nowrap text-sm sm:text-base ${
+                            className={`font-medium py-2.5 sm:py-2 px-3 sm:px-4 rounded-full border-2 transition-smooth btn-hover whitespace-nowrap text-sm sm:text-base ${
                                 filter === "all" 
                                 ? "text-white bg-blue-500 border-blue-500" 
                                 : "text-gray-500 border-gray-300 hover:text-blue-500 hover:border-blue-400"
@@ -85,7 +85,7 @@ export default function TicketsLists({
                         </button>
                         <button 
                             onClick={(e) => setFilter("open")}
-                            className={`font-medium py-2 px-2 sm:px-4 rounded-full border-2 transition-smooth btn-hover whitespace-nowrap text-sm sm:text-base ${
+                            className={`font-medium py-2.5 sm:py-2 px-3 sm:px-4 rounded-full border-2 transition-smooth btn-hover whitespace-nowrap text-sm sm:text-base ${
                                 filter === "open" 
                                 ? "text-white bg-green-500 border-green-500" 
                                 : "text-gray-500 border-gray-300 hover:text-green-500 hover:border-green-400"
@@ -95,7 +95,7 @@ export default function TicketsLists({
                         </button>
                         <button 
                             onClick={(e) => setFilter("closed")}
-                            className={`font-medium py-2 px-2 sm:px-4 rounded-full border-2 transition-smooth btn-hover whitespace-nowrap text-sm sm:text-base ${
+                            className={`font-medium py-2.5 sm:py-2 px-3 sm:px-4 rounded-full border-2 transition-smooth btn-hover whitespace-nowrap text-sm sm:text-base ${
                                 filter === "closed" 
                                 ? "text-white bg-red-500 border-red-500" 
                                 : "text-gray-500 border-gray-300 hover:text-red-500 hover:border-red-400"

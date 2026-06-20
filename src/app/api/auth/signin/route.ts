@@ -43,15 +43,38 @@ export async function POST(request: Request) {
     }
     const { email, password } = parsed.data;
     const db = await getMongoClient();
-    var hashPassword = await encryptCode(password);
+    const hashPassword = await encryptCode(password);
     const result = await db.collection('users').findOne({
       email: email,
-      password: hashPassword
     });
+    
+    // Check if user exists but is a guest (no password set yet)
     if (!result) {
       le.count += 1;
       loginMap.set(ip, le);
       return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // If guest account has no password, they can't sign in via email/password
+    if ((result.guest || result.temporary) && !result.password) {
+      le.count += 1;
+      loginMap.set(ip, le);
+      return NextResponse.json({ success: false, message: 'This email is registered as a guest. Please sign up to create a password.' }, { status: 401 });
+    }
+
+    // Verify password
+    if (result.password !== hashPassword) {
+      le.count += 1;
+      loginMap.set(ip, le);
+      return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // If upgrading from guest, clear the flag
+    if (result.guest || result.temporary) {
+      await db.collection('users').updateOne(
+        { _id: result._id },
+        { $set: { guest: false, temporary: false, upgradedAt: new Date() } }
+      );
     }
     // if (!result.verify) {
     //   return NextResponse.json({ success: false, message: 'Email not verified.' }), {
@@ -60,7 +83,7 @@ export async function POST(request: Request) {
     //   });
     // }
     /** Session */
-    var encry = await encrypt(result._id.toString());
+    const encry = await encrypt(result._id.toString());
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const session = await encryptSession({ token: encry, expiresAt });
     // Set secure cookie flags

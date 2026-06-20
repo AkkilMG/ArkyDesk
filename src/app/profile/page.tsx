@@ -31,9 +31,11 @@ export default function ProfileCard() {
                 setDetails(data.details);
             } else {
                 console.error("details failed:", data.message);
+                setDetails({});
             }
         } catch (error) {
             console.error("Error during details:", error);
+            setDetails({});
         }
     }
 
@@ -64,15 +66,60 @@ export default function ProfileCard() {
     }, []);
 
     if (!details) {
-        return <div className="flex h-screen items-center justify-center bg-gray-100">
-            <div className="text-center">
-                <div className="mt-4">
-                        <div className="mx-auto">
-                            <Shimmer className="h-10 w-10 bg-blue-200/80" shape="circle" variant="avatar" />
+        return (
+            <div className="flex h-screen bg-gray-100">
+                {/* Sidebar skeleton */}
+                <div className="md:w-1/4 xl:w-1/5 2xl:w-1/5 shadow-xl bg-white p-4 space-y-4 hidden md:block">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                        <Shimmer className="h-10 w-10 rounded-full" shape="circle" variant="avatar" />
+                        <div className="space-y-2 flex-1">
+                            <Shimmer className="h-3.5 w-28 rounded" variant="list" />
+                            <Shimmer className="h-3 w-20 rounded" variant="list" />
                         </div>
+                    </div>
+                    <div className="space-y-1.5">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                                <Shimmer className="h-5 w-5 rounded-lg" variant="list" />
+                                <Shimmer className="h-3.5 w-24 rounded" variant="list" />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="border-t border-gray-100 pt-3">
+                        <Shimmer className="h-9 w-full rounded-xl" variant="card" />
+                    </div>
+                </div>
+
+                {/* Profile content skeleton */}
+                <div className="flex-1 md:w-3/4 xl:w-4/5 2xl:w-4/5 p-4 sm:p-8 md:p-12 mx-auto bg-gray-200 overflow-auto">
+                    <div className="rounded-xl bg-white shadow-lg overflow-hidden max-w-3xl mx-auto">
+                        {/* Banner */}
+                        <Shimmer className="h-40 w-full" variant="banner" />
+                        
+                        {/* Avatar overlapping banner */}
+                        <div className="px-6 pb-6">
+                            <div className="flex items-end -mt-12 mb-4">
+                                <Shimmer className="h-24 w-24 rounded-full border-4 border-white flex-shrink-0" shape="circle" variant="avatar" />
+                                <div className="ml-4 mb-2 space-y-2.5 flex-1">
+                                    <Shimmer className="h-6 w-44 rounded" variant="card" />
+                                    <Shimmer className="h-4 w-28 rounded" variant="list" />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2">
+                                    <Shimmer className="h-4 w-8 rounded" variant="list" />
+                                    <Shimmer className="h-3.5 w-14 rounded" variant="list" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Shimmer className="h-4 w-8 rounded" variant="list" />
+                                    <Shimmer className="h-3.5 w-12 rounded" variant="list" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        );
     }
 
     return (
@@ -87,10 +134,10 @@ export default function ProfileCard() {
         {details && (<div className="flex h-screen">
             
             {/* Sidebar */}
-            <div className="2xl:w-1/5 xl:w-1/5 md:w-1/4 shadow-xl">
+            <div className="hidden md:block md:w-1/4 xl:w-1/5 2xl:w-1/5 shadow-xl">
                 <SideNav create={create} setCreate={setCreate} settings={settings} setSettings={setSettings} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
             </div>
-            <div className="2xl:w-4/5 xl:w-4/5 md:w-3/4 p-12 mx-auto bg-gray-200 shadow-lg">
+            <div className="flex-1 w-full md:w-3/4 xl:w-4/5 2xl:w-4/5 p-4 sm:p-8 md:p-12 mx-auto bg-gray-200 shadow-lg">
                 <div className="rounded-lg bg-white">
                     <div className="relative h-40">
                         <div className="absolute top-2 left-2">

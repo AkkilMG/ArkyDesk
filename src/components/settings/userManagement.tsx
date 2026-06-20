@@ -128,7 +128,7 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
     return (
         <div className="flex-1 px-4 py-4 pt-5 md:px-8 md:py-4 h-full overflow-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <h2 className="text-xl font-bold hidden sm:block">User Management</h2>
+                <h2 className="text-xl font-bold">User Management</h2>
                 <button
                     onClick={fetchUsers}
                     disabled={loading}
@@ -182,8 +182,8 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                                         {action.reason && <div className="text-sm text-gray-600">Reason: {action.reason}</div>}
                                     </div>
                                     <div className="flex gap-2 justify-end">
-                                        <button onClick={() => handleApproveReject(action.id, true)} className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Approve</button>
-                                        <button onClick={() => handleApproveReject(action.id, false)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Reject</button>
+                                        <button onClick={() => handleApproveReject(action.id, true)} className="px-3 py-2 sm:py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Approve</button>
+                                        <button onClick={() => handleApproveReject(action.id, false)} className="px-3 py-2 sm:py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Reject</button>
                                     </div>
                                 </div>
                             </div>
@@ -240,9 +240,9 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                                         <div>Joined: {user._id ? new Date(parseInt(user._id.substring(0, 8), 16) * 1000).toLocaleDateString() : 'Unknown'}</div>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {!user.flagged && !user.admin && <button onClick={() => { setSelectedUser(user); setActionType('flag'); }} className="flex-1 min-w-0 text-orange-600 hover:text-orange-900 text-xs bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded border border-orange-200">Flag</button>}
-                                        {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('admin'); }} className="flex-1 min-w-0 text-blue-600 hover:text-blue-900 text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded border border-blue-200">Make Admin</button>}
-                                        {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('delete'); }} className="flex-1 min-w-0 text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-2 py-1 rounded border border-red-200">Delete</button>}
+                                        {!user.flagged && !user.admin && <button onClick={() => { setSelectedUser(user); setActionType('flag'); }} className="flex-1 min-w-0 text-orange-600 hover:text-orange-900 text-xs bg-orange-50 hover:bg-orange-100 px-3 py-2 sm:px-2 sm:py-1 rounded border border-orange-200">Flag</button>}
+                                        {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('admin'); }} className="flex-1 min-w-0 text-blue-600 hover:text-blue-900 text-xs bg-blue-50 hover:bg-blue-100 px-3 py-2 sm:px-2 sm:py-1 rounded border border-blue-200">Make Admin</button>}
+                                        {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('delete'); }} className="flex-1 min-w-0 text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-3 py-2 sm:px-2 sm:py-1 rounded border border-red-200">Delete</button>}
                                     </div>
                                 </div>
                             ))}
@@ -349,13 +349,13 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                                     setActionType(null);
                                     setActionReason('');
                                 }}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded text-sm"
+                                className="px-4 py-3 sm:py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={(e) => handleUserAction(actionType, selectedUser, actionReason)}
-                                className={`px-4 py-2 text-white rounded text-sm ${
+                                className={`px-4 py-3 sm:py-2 text-white rounded text-sm ${
                                     actionType === 'flag' ? 'bg-orange-600 hover:bg-orange-700' :
                                     actionType === 'admin' ? 'bg-blue-600 hover:bg-blue-700' :
                                     'bg-red-600 hover:bg-red-700'

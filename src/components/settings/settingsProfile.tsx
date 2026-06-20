@@ -117,14 +117,14 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
                         <>
                             <button 
                                 onClick={handleCancel}
-                                className="text-sm font-medium text-gray-600 hover:text-gray-800 px-3 py-1 border border-gray-300 rounded"
+                                className="text-sm font-medium text-gray-600 hover:text-gray-800 px-3 py-2 sm:py-1 border border-gray-300 rounded"
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleSave}
                                 disabled={isLoading}
-                                className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 px-3 py-1 rounded"
+                                className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 px-3 py-2 sm:py-1 rounded"
                             >
                                 {isLoading ? 'Saving...' : 'Save'}
                             </button>

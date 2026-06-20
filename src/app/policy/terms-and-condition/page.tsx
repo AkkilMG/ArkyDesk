@@ -1,6 +1,5 @@
 
 
-
 'use client';
 
 import { useEffect } from 'react';
@@ -17,10 +16,62 @@ export default function TermsAndCondition() {
                     <div className="text-center mb-8">
                         <img src="/logo/logo.png" alt="Arkynox Logo" className="h-16 mx-auto mb-4" />
                         <h1 className="text-3xl font-bold text-gray-900">Terms and Conditions</h1>
-                        <p className="text-gray-600 mt-2">Effective Date: August 15, 2025</p>
+                        <p className="text-gray-600 mt-2">Effective Date: June 20, 2026</p>
                     </div>
 
                     <div className="prose max-w-none">
+                        {/* Quick Summary - Plain Language */}
+                        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-xl p-6 mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-slate-100 rounded-full p-2">
+                                    <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900">Quick Summary (Plain English) 📋</h3>
+                                    <p className="text-sm text-slate-700">The legal agreement between you and Arkynox when you use our support system</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div className="bg-white/80 rounded-lg p-3 border border-slate-200">
+                                    <div className="font-semibold text-slate-800 mb-1">🔑 Your Responsibilities</div>
+                                    <ul className="text-slate-700 space-y-0.5">
+                                        <li>✓ Provide accurate account info</li>
+                                        <li>✓ Keep your password secure</li>
+                                        <li>✓ Use the service legally and professionally</li>
+                                        <li>✓ Comply with all applicable laws</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-slate-200">
+                                    <div className="font-semibold text-slate-800 mb-1">⚖️ Governing Law By Country</div>
+                                    <ul className="text-slate-700 space-y-0.5">
+                                        <li><strong>India:</strong> Laws of India, courts in New Delhi</li>
+                                        <li><strong>EU:</strong> Your country's law + consumer rights</li>
+                                        <li><strong>US:</strong> Delaware law, binding arbitration</li>
+                                        <li><strong>Brazil, Japan, Turkey, etc:</strong> Local law applies</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-slate-200">
+                                    <div className="font-semibold text-slate-800 mb-1">📝 What We Provide</div>
+                                    <ul className="text-slate-700 space-y-0.5">
+                                        <li>✓ Support ticket system with 99.9% uptime target</li>
+                                        <li>✓ Tiered response times (2-72 hours)</li>
+                                        <li>✓ Knowledge base & self-service</li>
+                                        <li>✓ Data protection per global privacy laws</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-slate-200">
+                                    <div className="font-semibold text-slate-800 mb-1">🛡️ Your Consumer Rights</div>
+                                    <p className="text-slate-700"><strong>EU:</strong> 14-day cooling-off period. <strong>India:</strong> Consumer Protection Act 2019. <strong>Brazil:</strong> CDC reverse burden of proof. <strong>Australia:</strong> Statutory guarantees. <strong>UK:</strong> Reasonable care and skill.</p>
+                                    <p className="text-slate-600 text-xs mt-1">Nothing in these Terms reduces your mandatory consumer rights.</p>
+                                </div>
+                            </div>
+                            <div className="mt-3 text-xs text-slate-500 text-center">
+                                This summary is for understanding. The full Terms below is the legally binding document.
+                            </div>
+                        </div>
+
                         <section className="mb-8">
                             <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. Acceptance of Terms</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
@@ -221,11 +272,77 @@ export default function TermsAndCondition() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">12. Governing Law</h2>
-                            <p className="text-gray-700 leading-relaxed">
-                                These Terms shall be governed by and construed in accordance with applicable laws. 
-                                Any disputes arising under these Terms shall be resolved through binding arbitration 
-                                or in courts of competent jurisdiction.
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">12. Governing Law and Dispute Resolution</h2>
+                            
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <p className="text-yellow-800 text-sm">
+                                    <strong>Important:</strong> If you are a consumer in any jurisdiction, nothing in these Terms 
+                                    reduces your mandatory rights under applicable consumer protection laws. Where laws provide 
+                                    you with greater protections, those laws prevail.
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">12.1 Governing Law by Region</h3>
+                            <div className="overflow-x-auto mb-4">
+                                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Region</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Governing Law</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Dispute Resolution</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        <tr><td className="px-4 py-3 font-medium">🌐 Global (default)</td><td className="px-4 py-3">Laws of England and Wales</td><td className="px-4 py-3">Arbitration under ICC Rules</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇪🇺 EU/EEA Consumers</td><td className="px-4 py-3">Consumer's country of residence</td><td className="px-4 py-3">Consumer's local courts + Online Dispute Resolution (ODR)</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇺🇸 United States</td><td className="px-4 py-3">State of Delaware, USA</td><td className="px-4 py-3">Binding arbitration (opt-out available within 30 days)</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇮🇳 India</td><td className="px-4 py-3">Laws of India</td><td className="px-4 py-3">Courts in New Delhi, India</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇧🇷 Brazil</td><td className="px-4 py-3">Laws of Brazil</td><td className="px-4 py-3">Consumer's local courts in Brazil</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇷🇺 Russia</td><td className="px-4 py-3">Laws of the Russian Federation</td><td className="px-4 py-3">Courts in Moscow, Russia</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇯🇵 Japan</td><td className="px-4 py-3">Laws of Japan</td><td className="px-4 py-3">Tokyo District Court</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇹🇷 Turkey</td><td className="px-4 py-3">Laws of the Republic of Turkey</td><td className="px-4 py-3">Istanbul Courts and Execution Offices</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇦🇺 Australia</td><td className="px-4 py-3">Laws of New South Wales, Australia</td><td className="px-4 py-3">Courts of New South Wales</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇿🇦 South Africa</td><td className="px-4 py-3">Laws of the Republic of South Africa</td><td className="px-4 py-3">Magistrate's Court / High Court depending on quantum</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇳🇬 Nigeria</td><td className="px-4 py-3">Laws of the Federal Republic of Nigeria</td><td className="px-4 py-3">High Court of Lagos State</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇪 Kenya</td><td className="px-4 py-3">Laws of the Republic of Kenya</td><td className="px-4 py-3">High Court of Kenya at Nairobi</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇮🇩 Indonesia</td><td className="px-4 py-3">Laws of the Republic of Indonesia</td><td className="px-4 py-3">District Court of Central Jakarta</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇹🇭 Thailand</td><td className="px-4 py-3">Laws of Thailand</td><td className="px-4 py-3">Thai courts (consumer's domicile)</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇵🇭 Philippines</td><td className="px-4 py-3">Laws of the Philippines</td><td className="px-4 py-3">Courts of Makati City</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇷 South Korea</td><td className="px-4 py-3">Laws of the Republic of Korea</td><td className="px-4 py-3">Seoul Central District Court</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇱🇰 Sri Lanka</td><td className="px-4 py-3">Laws of Sri Lanka</td><td className="px-4 py-3">Colombo Commercial High Court</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇿 Kazakhstan</td><td className="px-4 py-3">Laws of Kazakhstan</td><td className="px-4 py-3">Courts of Astana</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">12.2 Consumer Protection</h3>
+                            <ul className="list-disc pl-6 mb-4 text-gray-700">
+                                <li><strong>EU Consumers:</strong> Have the right to withdraw from service contracts within 14 days (Cooling-off period) under the Consumer Rights Directive</li>
+                                <li><strong>UK Consumers:</strong> Have rights under the Consumer Rights Act 2015, including that services must be provided with reasonable care and skill</li>
+                                <li><strong>India Consumers:</strong> Have rights under the Consumer Protection Act 2019, including the right to file complaints before the District/State/National Consumer Disputes Redressal Commission</li>
+                                <li><strong>Brazil Consumers:</strong> Have rights under the Brazilian Consumer Protection Code (CDC - Lei 8.078/90), including the right to reverse burden of proof</li>
+                                <li><strong>Australia Consumers:</strong> Have rights under the Australian Consumer Law, including statutory guarantees that cannot be excluded</li>
+                                <li><strong>South Africa Consumers:</strong> Have rights under the Consumer Protection Act 68 of 2008</li>
+                                <li><strong>Russia Consumers:</strong> Have rights under the Consumer Protection Law (Law No. 2300-1), including the right to demand quality service</li>
+                                <li><strong>Japan Consumers:</strong> Have rights under the Consumer Contract Act and Product Liability Act</li>
+                            </ul>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">12.3 Contractual Capacity (Age of Consent)</h3>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                By agreeing to these Terms, you confirm that you have the legal capacity to enter into a 
+                                binding contract in your country of residence. The minimum age to use our Service independently is:
+                            </p>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-sm mb-4">
+                                <div className="bg-gray-50 p-2 rounded text-center"><span className="font-medium">No minimum</span><br/>UK, US</div>
+                                <div className="bg-gray-50 p-2 rounded text-center"><span className="font-medium">14+</span><br/>Spain, South Korea</div>
+                                <div className="bg-gray-50 p-2 rounded text-center"><span className="font-medium">15+</span><br/>Japan, France</div>
+                                <div className="bg-gray-50 p-2 rounded text-center"><span className="font-medium">16+</span><br/>Germany, Netherlands</div>
+                                <div className="bg-gray-50 p-2 rounded text-center"><span className="font-medium">18+</span><br/>India, Brazil, Turkey, Nigeria, Kenya, etc.</div>
+                                <div className="bg-gray-50 p-2 rounded text-center"><span className="font-medium">20+</span><br/>Thailand</div>
+                            </div>
+                            <p className="text-gray-700 text-sm">
+                                If you are below the age of majority in your jurisdiction, you may only use the Service with 
+                                the involvement of a parent or legal guardian who agrees to these Terms on your behalf.
                             </p>
                         </section>
 
@@ -247,7 +364,7 @@ export default function TermsAndCondition() {
 
                     <div className="mt-8 pt-8 border-t border-gray-200 text-center">
                         <p className="text-sm text-gray-600">
-                            These Terms and Conditions were last updated on August 15, 2025
+                            These Terms and Conditions were last updated on June 20, 2026
                         </p>
                         <div className="mt-4">
                             <a href="/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">

@@ -14,10 +14,75 @@ export default function DataRetentionPolicy() {
                     <div className="text-center mb-8">
                         <img src="/logo/logo.png" alt="Arkynox Logo" className="h-16 mx-auto mb-4" />
                         <h1 className="text-3xl font-bold text-gray-900">Data Retention Policy</h1>
-                        <p className="text-gray-600 mt-2">Effective Date: August 15, 2025</p>
+                        <p className="text-gray-600 mt-2">Effective Date: June 20, 2026</p>
                     </div>
 
                     <div className="prose max-w-none">
+                        {/* Quick Summary - Plain Language */}
+                        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-6 mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-amber-100 rounded-full p-2">
+                                    <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-amber-900">Quick Summary (Plain English) 🗂️</h3>
+                                    <p className="text-sm text-amber-700">How long we keep your data and when we delete it</p>
+                                </div>
+                            </div>
+
+                            {/* Data Lifecycle Visual Diagram */}
+                            <div className="bg-white/80 rounded-xl p-4 border border-amber-200 mb-4">
+                                <h4 className="font-semibold text-amber-800 mb-3 text-center">🔄 Data Lifecycle</h4>
+                                <div className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 text-xs">
+                                    <div className="bg-green-100 border-2 border-green-300 rounded-lg px-4 py-3 text-center min-w-[100px]">
+                                        <div className="font-bold text-green-800 text-sm">📥 Collect</div>
+                                        <div className="text-green-600">When you create ticket</div>
+                                    </div>
+                                    <div className="text-green-500 text-xl">→</div>
+                                    <div className="bg-blue-100 border-2 border-blue-300 rounded-lg px-4 py-3 text-center min-w-[100px]">
+                                        <div className="font-bold text-blue-800 text-sm">💾 Active</div>
+                                        <div className="text-blue-600">Until ticket resolved</div>
+                                    </div>
+                                    <div className="text-green-500 text-xl">→</div>
+                                    <div className="bg-yellow-100 border-2 border-yellow-300 rounded-lg px-4 py-3 text-center min-w-[100px]">
+                                        <div className="font-bold text-yellow-800 text-sm">📦 Archive</div>
+                                        <div className="text-yellow-600">Read-only storage</div>
+                                    </div>
+                                    <div className="text-green-500 text-xl">→</div>
+                                    <div className="bg-red-100 border-2 border-red-300 rounded-lg px-4 py-3 text-center min-w-[100px]">
+                                        <div className="font-bold text-red-800 text-sm">🗑️ Delete</div>
+                                        <div className="text-red-600">Securely destroyed</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                                    <div className="font-semibold text-amber-800 mb-1">📄 How Long We Keep Things</div>
+                                    <ul className="text-amber-700 space-y-0.5">
+                                        <li><strong>Tickets & billing:</strong> 7 years</li>
+                                        <li><strong>Account info:</strong> 3 years after last use</li>
+                                        <li><strong>File attachments:</strong> 3 years after ticket closed</li>
+                                        <li><strong>Access logs:</strong> 90 days</li>
+                                        <li><strong>Feedback:</strong> 5 years</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                                    <div className="font-semibold text-amber-800 mb-1">🌍 Country-Specific Rules</div>
+                                    <p className="text-amber-700">We auto-apply the longest required period based on your country. <strong>India (DPDP):</strong> delete when purpose served. <strong>EU (GDPR):</strong> proportionate retention. <strong>Turkey:</strong> up to 10 years. <strong>Indonesia:</strong> up to 30 years for civil claims.</p>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                                    <div className="font-semibold text-amber-800 mb-1">🔒 Secure Deletion</div>
+                                    <p className="text-amber-700">Data is permanently destroyed with multi-pass overwriting. Backups are purged too. You can request early deletion anytime — we'll honor it unless the law says we must keep it longer.</p>
+                                </div>
+                            </div>
+                            <div className="mt-3 text-xs text-amber-600 text-center">
+                                This summary is for understanding. The full policy below is the legally binding document.
+                            </div>
+                        </div>
+
                         <section className="mb-8">
                             <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. Policy Overview</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
@@ -351,7 +416,60 @@ export default function DataRetentionPolicy() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">10. Contact Information</h2>
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">10. Country-Specific Retention Requirements</h2>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                Different jurisdictions mandate minimum and maximum data retention periods for various 
+                                data categories. Where local law requires a longer retention period than our standard 
+                                policy, the local requirement prevails. Where local law requires earlier deletion, 
+                                we accommodate that for users in that jurisdiction.
+                            </p>
+
+                            <div className="overflow-x-auto mb-6">
+                                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Country</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Key Retention Requirements</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Statute of Limitations</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Impact on Our Policy</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        <tr><td className="px-4 py-3 font-medium">🇪🇺 EU/EEA</td><td className="px-4 py-3 text-xs">GDPR Art. 5(1)(e): Data kept no longer than necessary. Limitation periods vary by country (typically 3-6 years for contracts).</td><td className="px-4 py-3">3-6 yrs</td><td className="px-4 py-3 text-xs">Our 7-year max covers all EU limitation periods</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇬🇧 UK</td><td className="px-4 py-3 text-xs">Limitation Act 1980: 6 years for contracts. Data retention must be proportionate.</td><td className="px-4 py-3">6 yrs</td><td className="px-4 py-3 text-xs">7-year retention aligns with UK requirements</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇮🇳 India</td><td className="px-4 py-3 text-xs">DPDP Act 2023: Data to be deleted when purpose is served. IT Act: 8 years for certain financial records. Companies Act: 8 years for books of account.</td><td className="px-4 py-3">3 yrs</td><td className="px-4 py-3 text-xs">Compliant. Deletion on request per DPDP Act.</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇧🇷 Brazil</td><td className="px-4 py-3 text-xs">LGPD Art. 16: Data can be retained for compliance, research, or anonymization. Civil Code: 3-10 years depending on claim type.</td><td className="px-4 py-3">3-10 yrs</td><td className="px-4 py-3 text-xs">7-year policy covers most LGPD requirements</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇷🇺 Russia</td><td className="px-4 py-3 text-xs">152-FZ: No fixed retention period, must be based on purpose. Tax Code: 4-6 years for accounting records. Data must be stored on Russian servers.</td><td className="px-4 py-3">3 yrs</td><td className="px-4 py-3 text-xs">We apply purpose-based retention + in-country storage</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇯🇵 Japan</td><td className="px-4 py-3 text-xs">APPI: Personal data must be deleted when purpose is achieved. Civil Code: 5 years for contractual claims (amended from 10 in 2020).</td><td className="px-4 py-3">5 yrs</td><td className="px-4 py-3 text-xs">Deletion on request. 5 years for contractual records.</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇺🇸 United States</td><td className="px-4 py-3 text-xs">Federal: 3-7 years for various regulated records. State laws vary. CCPA: No mandatory retention period, but must disclose retention.</td><td className="px-4 py-3">2-6 yrs</td><td className="px-4 py-3 text-xs">7-year policy covers US federal and state variation</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇦🇺 Australia</td><td className="px-4 py-3 text-xs">Privacy Act: Must destroy or de-identify when no longer needed. Corporations Act: 7 years for financial records.</td><td className="px-4 py-3">6 yrs</td><td className="px-4 py-3 text-xs">7-year retention aligns with Corporations Act</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇹🇷 Turkey</td><td className="px-4 py-3 text-xs">KVKK: Data must be deleted/anonymized when processing purpose ends. Turkish Code of Obligations: 10 years.</td><td className="px-4 py-3">10 yrs</td><td className="px-4 py-3 text-xs">7-year policy extended to 10 years for Turkish users where required</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇿🇦 South Africa</td><td className="px-4 py-3 text-xs">POPIA: Retention must be justifiable. Prescription Act: 3-6 years depending on debt type.</td><td className="px-4 py-3">3-6 yrs</td><td className="px-4 py-3 text-xs">7-year policy covers all POPIA requirements</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇳🇬 Nigeria</td><td className="px-4 py-3 text-xs">NDPR: Data must be retained only as long as necessary for lawful purpose. Companies and Allied Matters Act: 6 years for records.</td><td className="px-4 py-3">6 yrs</td><td className="px-4 py-3 text-xs">7-year retention covers CAMA requirements</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇪 Kenya</td><td className="px-4 py-3 text-xs">Data Protection Act 2019: Retain only as long as necessary. Limitation of Actions Act: 6 years for contracts.</td><td className="px-4 py-3">6 yrs</td><td className="px-4 py-3 text-xs">7-year retention covers Kenyan requirements</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇮🇩 Indonesia</td><td className="px-4 py-3 text-xs">UU PDP: Data must be deleted when retention period expires or purpose is fulfilled. Civil Code: 30 years for certain claims.</td><td className="px-4 py-3">30 yrs</td><td className="px-4 py-3 text-xs">Longer retention for Indonesian users where required by Civil Code</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇹🇭 Thailand</td><td className="px-4 py-3 text-xs">PDPA: No fixed retention period. Civil and Commercial Code: 10 years for contracts.</td><td className="px-4 py-3">10 yrs</td><td className="px-4 py-3 text-xs">Extended to 10 years for Thai users where required</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇵🇭 Philippines</td><td className="px-4 py-3 text-xs">Data Privacy Act: Retain only as long as necessary. Civil Code: 10 years for written contracts.</td><td className="px-4 py-3">10 yrs</td><td className="px-4 py-3 text-xs">Extended to 10 years for Philippine users where required</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇷 South Korea</td><td className="px-4 py-3 text-xs">PIPA: Must destroy when purpose achieved. Act on Consumer Protection: 5 years for transaction records.</td><td className="px-4 py-3">3-5 yrs</td><td className="px-4 py-3 text-xs">5-year minimum for records, deletion on request</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇱🇰 Sri Lanka</td><td className="px-4 py-3 text-xs">PDPA No. 9 of 2022: Data must be destroyed when purpose is fulfilled. Prescription Ordinance: 6 years for contracts.</td><td className="px-4 py-3">6 yrs</td><td className="px-4 py-3 text-xs">7-year policy covers Sri Lankan requirements</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇿 Kazakhstan</td><td className="px-4 py-3 text-xs">Law No. 94-V: No fixed period, purpose-based. Civil Code: 3 years general. Data must be stored in Kazakhstan.</td><td className="px-4 py-3">3 yrs</td><td className="px-4 py-3 text-xs">Purpose-based retention with in-country storage</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <p className="text-yellow-800 text-sm">
+                                    <strong>🔍 How this works in practice:</strong> Our system automatically applies the 
+                                    longest legally required retention period based on your country of residence and the 
+                                    type of data. Upon your request, we will delete data earlier where permitted by law. 
+                                    If you move to a different country, the retention rules of your new country of 
+                                    residence will apply to data collected after the move.
+                                </p>
+                            </div>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">11. Contact Information</h2>
                             <div className="bg-blue-50 p-6 rounded-lg">
                                 <p className="text-gray-700 leading-relaxed mb-4">
                                     For questions about data retention or to request data deletion:
@@ -368,7 +486,7 @@ export default function DataRetentionPolicy() {
 
                     <div className="mt-8 pt-8 border-t border-gray-200 text-center">
                         <p className="text-sm text-gray-600">
-                            This Data Retention Policy was last updated on August 15, 2025
+                            This Data Retention Policy was last updated on June 20, 2026
                         </p>
                         <div className="mt-4 space-x-4">
                             <a href="/policy/privacy-policy" className="text-blue-600 hover:text-blue-800 font-medium">

@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       });
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
-      var data = await decrypt(decryptedSession.token);
+      const data = await decrypt(decryptedSession.token);
       const db = await getMongoClient();
       const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
       if (!check) {
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      var tickets;
+      let tickets;
       if (check.admin) {
         // Admin sees all tickets, but limit to recent ones for performance
         tickets = await db.collection('tickets').find({ 
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       });
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
-      var data = await decrypt(decryptedSession.token);
+      const data = await decrypt(decryptedSession.token);
       
       // Check if user is guest and prevent access to authenticated endpoint
       const user = await db.collection('users').findOne({ _id: new ObjectId(data) });
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
         });
       }
       
-      var result = await db.collection('tickets').insertOne({
+      const result = await db.collection('tickets').insertOne({
         subject: subject,
         description: description,
         attachment: attachment,

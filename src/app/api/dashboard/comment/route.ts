@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       });
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
-      var data = await decrypt(decryptedSession.token);
+      const data = await decrypt(decryptedSession.token);
       const db = await getMongoClient();
       const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
       if (!check) {
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
       });
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
-      var data = await decrypt(decryptedSession.token);
+      const data = await decrypt(decryptedSession.token);
       const user = await db.collection('users').findOne({ _id: new ObjectId(data) });
       if (!user) {
         return NextResponse.json({ success: false, message: "Invalid session token." }, {
@@ -166,9 +166,9 @@ export async function POST(request: Request) {
         ticket: new ObjectId(ticketId) 
       });
       
-      var result = await db.collection('comments').insertOne({
+      const result = await db.collection('comments').insertOne({
         comment: comment,
-        ticket: new ObjectId(ticketId), // Use ObjectId instead of full ticket object
+        ticket: new ObjectId(ticketId),
         user: data,
         order: commentCount + 1,
         createdAt: new Date(),

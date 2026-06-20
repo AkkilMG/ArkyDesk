@@ -142,7 +142,7 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
     <>
       {showPopup && <ImagePopup imageUrl={selectedImage} onClose={handleClose} />}
       
-      <div className="space-y-4 p-6 sm:p-4 md:p-5 fade-in">
+      <div className="space-y-4 p-4 sm:p-5 md:p-6 fade-in">
         <div>
           {/* Mobile-first responsive header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-2 mb-4">
@@ -184,7 +184,7 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
               >
                   {isClosingTicket ? (
                     <span className="flex items-center justify-center space-x-2">
-                      <Shimmer className="h-4 w-4 bg-current" shape="circle" />
+                      <Shimmer className="h-4 w-4 rounded-full" shape="circle" variant="button" />
                       <span>Closing...</span>
                     </span>
                   ) : (
@@ -305,7 +305,7 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
                   >
                     {isCommenting ? (
                       <span className="flex items-center justify-center space-x-2">
-                        <Shimmer className="h-4 w-4 bg-white/60" shape="circle" />
+                        <Shimmer className="h-4 w-4 rounded-full" shape="circle" variant="button" />
                         <span>Sending...</span>
                       </span>
                     ) : (

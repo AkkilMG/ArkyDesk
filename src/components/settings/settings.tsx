@@ -103,13 +103,16 @@ export default function AccountSettings({ details, settings, setSettings }: Sett
       className="fixed inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center z-50"
       style={{ zIndex: 1000 }}
       onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Settings"
     >
-      <div className="flex w-screen h-screen p-4 md:p-12 rounded-md">
+      <div className="flex w-full h-screen p-4 md:p-12 rounded-md">
         <div className="flex flex-col md:flex-row w-full h-full rounded-2xl bg-white shadow-2xl overflow-hidden relative">
           {/* Close button - always visible on top right */}
           <button 
             onClick={(e) => setSettings(false)} 
-            className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-full p-2 shadow-lg transition-all duration-200"
+            className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-full p-3 sm:p-2 shadow-lg transition-all duration-200"
           >
             <img src="/icons/close.svg" className="h-5 w-5" alt="Close" />
           </button>

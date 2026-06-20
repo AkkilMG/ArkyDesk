@@ -14,10 +14,65 @@ export default function AcceptableUsePolicy() {
                     <div className="text-center mb-8">
                         <img src="/logo/logo.png" alt="Arkynox Logo" className="h-16 mx-auto mb-4" />
                         <h1 className="text-3xl font-bold text-gray-900">Acceptable Use Policy</h1>
-                        <p className="text-gray-600 mt-2">Effective Date: August 15, 2025</p>
+                        <p className="text-gray-600 mt-2">Effective Date: June 20, 2026</p>
                     </div>
 
                     <div className="prose max-w-none">
+                        {/* Quick Summary - Plain Language */}
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6 mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-purple-100 rounded-full p-2">
+                                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-purple-900">Quick Summary (Plain English) ✅</h3>
+                                    <p className="text-sm text-purple-700">What's okay and what's not okay when using our support system</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div className="bg-white/80 rounded-lg p-3 border border-green-200">
+                                    <div className="font-semibold text-green-800 mb-1">✅ Do's — Allowed</div>
+                                    <ul className="text-green-700 space-y-0.5">
+                                        <li>✓ Submit real support requests</li>
+                                        <li>✓ Upload relevant files for troubleshooting</li>
+                                        <li>✓ Communicate professionally</li>
+                                        <li>✓ Report bugs & security issues responsibly</li>
+                                        <li>✓ Give constructive feedback</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-red-200">
+                                    <div className="font-semibold text-red-800 mb-1">❌ Don'ts — Not Allowed</div>
+                                    <ul className="text-red-700 space-y-0.5">
+                                        <li>✗ Illegal activities, fraud, hacking</li>
+                                        <li>✗ Harassment, threats, hate speech</li>
+                                        <li>✗ Malware, viruses, malicious code</li>
+                                        <li>✗ Spam, fake tickets, account sharing</li>
+                                        <li>✗ Uploading copyrighted/inappropriate content</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-orange-200">
+                                    <div className="font-semibold text-orange-800 mb-1">⚠️ What Happens If You Violate</div>
+                                    <div className="flex items-center gap-1 text-orange-700">
+                                        <span className="text-lg">🟢</span> Minor: Warning
+                                        <span className="text-lg ml-2">🟡</span> Moderate: Suspension
+                                    </div>
+                                    <div className="flex items-center gap-1 text-orange-700">
+                                        <span className="text-lg">🔴</span> Severe: Account terminated
+                                        <span className="text-lg ml-2">⚫</span> Critical: Legal action
+                                    </div>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-200">
+                                    <div className="font-semibold text-blue-800 mb-1">⚖️ Legal Consequences</div>
+                                    <p className="text-blue-700">Violations may lead to prosecution under cybercrime laws in 25+ countries (including India IT Act, US CFAA, EU Cybercrime Directive, UK Computer Misuse Act). We cooperate with law enforcement worldwide.</p>
+                                </div>
+                            </div>
+                            <div className="mt-3 text-xs text-purple-600 text-center">
+                                This summary is for understanding. The full AUP below is the legally binding document.
+                            </div>
+                        </div>
+
                         <section className="mb-8">
                             <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. Purpose and Scope</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
@@ -334,7 +389,63 @@ export default function AcceptableUsePolicy() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">10. Policy Updates</h2>
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">10. Applicable Cybercrime Laws by Jurisdiction</h2>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                Violations of this Acceptable Use Policy may also constitute violations of cybercrime and 
+                                computer misuse laws in multiple jurisdictions. We cooperate with law enforcement worldwide. 
+                                Below are key laws applicable to prohibited activities:
+                            </p>
+
+                            <div className="overflow-x-auto mb-6">
+                                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Country</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Key Cybercrime Laws</th>
+                                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Scope</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        <tr><td className="px-4 py-3 font-medium">🌐 International</td><td className="px-4 py-3">Budapest Convention on Cybercrime</td><td className="px-4 py-3 text-xs">Council of Europe treaty (ratified by 60+ countries including US, Japan, EU members, South Africa, Sri Lanka)</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇪🇺 EU</td><td className="px-4 py-3">Directive 2013/40/EU (Cybercrime Directive)</td><td className="px-4 py-3 text-xs">Illegal access, system interference, data interference, interception</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇺🇸 United States</td><td className="px-4 py-3">CFAA (Computer Fraud and Abuse Act), ECPA, CAN-SPAM Act</td><td className="px-4 py-3 text-xs">Unauthorized access, computer fraud, wiretapping, spam</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇬🇧 United Kingdom</td><td className="px-4 py-3">Computer Misuse Act 1990, Fraud Act 2006</td><td className="px-4 py-3 text-xs">Unauthorized access, modification, making/supplying tools for hacking</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇮🇳 India</td><td className="px-4 py-3">IT Act 2000 (amended 2008) — Sections 43, 66, 66C-66F</td><td className="px-4 py-3 text-xs">Hacking, identity theft, cyber fraud, cyberstalking, phishing, child pornography</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇧🇷 Brazil</td><td className="px-4 py-3">Lei 12.737/2012 (Carolina Dieckmann Law), Lei 12.965/2014 (Marco Civil)</td><td className="px-4 py-3 text-xs">Invasion of devices, unauthorized access, data breach</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇯🇵 Japan</td><td className="px-4 py-3">Unauthorized Computer Access Law (Act No. 128 of 1999)</td><td className="px-4 py-3 text-xs">Unauthorized access, hacking tools possession</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇷🇺 Russia</td><td className="px-4 py-3">Criminal Code Chapter 28 (Arts. 272-274)</td><td className="px-4 py-3 text-xs">Unauthorized access, malicious software, data interference</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇩🇪 Germany</td><td className="px-4 py-3">German Criminal Code (StGB) §§ 202a-202d, 303a-303c</td><td className="px-4 py-3 text-xs">Data espionage, hacking, computer sabotage, data suppression</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇫🇷 France</td><td className="px-4 py-3">French Penal Code Arts. 323-1 to 323-8</td><td className="px-4 py-3 text-xs">Unauthorized access, interference with automated systems</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇪🇸 Spain</td><td className="px-4 py-3">Spanish Penal Code Arts. 197-201, 264-270</td><td className="px-4 py-3 text-xs">Data discovery, computer damage, hacking</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇳🇱 Netherlands</td><td className="px-4 py-3">Dutch Criminal Code Arts. 138ab-138d, 161sexies, 350a-350d</td><td className="px-4 py-3 text-xs">Computer trespass, hacking tools, data breach</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇦🇺 Australia</td><td className="px-4 py-3">Criminal Code Act 1995 (Cth) Div 477-478</td><td className="px-4 py-3 text-xs">Unauthorized access, modification, impairment of electronic communications</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇿🇦 South Africa</td><td className="px-4 py-3">Cybercrimes Act 19 of 2020</td><td className="px-4 py-3 text-xs">Hacking, ransomware, data interference, cyber fraud, malicious communications</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇳🇬 Nigeria</td><td className="px-4 py-3">Cybercrimes (Prohibition, Prevention, etc.) Act 2015</td><td className="px-4 py-3 text-xs">Hacking, identity theft, cyberstalking, child pornography, phishing</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇰🇪 Kenya</td><td className="px-4 py-3">Computer Misuse and Cybercrimes Act No. 5 of 2018</td><td className="px-4 py-3 text-xs">Unauthorized access, cyber espionage, cyber harassment, identity theft</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇹🇷 Turkey</td><td className="px-4 py-3">Turkish Penal Code Arts. 243-246 (Cybercrime provisions)</td><td className="px-4 py-3 text-xs">Hacking, data destruction, blocking access, misuse of systems</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇮🇩 Indonesia</td><td className="px-4 py-3">Law No. 11/2008 (ITE Law, amended 2016)</td><td className="px-4 py-3 text-xs">Unauthorized access, electronic fraud, defamation, hate speech</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇹🇭 Thailand</td><td className="px-4 py-3">Computer Crime Act B.E. 2550 (2007, amended 2017)</td><td className="px-4 py-3 text-xs">Unauthorized access, data interference, computer-related fraud</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇵🇭 Philippines</td><td className="px-4 py-3">Cybercrime Prevention Act of 2012 (RA 10175)</td><td className="px-4 py-3 text-xs">Hacking, identity theft, cybersquatting, child pornography, libel</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇰🇷 South Korea</td><td className="px-4 py-3">Act on Promotion of Information and Communications Network Utilization</td><td className="px-4 py-3 text-xs">Hacking, spam, personal information breach, defamation</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇱🇰 Sri Lanka</td><td className="px-4 py-3">Computer Crimes Act No. 24 of 2007</td><td className="px-4 py-3 text-xs">Unauthorized access, data interference, device misuse</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇰🇿 Kazakhstan</td><td className="px-4 py-3">Criminal Code Arts. 205-211 (cybercrime provisions)</td><td className="px-4 py-3 text-xs">Hacking, data theft, illegal access to information systems</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-4 py-3 font-medium">🇾🇪 Yemen</td><td className="px-4 py-3">Cybercrime Law No. 5 of 2015</td><td className="px-4 py-3 text-xs">Hacking, fraud, copyright infringement, system interference</td></tr>
+                                        <tr><td className="px-4 py-3 font-medium">🇮🇷 Iran</td><td className="px-4 py-3">Computer Crimes Law (ratified 2009)</td><td className="px-4 py-3 text-xs">Hacking, data theft, system disruption, cyber fraud</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <p className="text-red-800 text-sm">
+                                    <strong>⚠ Important:</strong> If you engage in any activity prohibited under Section 3 of this 
+                                    policy, you may be subject to criminal prosecution under one or more of the above laws. 
+                                    We will fully cooperate with law enforcement authorities in investigating such violations.
+                                </p>
+                            </div>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">11. Policy Updates</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
                                 This AUP may be updated periodically to address new technologies, threats, or 
                                 regulatory requirements. Users will be notified of material changes, and continued 
@@ -343,7 +454,7 @@ export default function AcceptableUsePolicy() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">11. Contact Information</h2>
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">12. Contact Information</h2>
                             <div className="bg-blue-50 p-6 rounded-lg">
                                 <p className="text-gray-700 leading-relaxed mb-4">
                                     For questions about this Acceptable Use Policy:
@@ -360,7 +471,7 @@ export default function AcceptableUsePolicy() {
 
                     <div className="mt-8 pt-8 border-t border-gray-200 text-center">
                         <p className="text-sm text-gray-600">
-                            This Acceptable Use Policy was last updated on August 15, 2025
+                            This Acceptable Use Policy was last updated on June 20, 2026
                         </p>
                         <div className="mt-4 space-x-4">
                             <a href="/policy/terms-and-condition" className="text-blue-600 hover:text-blue-800 font-medium">

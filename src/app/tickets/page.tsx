@@ -139,9 +139,11 @@ export default function TicketsPage() {
                 setDetails(data.details);
             } else {
                 console.error("Details failed:", data.message);
+                setDetails({});
             }
         } catch (error) {
             console.error("Error during details fetch:", error);
+            setDetails({});
         } finally {
             setDetailsLoading(false);
         }
@@ -275,52 +277,73 @@ export default function TicketsPage() {
 
     if (loading || detailsLoading || !details) {
         return (
-            <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
-                <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-4 space-y-4">
-                        <div className="flex items-center gap-3">
-                            <Shimmer className="h-12 w-12 rounded-full" shape="circle" variant="avatar" />
-                            <div className="space-y-2 flex-1">
-                                <Shimmer className="h-4 w-32 rounded" variant="list" />
+            <div className="flex h-screen bg-gray-50 overflow-hidden">
+                {/* Sidebar skeleton */}
+                <div className="hidden sm:block sm:w-1/4 md:w-1/4 lg:w-1/5 xl:w-1/5 2xl:w-1/5 shadow-xl bg-white p-4 space-y-4">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                        <Shimmer className="h-10 w-10 rounded-full" shape="circle" variant="avatar" />
+                        <div className="space-y-2 flex-1">
+                            <Shimmer className="h-3.5 w-28 rounded" variant="list" />
+                            <Shimmer className="h-3 w-20 rounded" variant="list" />
+                        </div>
+                    </div>
+                    <div className="space-y-1.5">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                                <Shimmer className="h-5 w-5 rounded-lg" variant="list" />
+                                <Shimmer className="h-3.5 w-24 rounded" variant="list" />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="border-t border-gray-100 pt-3 space-y-1.5">
+                        {[1, 2].map((i) => (
+                            <div key={i} className="flex items-center gap-3 px-3 py-2">
+                                <Shimmer className="h-4 w-4 rounded" variant="list" />
                                 <Shimmer className="h-3 w-20 rounded" variant="list" />
                             </div>
+                        ))}
+                    </div>
+                    <div className="border-t border-gray-100 pt-3 mt-auto">
+                        <Shimmer className="h-9 w-full rounded-xl" variant="card" />
+                    </div>
+                </div>
+
+                {/* Main content */}
+                <div className="w-full sm:w-3/4 md:w-3/4 lg:w-4/5 xl:w-4/5 2xl:w-4/5 flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-50 h-screen overflow-hidden">
+                    {/* Ticket list panel skeleton */}
+                    <div className="w-full md:w-1/2 lg:w-5/12 xl:w-1/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-4 space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <Shimmer className="h-9 w-full rounded-lg" variant="card" />
                         </div>
-                        <Shimmer className="h-12 w-full rounded-xl" variant="banner" />
-                        <div className="space-y-3">
-                            {[1, 2, 3, 4].map((item) => (
-                                <div key={item} className="p-3 border border-gray-200 rounded-xl space-y-2">
-                                    <div className="flex justify-between items-start gap-3">
-                                        <Shimmer className="h-4 w-2/3 rounded" variant="list" />
-                                        <Shimmer className="h-3 w-16 rounded" variant="list" />
+                        <div className="flex gap-2">
+                            {[1, 2, 3, 4].map((i) => (
+                                <Shimmer key={i} className="h-7 w-16 rounded-full" variant="button" />
+                            ))}
+                        </div>
+                        <div className="space-y-2.5">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="p-3 border border-gray-100 rounded-xl space-y-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <Shimmer className="h-4 w-3/5 rounded" variant="list" />
+                                        <Shimmer className="h-5 w-14 rounded-full" variant="button" />
                                     </div>
                                     <Shimmer className="h-3 w-full rounded" variant="list" />
-                                    <Shimmer className="h-3 w-5/6 rounded" variant="list" />
+                                    <div className="flex items-center gap-3 pt-1">
+                                        <Shimmer className="h-2.5 w-16 rounded" variant="list" />
+                                        <Shimmer className="h-2.5 w-12 rounded" variant="list" />
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
-                        <div className="flex items-center justify-between gap-4">
-                            <Shimmer className="h-6 w-48 rounded" variant="card" />
-                            <Shimmer className="h-9 w-24 rounded-full" variant="avatar" />
+
+                    {/* Ticket detail panel skeleton */}
+                    <div className="hidden md:flex w-full md:w-1/2 lg:w-7/12 xl:w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden items-center justify-center">
+                        <div className="text-center space-y-3">
+                            <Shimmer className="h-16 w-16 rounded-2xl mx-auto" variant="card" />
+                            <Shimmer className="h-4 w-44 mx-auto rounded" variant="list" />
+                            <Shimmer className="h-3 w-64 mx-auto rounded" variant="list" />
                         </div>
-                        <Shimmer className="h-4 w-32 rounded" variant="list" />
-                        <div className="space-y-3">
-                            <Shimmer className="h-4 w-full rounded" variant="list" />
-                            <Shimmer className="h-4 w-11/12 rounded" variant="list" />
-                            <Shimmer className="h-4 w-10/12 rounded" variant="list" />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <Shimmer className="h-24 rounded-xl" variant="card" />
-                            <Shimmer className="h-24 rounded-xl" variant="card" />
-                            <Shimmer className="h-24 rounded-xl" variant="card" />
-                            <Shimmer className="h-24 rounded-xl" variant="card" />
-                        </div>
-                        {!isConnected && (
-                            <p className="text-yellow-600 text-sm mt-1">Establishing real-time connection...</p>
-                        )}
-                        <p className="text-gray-600 font-medium">Loading tickets...</p>
-                        <p className="text-gray-400 text-sm">Please wait while we fetch your data</p>
                     </div>
                 </div>
             </div>
@@ -378,20 +401,8 @@ export default function TicketsPage() {
         )}
         { <AccountSettings details={details} settings={settings} setSettings={setSettings} /> }
         <div className="flex h-screen bg-gray-50 overflow-hidden">
-            {/* Sidebar */}
-            <div className="hidden sm:block w-full sm:w-1/4 md:w-1/4 lg:w-1/5 xl:w-1/5 2xl:w-1/5 shadow-xl bg-white">
-                <SideNav 
-                    create={create} 
-                    setCreate={setCreate} 
-                    settings={settings} 
-                    setSettings={setSettings} 
-                    isMobileMenuOpen={isMobileMenuOpen} 
-                    setIsMobileMenuOpen={setIsMobileMenuOpen} 
-                />
-            </div>
-            
-            {/* Mobile Sidebar Overlay */}
-            <div className="sm:hidden">
+            {/* Sidebar — handles both desktop sidebar and mobile overlay */}
+            <div className="hidden sm:block sm:w-1/4 md:w-1/4 lg:w-1/5 xl:w-1/5 2xl:w-1/5 shadow-xl bg-white">
                 <SideNav 
                     create={create} 
                     setCreate={setCreate} 
@@ -403,7 +414,7 @@ export default function TicketsPage() {
             </div>
 
             {/* Main content */}
-            <div className="w-full sm:w-3/4 md:w-3/4 lg:w-4/5 xl:w-4/5 2xl:w-4/5 flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-50 h-screen overflow-hidden">
+            <div className="w-full flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-50 h-screen overflow-hidden">
                 {/* Tickets List */}
                 <div className={`${ticketId ? 'hidden md:block' : 'block'} w-full md:w-1/2 lg:w-5/12 xl:w-1/3 bg-white rounded-xl shadow-md overflow-hidden`}>
                     <div className="p-3 sm:p-4 h-full overflow-y-auto relative">

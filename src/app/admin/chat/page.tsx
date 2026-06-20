@@ -59,11 +59,20 @@ export default function AdminChatPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <div className="mx-auto">
-                        <Shimmer className="h-8 w-8" shape="circle" />
+                <div className="w-full max-w-lg space-y-6 p-8">
+                    <div className="flex items-center justify-center gap-3">
+                        <Shimmer className="h-10 w-10 rounded-full" shape="circle" />
+                        <div className="space-y-2">
+                            <Shimmer className="h-4 w-40 rounded" />
+                            <Shimmer className="h-3 w-28 rounded" />
+                        </div>
                     </div>
-                    <p className="mt-2 text-gray-600">Verifying access...</p>
+                    <div className="space-y-4">
+                        <Shimmer className="h-12 w-full rounded-lg" variant="card" />
+                        <Shimmer className="h-12 w-full rounded-lg" variant="card" />
+                        <Shimmer className="h-12 w-full rounded-lg" variant="card" />
+                        <Shimmer className="h-12 w-3/4 rounded-lg" variant="card" />
+                    </div>
                 </div>
             </div>
         );
@@ -103,20 +112,8 @@ export default function AdminChatPage() {
             </div>
 
             <div className="flex h-screen bg-gray-50 overflow-hidden">
-                {/* Side Navigation */}
+                {/* Side Navigation — handles both desktop sidebar and mobile overlay */}
                 <div className="hidden sm:block sm:w-64 lg:w-72 xl:w-80 shadow-xl bg-white flex-shrink-0">
-                    <SideNav 
-                        create={() => {}} 
-                        setCreate={() => {}} 
-                        settings={settings} 
-                        setSettings={setSettings}
-                        isMobileMenuOpen={isMobileMenuOpen}
-                        setIsMobileMenuOpen={setIsMobileMenuOpen}
-                    />
-                </div>
-
-                {/* Mobile Navigation Overlay */}
-                <div className="sm:hidden">
                     <SideNav 
                         create={() => {}} 
                         setCreate={() => {}} 

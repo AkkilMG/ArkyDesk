@@ -15,10 +15,54 @@ export default function PrivacyPolicy() {
                     <div className="text-center mb-8">
                         <img src="/logo/logo.png" alt="Arkynox Logo" className="h-16 mx-auto mb-4" />
                         <h1 className="text-3xl font-bold text-gray-900">Privacy Policy</h1>
-                        <p className="text-gray-600 mt-2">Effective Date: August 15, 2025</p>
+                        <p className="text-gray-600 mt-2">Effective Date: June 20, 2026</p>
                     </div>
 
                     <div className="prose max-w-none">
+                        {/* Quick Summary - Plain Language */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-blue-100 rounded-full p-2">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-blue-900">Quick Summary (Plain English) 🗺️</h3>
+                                    <p className="text-sm text-blue-700">What happens to your data when you use our support system</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-100">
+                                    <div className="font-semibold text-blue-800 mb-1">📥 What We Collect</div>
+                                    <p className="text-blue-700">Name, email, ticket details, files you upload, and technical data (browser, IP). We only collect what's needed to help you.</p>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-100">
+                                    <div className="font-semibold text-blue-800 mb-1">🔒 How We Protect It</div>
+                                    <p className="text-blue-700">AES-256 encryption, TLS 1.3, multi-factor auth, role-based access, regular security audits. Your data is locked down tight.</p>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-100">
+                                    <div className="font-semibold text-blue-800 mb-1">🌍 Your Rights By Country</div>
+                                    <p className="text-blue-700">We honor GDPR (EU), DPDP Act (India), LGPD (Brazil), CCPA (US), POPIA (SA), and 20+ other privacy laws. See Section 11 for your specific rights.</p>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-100">
+                                    <div className="font-semibold text-blue-800 mb-1">🔄 Data Sharing</div>
+                                    <p className="text-blue-700">We never sell your data. We share only with trusted service providers (hosting, email) under strict contracts. No third-party marketing.</p>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-100">
+                                    <div className="font-semibold text-blue-800 mb-1">⏱️ How Long We Keep It</div>
+                                    <p className="text-blue-700">Tickets: 7 years. Account info: 3 years after last activity. Logs: 90 days. You can request earlier deletion anytime.</p>
+                                </div>
+                                <div className="bg-white/80 rounded-lg p-3 border border-blue-100">
+                                    <div className="font-semibold text-blue-800 mb-1">📞 Need Help?</div>
+                                    <p className="text-blue-700">Email privacy@arkynox.com or create a "Privacy Request" ticket. We respond within 48 hours. Your privacy matters to us.</p>
+                                </div>
+                            </div>
+                            <div className="mt-3 text-xs text-blue-600 text-center">
+                                This summary is for understanding. The full policy below is the legally binding document.
+                            </div>
+                        </div>
+
                         <section className="mb-8">
                             <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. Introduction</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
@@ -508,13 +552,345 @@ export default function PrivacyPolicy() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">11. Changes to This Privacy Policy</h2>
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">11. Jurisdiction-Specific Rights and Compliance</h2>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                We recognize that privacy laws differ across the world. Below is a jurisdiction-by-jurisdiction 
+                                guide to your specific rights, the laws that protect you, and how we comply. This section 
+                                should be read together with the rest of this Privacy Policy.
+                            </p>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.1 Quick Reference by Country</h3>
+                            <div className="overflow-x-auto mb-6">
+                                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Country</th>
+                                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Governing Law</th>
+                                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Consent Age</th>
+                                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Breach Notice</th>
+                                            <th className="px-3 py-2 text-left font-semibold text-gray-700">Localization</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        <tr><td className="px-3 py-2">🇺🇸 United States</td><td className="px-3 py-2 text-xs">CCPA/CPRA, COPPA, HIPAA</td><td className="px-3 py-2">13</td><td className="px-3 py-2 text-xs">By state (30-60 days)</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇪🇺 EU/EEA</td><td className="px-3 py-2 text-xs">GDPR</td><td className="px-3 py-2">16</td><td className="px-3 py-2 text-xs">72 hours</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr><td className="px-3 py-2">🇬🇧 United Kingdom</td><td className="px-3 py-2 text-xs">UK GDPR / DPA 2018</td><td className="px-3 py-2">13</td><td className="px-3 py-2 text-xs">72 hours</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇮🇳 India</td><td className="px-3 py-2 text-xs">DPDP Act 2023</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours to DPBI</td><td className="px-3 py-2 text-red-600 font-medium">Yes*</td></tr>
+                                        <tr><td className="px-3 py-2">🇧🇷 Brazil</td><td className="px-3 py-2 text-xs">LGPD (Lei 13.709/2018)</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">Reasonable time</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇯🇵 Japan</td><td className="px-3 py-2 text-xs">APPI (amended 2022)</td><td className="px-3 py-2">15</td><td className="px-3 py-2 text-xs">Promptly required</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr><td className="px-3 py-2">🇿🇦 South Africa</td><td className="px-3 py-2 text-xs">POPIA</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">As soon as possible</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇷🇺 Russia</td><td className="px-3 py-2 text-xs">152-FZ on Personal Data</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">24 hours to Roskomnadzor</td><td className="px-3 py-2 text-red-600 font-medium">Yes</td></tr>
+                                        <tr><td className="px-3 py-2">🇹🇷 Turkey</td><td className="px-3 py-2 text-xs">KVKK No. 6698</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours to KVKK</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇦🇺 Australia</td><td className="px-3 py-2 text-xs">Privacy Act 1988 (2023 amend.)</td><td className="px-3 py-2">15</td><td className="px-3 py-2 text-xs">30 days max</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr><td className="px-3 py-2">🇳🇬 Nigeria</td><td className="px-3 py-2 text-xs">Data Protection Act 2023</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours to NDPC</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇮🇩 Indonesia</td><td className="px-3 py-2 text-xs">UU PDP No. 27/2022</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours</td><td className="px-3 py-2 text-red-600 font-medium">Yes</td></tr>
+                                        <tr><td className="px-3 py-2">🇹🇭 Thailand</td><td className="px-3 py-2 text-xs">PDPA B.E. 2562</td><td className="px-3 py-2">20</td><td className="px-3 py-2 text-xs">72 hours to PDPC</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇵🇭 Philippines</td><td className="px-3 py-2 text-xs">Data Privacy Act 2012</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours to NPC</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr><td className="px-3 py-2">🇩🇪 Germany</td><td className="px-3 py-2 text-xs">BDSG + GDPR</td><td className="px-3 py-2">16</td><td className="px-3 py-2 text-xs">72 hours (GDPR)</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇫🇷 France</td><td className="px-3 py-2 text-xs">Loi Informatique et Libertés + GDPR</td><td className="px-3 py-2">15</td><td className="px-3 py-2 text-xs">72 hours to CNIL</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr><td className="px-3 py-2">🇪🇸 Spain</td><td className="px-3 py-2 text-xs">LOPDGDD + GDPR</td><td className="px-3 py-2">14</td><td className="px-3 py-2 text-xs">72 hours to AEPD</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇳🇱 Netherlands</td><td className="px-3 py-2 text-xs">UAVG + GDPR</td><td className="px-3 py-2">16</td><td className="px-3 py-2 text-xs">72 hours to AP</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr><td className="px-3 py-2">🇰🇪 Kenya</td><td className="px-3 py-2 text-xs">Data Protection Act 2019</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours to ODPC</td><td className="px-3 py-2 text-red-600 font-medium">Yes</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇰🇷 South Korea</td><td className="px-3 py-2 text-xs">PIPA (amended 2023)</td><td className="px-3 py-2">14</td><td className="px-3 py-2 text-xs">72 hours to PIPC</td><td className="px-3 py-2 text-red-600 font-medium">Yes</td></tr>
+                                        <tr><td className="px-3 py-2">🇱🇰 Sri Lanka</td><td className="px-3 py-2 text-xs">PDPA No. 9 of 2022</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">72 hours to DPA</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇰🇿 Kazakhstan</td><td className="px-3 py-2 text-xs">Law No. 94-V</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">3 days to MDDIAI</td><td className="px-3 py-2 text-red-600 font-medium">Yes</td></tr>
+                                        <tr><td className="px-3 py-2">🇾🇪 Yemen</td><td className="px-3 py-2 text-xs">Constitutional provisions</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">As soon as practicable*</td><td className="px-3 py-2 text-gray-500">No</td></tr>
+                                        <tr className="bg-gray-50"><td className="px-3 py-2">🇮🇷 Iran</td><td className="px-3 py-2 text-xs">Constitutional + Computer Crimes Law</td><td className="px-3 py-2">18</td><td className="px-3 py-2 text-xs">As soon as practicable*</td><td className="px-3 py-2 text-red-600 font-medium">Yes*</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-6">
+                                * Data localization: Russia's 152-FZ requires storing Russian citizens' data on servers within Russia. 
+                                India's DPDP Act mandates notification of transfer arrangements. Kazakhstan requires servers in-country 
+                                for citizen data. Iran has sectoral localization requirements. Yemen does not currently mandate localization.
+                                We provide localized hosting options where required by law.
+                            </p>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.2 GDPR (EU/EEA/UK) — Your Additional Rights</h3>
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                                <p className="text-indigo-800 text-sm mb-2">
+                                    If you are in the EU, EEA, or UK, you have these additional rights under the GDPR/UK GDPR:
+                                </p>
+                                <ul className="list-disc pl-6 text-indigo-700 text-sm space-y-1">
+                                    <li><strong>Right to Data Portability</strong> — Receive your data in a structured, machine-readable format</li>
+                                    <li><strong>Right to Restrict Processing</strong> — Temporarily limit how we use your data while a complaint is resolved</li>
+                                    <li><strong>Right to Object</strong> — Object to processing based on legitimate interests or direct marketing</li>
+                                    <li><strong>Automated Decision-Making</strong> — Not be subject to decisions based solely on automated processing</li>
+                                    <li><strong>Lodge a Complaint</strong> — With your local Data Protection Authority at any time</li>
+                                </ul>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.3 India (DPDP Act 2023) — Your Additional Rights</h3>
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                                <p className="text-orange-800 text-sm mb-2">
+                                    If you are in India, you have these additional rights under the Digital Personal Data Protection Act 2023:
+                                </p>
+                                <ul className="list-disc pl-6 text-orange-700 text-sm space-y-1">
+                                    <li><strong>Right to Information</strong> — Know the purpose, categories, and recipients of your data</li>
+                                    <li><strong>Right to Correction and Erasure</strong> — Update or delete your data</li>
+                                    <li><strong>Right to Grievance Redressal</strong> — Our Grievance Officer will respond within 48 hours</li>
+                                    <li><strong>Right to Nominate</strong> — Appoint a representative to exercise rights on your behalf after your death or incapacity</li>
+                                    <li><strong>Consent Manager</strong> — You may withdraw consent at any time (note: this may affect service availability)</li>
+                                    <li><strong>Parental Consent</strong> — For users under 18, we require verifiable parental consent</li>
+                                </ul>
+                                <div className="mt-3 p-3 bg-orange-100 rounded">
+                                    <p className="text-orange-800 text-xs font-medium">Grievance Officer: grievance@arkynox.com | Response within 48 hours</p>
+                                </div>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.4 Brazil (LGPD) — Your Additional Rights</h3>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                <p className="text-green-800 text-sm mb-2">
+                                    If you are in Brazil, under Lei Geral de Proteção de Dados (LGPD) you have:
+                                </p>
+                                <ul className="list-disc pl-6 text-green-700 text-sm space-y-1">
+                                    <li><strong>Confirmation</strong> — Know if we process your data</li>
+                                    <li><strong>Access</strong> — View your data held by us</li>
+                                    <li><strong>Correction</strong> — Fix incomplete or inaccurate data</li>
+                                    <li><strong>Anonymization/Blocking/Deletion</strong> — For unnecessary or excessive data</li>
+                                    <li><strong>Portability</strong> — Transfer your data to another service provider</li>
+                                    <li><strong>Revoke Consent</strong> — At any time (affects service capability)</li>
+                                    <li><strong>Oppose Processing</strong> — For certain purposes</li>
+                                </ul>
+                                <p className="text-green-700 text-xs mt-2">
+                                    DPO Contact: dpo@arkynox.com | ANPD may be contacted at anpd.gov.br
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.5 Japan (APPI) — Your Additional Rights</h3>
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-red-700 text-sm space-y-1">
+                                    <li><strong>Disclosure</strong> — Request disclosure of retained personal data</li>
+                                    <li><strong>Correction/Addition/Deletion</strong> — Of your personal data</li>
+                                    <li><strong>Cessation of Use</strong> — Stop processing in cases of violation or where consent is withdrawn</li>
+                                    <li><strong>Explanation</strong> — Request explanation of our processing methods</li>
+                                    <li><strong>Opt-Out</strong> — You may opt out of third-party provision of your data</li>
+                                </ul>
+                                <p className="text-red-700 text-xs mt-2">
+                                    PPC Contact: ppc@arkynox.com (we will forward to PPC Japan upon request)
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.6 South Africa (POPIA) — Your Additional Rights</h3>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-yellow-700 text-sm space-y-1">
+                                    <li><strong>Access</strong> — Request confirmation of what data we hold</li>
+                                    <li><strong>Correction</strong> — Fix inaccurate or misleading information</li>
+                                    <li><strong>Deletion</strong> — Request deletion (subject to legal limits)</li>
+                                    <li><strong>Object to Marketing</strong> — Direct marketing opt-out at any time</li>
+                                    <li><strong>Breach Notification</strong> — Notified as soon as reasonably possible</li>
+                                    <li><strong>Complaint</strong> — Lodge with the Information Regulator</li>
+                                </ul>
+                                <p className="text-yellow-700 text-xs mt-2">
+                                    Information Regulator: inforeg@justice.gov.za | Our DPO: dpo@arkynox.com
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.7 Russia (152-FZ) — Data Localization</h3>
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                <p className="text-red-800 text-sm">
+                                    If you are in Russia, Federal Law No. 152-FZ requires that Russian citizens' personal data 
+                                    be processed using databases located within the Russian Federation. We comply by maintaining 
+                                    localized data processing infrastructure for Russian users. Roskomnadzor may be contacted 
+                                    regarding data protection matters.
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.8 Turkey (KVKK) — Your Additional Rights</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li>Learn whether your data is being processed</li>
+                                    <li>Request information about processing activities</li>
+                                    <li>Learn the purpose and whether data is used appropriately</li>
+                                    <li>Request correction of inaccurate/incomplete data</li>
+                                    <li>Request deletion or anonymization of data</li>
+                                    <li>Object to unfavorable automated processing results</li>
+                                    <li>Claim damages for unlawful processing</li>
+                                </ul>
+                                <p className="text-blue-700 text-xs mt-2">
+                                    KVKK: kvkk.gov.tr | Our Representative: kvkk@arkynox.com
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.9 Australia (Privacy Act) — Your Additional Rights</h3>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-green-700 text-sm space-y-1">
+                                    <li><strong>Access</strong> — Request access to your personal information</li>
+                                    <li><strong>Correction</strong> — Update or correct your information</li>
+                                    <li><strong>Deletion</strong> — Request deletion in certain circumstances</li>
+                                    <li><strong>Notifiable Data Breaches</strong> — We will notify OAIC and affected individuals</li>
+                                    <li><strong>Children's Privacy</strong> — Enhanced protections for under-15s</li>
+                                </ul>
+                                <p className="text-green-700 text-xs mt-2">
+                                    OAIC: oaic.gov.au | Our DPO: dpo@arkynox.com
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.10 Indonesia (UU PDP) — Your Additional Rights</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li>Right to Information about data processing</li>
+                                    <li>Right to Access your personal data</li>
+                                    <li>Right to Correction and Update of data</li>
+                                    <li>Right to Deletion of personal data</li>
+                                    <li>Right to Data Portability</li>
+                                    <li>Right to Withdraw consent</li>
+                                    <li>Right to Object to automated decisions</li>
+                                </ul>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.11 Thailand (PDPA) — Your Additional Rights</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li>Right of Access</li>
+                                    <li>Right to Data Portability</li>
+                                    <li>Right to Object to collection/use/disclosure</li>
+                                    <li>Right to Erasure</li>
+                                    <li>Right to Restrict Processing</li>
+                                    <li>Right to Rectification</li>
+                                </ul>
+                                <p className="text-blue-700 text-xs mt-2">
+                                    Note: Consent age in Thailand is 20. For users under 20, we require parental/guardian consent.
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.12 Philippines (Data Privacy Act) — Your Additional Rights</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li>Right to be Informed</li>
+                                    <li>Right to Access</li>
+                                    <li>Right to Object</li>
+                                    <li>Right to Erasure or Blocking</li>
+                                    <li>Right to Damages for violation</li>
+                                    <li>Right to Data Portability</li>
+                                    <li>Right to File a complaint with NPC</li>
+                                </ul>
+                                <p className="text-blue-700 text-xs mt-2">
+                                    NPC: privacy.gov.ph | Our DPO: dpo@arkynox.com
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.13 Nigeria, Kenya & South Africa — Data Protection</h3>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                <p className="text-green-800 text-sm mb-2">
+                                    These African nations have comprehensive data protection laws. Key similarities:
+                                </p>
+                                <ul className="list-disc pl-6 text-green-700 text-sm space-y-1">
+                                    <li><strong>Nigeria (NDPR Act 2023):</strong> Right to access, correction, deletion, objection, portability. Consent required for sensitive data. Breach notification to NDPC within 72 hours.</li>
+                                    <li><strong>Kenya (DPA 2019):</strong> Right to be informed, access, object, correct, delete, portability. <strong>Data localization required</strong> for critical data. Breach notification to ODPC within 72 hours.</li>
+                                    <li><strong>South Africa (POPIA):</strong> 8 conditions for lawful processing including accountability, purpose specification, further processing limitation. See section 11.6 above.</li>
+                                </ul>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.14 South Korea (PIPA) — Your Additional Rights</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li>Right to Consent before collection and use</li>
+                                    <li>Right to Access personal information</li>
+                                    <li>Right to Correction of inaccurate info</li>
+                                    <li>Right to Deletion</li>
+                                    <li>Right to Suspension of processing</li>
+                                    <li><strong>Strict cross-border transfer rules</strong> — We implement alternative safeguards per PIPA</li>
+                                    <li>Pseudonymized data may be processed without consent for specific purposes</li>
+                                </ul>
+                                <p className="text-blue-700 text-xs mt-2">
+                                    PIPC: pipc.go.kr | Consent age: 14
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.15 Sri Lanka (PDPA No. 9 of 2022)</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li>Right to be Informed</li>
+                                    <li>Right of Access</li>
+                                    <li>Right to Correction</li>
+                                    <li>Right to Erasure</li>
+                                    <li>Right to Restrict Processing</li>
+                                    <li>Right to Data Portability</li>
+                                    <li>Right to Object</li>
+                                </ul>
+                                <p className="text-blue-700 text-xs mt-2">
+                                    DPA of Sri Lanka: dpa.gov.lk | Breach notify: 72 hours
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.16 Kazakhstan (Law No. 94-V)</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <p className="text-blue-800 text-sm">
+                                    Kazakhstan requires that personal data of Kazakh citizens be stored on servers within 
+                                    Kazakhstan. We comply through localized hosting infrastructure. Consent is required for 
+                                    third-party sharing. Breach notification must be made within 3 days to the authorized body (MDDIAI).
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.17 Yemen & Iran — Privacy Protections</h3>
+                            <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 mb-4">
+                                <p className="text-gray-700 text-sm">
+                                    <strong>Yemen:</strong> Privacy is protected under Article 40 of the Constitution. There is no 
+                                    comprehensive data protection law currently. We voluntarily extend the same high standard of 
+                                    data protection to all users regardless of their country's legal framework.
+                                </p>
+                                <p className="text-gray-700 text-sm mt-2">
+                                    <strong>Iran:</strong> Privacy protections exist under Articles 22-25 of the Constitution and 
+                                    the Computer Crimes Law. While no comprehensive data protection law exists, we apply our 
+                                    global privacy standards to all users. Iran has sectoral data localization requirements that 
+                                    we accommodate where applicable.
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.18 Children's Privacy Across Jurisdictions</h3>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <p className="text-yellow-800 text-sm mb-2">
+                                    The age at which a child can independently consent to data processing varies by country:
+                                </p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm text-yellow-700">
+                                    <div><span className="font-medium">13+</span> — US (COPPA), UK</div>
+                                    <div><span className="font-medium">14+</span> — Spain, South Korea</div>
+                                    <div><span className="font-medium">15+</span> — Japan, France, Australia</div>
+                                    <div><span className="font-medium">16+</span> — EU/EEA, Germany, Netherlands</div>
+                                    <div><span className="font-medium">18+</span> — India, Brazil, Turkey, Nigeria, Kenya, Philippines, Sri Lanka, Kazakhstan, Yemen, Iran</div>
+                                    <div><span className="font-medium">20+</span> — Thailand</div>
+                                </div>
+                                <p className="text-yellow-700 text-xs mt-2">
+                                    For users under the applicable age in their jurisdiction, we require verifiable parental 
+                                    or guardian consent before processing personal data. Please contact privacy@arkynox.com 
+                                    if you need to provide parental consent.
+                                </p>
+                            </div>
+
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.19 Cross-Border Data Transfer Mechanisms</h3>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <p className="text-blue-800 text-sm mb-2">
+                                    When we transfer your data across borders, we rely on these safeguards:
+                                </p>
+                                <ul className="list-disc pl-6 text-blue-700 text-sm space-y-1">
+                                    <li><strong>Standard Contractual Clauses (SCCs)</strong> — EU/EEA/UK approved transfer agreements</li>
+                                    <li><strong>Adequacy Decisions</strong> — Transfers to countries deemed adequate by the European Commission</li>
+                                    <li><strong>Data Localization</strong> — In-country hosting for Russia, Kazakhstan, Indonesia, Kenya, South Korea, and India (where required)</li>
+                                    <li><strong>Binding Corporate Rules</strong> — Internal privacy standards for our global operations</li>
+                                    <li><strong>Explicit Consent</strong> — For cross-border transfers where other mechanisms are not available</li>
+                                    <li><strong>DPDP Act (India)</strong> — Notice to Data Principal before transfer, with consent or deemed consent</li>
+                                    <li><strong>PIPA (South Korea)</strong> — Alternative safeguards per PIPA Article 28-8</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <p className="text-gray-600 text-sm">
+                                    <strong>Questions about your specific jurisdiction?</strong> Contact privacy@arkynox.com with 
+                                    your country of residence and we will provide you with the specific rights and protections 
+                                    applicable to you. We respond to all jurisdictional inquiries within 48 hours.
+                                </p>
+                            </div>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">12. Changes to This Privacy Policy</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
                                 We regularly review and may update this Privacy Policy to reflect changes in our services, 
                                 legal requirements, or industry best practices:
                             </p>
 
-                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.1 Types of Changes</h3>
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">12.1 Types of Changes</h3>
                             <ul className="list-disc pl-6 mb-4 text-gray-700">
                                 <li><strong>Minor Updates:</strong> Clarifications, contact information updates, formatting changes</li>
                                 <li><strong>Material Changes:</strong> New data collection, sharing practices, or use purposes</li>
@@ -522,7 +898,7 @@ export default function PrivacyPolicy() {
                                 <li><strong>Feature Changes:</strong> Privacy implications of new product features</li>
                             </ul>
 
-                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.2 Notification Process</h3>
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">12.2 Notification Process</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div className="bg-green-50 p-4 rounded-lg">
                                     <h4 className="font-semibold text-green-800 mb-2">Minor Changes</h4>
@@ -544,7 +920,7 @@ export default function PrivacyPolicy() {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-medium text-gray-800 mb-3">11.3 Your Options</h3>
+                            <h3 className="text-xl font-medium text-gray-800 mb-3">12.3 Your Options</h3>
                             <ul className="list-disc pl-6 mb-4 text-gray-700">
                                 <li><strong>Review Changes:</strong> Compare current and previous versions side-by-side</li>
                                 <li><strong>Ask Questions:</strong> Contact our privacy team for clarification</li>
@@ -554,7 +930,7 @@ export default function PrivacyPolicy() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">12. Contact Information and Support</h2>
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">13. Contact Information and Support</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="bg-blue-50 p-6 rounded-lg">
                                     <h3 className="text-xl font-medium text-blue-800 mb-4">Privacy Team</h3>
@@ -577,23 +953,71 @@ export default function PrivacyPolicy() {
                             </div>
 
                             <div className="mt-6 bg-gray-50 p-6 rounded-lg">
-                                <h3 className="text-xl font-medium text-gray-800 mb-4">Regulatory Contacts</h3>
+                                <h3 className="text-xl font-medium text-gray-800 mb-4">Regulatory Contacts by Region</h3>
                                 <p className="text-gray-700 text-sm mb-3">
                                     If you believe we have not adequately addressed your privacy concerns, you have the 
-                                    right to lodge a complaint with the relevant supervisory authority:
+                                    right to lodge a complaint with the relevant supervisory authority in your jurisdiction:
                                 </p>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    <div>
-                                        <strong className="text-gray-800">EU/GDPR:</strong>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇪🇺 EU/EEA (GDPR):</strong>
                                         <br />Your local Data Protection Authority
                                     </div>
-                                    <div>
-                                        <strong className="text-gray-800">US/CCPA:</strong>
-                                        <br />California Attorney General
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇬🇧 UK (UK GDPR):</strong>
+                                        <br />Information Commissioner's Office (ICO)
                                     </div>
-                                    <div>
-                                        <strong className="text-gray-800">Canada/PIPEDA:</strong>
-                                        <br />Privacy Commissioner of Canada
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇮🇳 India (DPDP Act):</strong>
+                                        <br />Data Protection Board of India
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇧🇷 Brazil (LGPD):</strong>
+                                        <br />Autoridade Nacional (ANPD)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇺🇸 US (CCPA/COPPA):</strong>
+                                        <br />California Attorney General / FTC
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇿🇦 South Africa (POPIA):</strong>
+                                        <br />Information Regulator
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇯🇵 Japan (APPI):</strong>
+                                        <br />Personal Information Protection Commission (PPC)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇷🇺 Russia (152-FZ):</strong>
+                                        <br />Roskomnadzor
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇹🇷 Turkey (KVKK):</strong>
+                                        <br />Kişisel Verileri Koruma Kurumu
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇰🇷 South Korea (PIPA):</strong>
+                                        <br />Personal Information Protection Commission (PIPC)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇦🇺 Australia:</strong>
+                                        <br />Office of the Australian Information Commissioner (OAIC)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇳🇬 Nigeria:</strong>
+                                        <br />Nigeria Data Protection Commission (NDPC)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇰🇪 Kenya:</strong>
+                                        <br />Office of Data Protection Commissioner (ODPC)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇹🇭 Thailand (PDPA):</strong>
+                                        <br />Personal Data Protection Committee (PDPC)
+                                    </div>
+                                    <div className="bg-white p-3 rounded border">
+                                        <strong className="text-gray-800">🇵🇭 Philippines:</strong>
+                                        <br />National Privacy Commission (NPC)
                                     </div>
                                 </div>
                             </div>
@@ -610,7 +1034,7 @@ export default function PrivacyPolicy() {
 
                     <div className="mt-8 pt-8 border-t border-gray-200 text-center">
                         <p className="text-sm text-gray-600">
-                            This Privacy Policy was last updated on August 15, 2025
+                            This Privacy Policy was last updated on June 20, 2026
                         </p>
                         <div className="mt-4">
                             <a href="/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">

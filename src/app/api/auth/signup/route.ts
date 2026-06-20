@@ -28,12 +28,23 @@ export async function POST(request: Request) {
         }
         const { name, email, password } = parsed.data;
          const db = await getMongoClient();
-         var hashPassword = await encryptCode(password);
-         var result;
+         const hashPassword = await encryptCode(password);
+         let result;
          result = await db.collection('users').findOne({
            email: email,
          });
          if (result) {
+            // If guest/temporary user exists, upgrade to full account
+            if (result.guest || result.temporary) {
+              await db.collection('users').updateOne(
+                { _id: result._id },
+                { $set: { name, password: hashPassword, guest: false, temporary: false, upgradedAt: new Date() } }
+              );
+              return NextResponse.json({ success: true, upgraded: true }, {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
             return NextResponse.json({ success: false, message: 'Email already exists' }, {
                 status: 201,
                 headers: { 'Content-Type': 'application/json' }
@@ -51,7 +62,7 @@ export async function POST(request: Request) {
                 headers: { 'Content-Type': 'application/json' }
             });
          }
-         var id = await encrypt(result.insertedId.toString());
+          const id = await encrypt(result.insertedId.toString());
         //  var quo = await sendVerificationEmail(name, email, id);
         //  if (!quo) {
         //     await db.collection('users').deleteOne({ _id: result.insertedId });

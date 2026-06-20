@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, ReactNode, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 
 interface RealtimeUpdate {
@@ -45,7 +45,7 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<RealtimeUpdate | null>(null);
-  const [eventSource, setEventSource] = useState<EventSource | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const [shouldConnect, setShouldConnect] = useState(true);
   const pathname = usePathname();
@@ -58,9 +58,9 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
     if (!shouldConnect || !isRealtimeRoute) return;
 
     // Close existing connection
-    if (eventSource) {
-      eventSource.close();
-      setEventSource(null);
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
 
     try {
@@ -113,24 +113,24 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
         }
       };
 
-      setEventSource(es);
+      eventSourceRef.current = es;
     } catch (error) {
       console.error('Error creating SSE connection:', error);
       setConnectionError('Failed to create real-time connection');
       setIsConnected(false);
     }
-  }, [shouldConnect, reconnectAttempts, eventSource, isRealtimeRoute]);
+  }, [shouldConnect, reconnectAttempts, isRealtimeRoute]);
 
   const disconnect = useCallback(() => {
     setShouldConnect(false);
-    if (eventSource) {
-      eventSource.close();
-      setEventSource(null);
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
     setIsConnected(false);
     setConnectionError(null);
     setReconnectAttempts(0);
-  }, [eventSource]);
+  }, []);
 
   const reconnect = useCallback(() => {
     setShouldConnect(true);
@@ -146,8 +146,8 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
     }
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
       }
     };
   }, [shouldConnect, isRealtimeRoute, connect, disconnect]);
@@ -155,8 +155,8 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
       }
     };
   }, []);
@@ -166,12 +166,9 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
     const handleVisibilityChange = () => {
       if (!isRealtimeRoute) return;
       if (document.hidden) {
-        // Page is hidden, disconnect to save resources
         disconnect();
       } else {
-        // Page is visible, reconnect
         setShouldConnect(true);
-        connect();
       }
     };
 
@@ -180,7 +177,7 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [connect, disconnect, isRealtimeRoute]);
+  }, [isRealtimeRoute]);
 
   const value: RealtimeContextType = {
     isConnected,

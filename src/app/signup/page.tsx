@@ -3,6 +3,7 @@ import { owner } from '@/lib/constants';
 import React, { useEffect, useState } from 'react';
 import TermsAcceptance from '@/components/ui/TermsAcceptance';
 import { useConsent } from '@/lib/ConsentContext';
+import Shimmer from '@/components/ui/Shimmer';
 
 export default function Signup() {
   const [error, setError] = useState("");
@@ -14,6 +15,7 @@ export default function Signup() {
   });
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [video, setVideo] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const { hasValidConsent, updateConsent } = useConsent();
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function Signup() {
 
   const proceedWithSignup = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch(`/api/auth/signup`, {
         method: 'POST',
         headers: {
@@ -53,13 +56,19 @@ export default function Signup() {
       });
       const responseData: any = await response.json();
       if (response.ok && responseData.success && typeof window !== "undefined") {
-        window.location.href = "/signin";
+        if (responseData.upgraded) {
+          window.location.href = "/signin?upgraded=1";
+        } else {
+          window.location.href = "/signin";
+        }
       } else {
         setError(responseData.message);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error:', error);
       setError("An error occurred during signup. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -104,7 +113,7 @@ export default function Signup() {
             <a href={`https://dribbble.com/${owner[video]}`} className="font-bold text-center text-white" style={{ position: 'absolute', bottom: 0, width: '100%', marginBottom: '20px' }}>@{owner[video]}</a>
           </div>
         </div>
-        <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 h-screen lg:h-auto pb-10">
+        <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 min-h-screen lg:min-h-0 pb-10">
           <div className="w-full max-w-md">
             <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign up to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='Arkynox' /></h2>
             <form action={submit}> {/**form*/}
@@ -154,13 +163,22 @@ export default function Signup() {
                     </div>
                   </div>
                 </div>
-              { error && (<div className="mb-6">
+              { error && (<div className="mb-6" role="alert">
                 <span className="flex items-center justify-between mb-2 font-sans text-lg font-bold text-red-700">
                   {error}
                 </span>
               </div> )}
               <div>
-                <button type='submit' className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none">Create Account</button>
+                <button type='submit' disabled={isLoading} className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center">
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Shimmer className="h-5 w-5 rounded-full" shape="circle" variant="button" />
+                      Creating Account...
+                    </span>
+                  ) : (
+                    'Create Account'
+                  )}
+                </button>
               </div>
               <p className="mt-4 text-sm text-center text-gray-600">
                 Already have an account?<span> </span>

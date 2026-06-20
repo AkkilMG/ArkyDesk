@@ -217,7 +217,7 @@ export default function AdminChat({ settings, setSettings, isMobile, currentUser
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold hidden sm:block">Admin Chat</h2>
+                    <h2 className="text-xl font-bold">Admin Chat</h2>
                     <div className="flex items-center gap-2">
                         <Shimmer className={`w-3 h-3 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} shape="circle" />
                         <span className={`text-sm ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
@@ -413,7 +413,7 @@ export default function AdminChat({ settings, setSettings, isMobile, currentUser
                         className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
                     >
                         {sending ? (
-                            <Shimmer className="w-4 h-4 bg-white/40" shape="circle" />
+                            <Shimmer className="w-4 h-4 rounded-full" shape="circle" variant="button" />
                         ) : (
                             <>
                                 <span className="hidden sm:inline">Send</span>

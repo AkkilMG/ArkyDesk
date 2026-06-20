@@ -17,16 +17,16 @@ export async function POST(request: Request) {
       });
     }
     const db = await getMongoClient();
-    var result = await db.collection('users').findOne({
-      email: email
+    const result = await db.collection('users').findOne({
+      email: email,
     });
     if (!result) {
-      return NextResponse.json({ success: false, message: 'Invalid credentials' }, {
-        status: 401,
+      return NextResponse.json({ success: false, message: 'Email not found' }, {
+        status: 201,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    var result1 = await db.collection('otDump').insertOne({
+    const result1 = await db.collection('otDump').insertOne({
       email: email,
       code: encryptCode(email),
       createdAt: new Date()
