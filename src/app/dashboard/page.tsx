@@ -40,11 +40,11 @@ export default function Dashboard() {
                 setAdmin(data.admin || false);
             } else {
                 console.error('Verify failed:', data.message);
-                setAdmin(false);
+                router.push('/signin');
             }
         } catch (error) {
             console.error('Error verify out:', error);
-            setAdmin(false);
+            router.push('/signin');
         } finally {
             setAdminLoading(false);
             setPageLoading(false);

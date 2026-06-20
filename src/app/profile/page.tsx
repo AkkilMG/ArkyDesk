@@ -6,9 +6,11 @@ import TicketCreate from "@/components/ticket/create";
 import TicketsLists from '@/components/ticket/list';
 import { use, useEffect, useState } from "react";
 import Shimmer from '@/components/ui/Shimmer';
+import { useRouter } from "next/navigation";
 
 
 export default function ProfileCard() {
+    const router = useRouter();
     const [create, setCreate] = useState(false);
     const [settings, setSettings] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -61,9 +63,21 @@ export default function ProfileCard() {
     }
 
     useEffect(() => {
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/verify');
+                const data = await res.json();
+                if (!data.success) {
+                    router.push('/signin');
+                }
+            } catch {
+                router.push('/signin');
+            }
+        }
+        checkAuth();
         getDetails();
         fetchTickets();
-    }, []);
+    }, [router]);
 
     if (!details) {
         return (

@@ -9,10 +9,12 @@ import GuestCreate from "@/components/ticket/guestCreate";
 import SideNav from "@/components/dashboard/sideNav";
 import { useRealtime } from "@/lib/RealtimeContext";
 import Shimmer from "@/components/ui/Shimmer";
+import { useRouter } from "next/navigation";
 // import TicketInfo from "@/components/ticket/info";
 
 
 export default function TicketsPage() {
+    const router = useRouter();
     const [create, setCreate] = useState(false);
     const [settings, setSettings] = useState(false);
     const [ticketId, setTicketId] = useState('');
@@ -63,13 +65,13 @@ export default function TicketsPage() {
                 setAdmin(data.admin || false);
             } else {
                 console.error('Verify failed:', data.message);
-                setAdmin(false);
+                router.push('/signin');
             }
         } catch (error) {
             console.error('Error verify out:', error);
-            setAdmin(false);
+            router.push('/signin');
         }
-    }, []);
+    }, [router]);
   
 
     const [data, setData] = useState<any[]>([]);

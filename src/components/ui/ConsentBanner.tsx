@@ -4,7 +4,7 @@ import { useConsent } from '@/lib/ConsentContext';
 import Link from 'next/link';
 
 export default function ConsentBanner() {
-    const { consentSettings, needsConsentUpdate, hasValidConsent } = useConsent();
+    const { consentSettings, needsConsentUpdate, hasValidConsent, updateConsent } = useConsent();
 
     // Don't show if consent is valid and up to date
     if (hasValidConsent() && !needsConsentUpdate()) {
@@ -68,6 +68,18 @@ export default function ConsentBanner() {
                     </div>
                     <div className="mt-4">
                         <div className="-mx-2 -my-1.5 flex space-x-3">
+                            <button
+                                onClick={(e) => {
+                                    updateConsent({
+                                        termsAccepted: true,
+                                        privacyAccepted: true,
+                                        dataProcessingAccepted: true,
+                                    });
+                                }}
+                                className="px-4 py-2 rounded-md text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors"
+                            >
+                                Accept
+                            </button>
                             <Link
                                 href="/policy"
                                 className={`${statusInfo.buttonBg} px-2 py-1.5 rounded-md text-xs font-medium ${statusInfo.textColor} ${statusInfo.buttonHover} transition-colors`}
@@ -76,7 +88,6 @@ export default function ConsentBanner() {
                             </Link>
                             <button
                                 onClick={(e) => {
-                                    // Trigger privacy settings modal
                                     const privacyButton = document.querySelector('[data-privacy-settings]');
                                     if (privacyButton) {
                                         (privacyButton as HTMLElement).click();

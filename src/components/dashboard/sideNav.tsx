@@ -234,6 +234,7 @@ export default function SideNav({ create, setCreate, settings, setSettings, isMo
                             <span>Settings</span>
                         </div>
                     </li>
+                    <PrivacySettings />
                     <li onClick={signOut} className="cursor-pointer">
                         <div className="flex items-center space-x-3 text-gray-600 hover:text-red-600 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 text-sm sm:text-base group">
                             <svg className="h-5 sm:h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
