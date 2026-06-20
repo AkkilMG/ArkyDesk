@@ -108,7 +108,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     // Parse the request body
     const body = await request.json();
-    const { comment, ticketId } = body;
+    const { z } = await import('zod');
+    const schema = z.object({ comment: z.string().min(1).max(2000), ticketId: z.string().min(1) });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, message: 'Invalid input' }, { status: 400 });
+    }
+    const { comment, ticketId } = parsed.data;
     const db = await getMongoClient();
     const sessionCookie = cookies().get('session');
     if (!sessionCookie) {
@@ -119,7 +125,7 @@ export async function POST(request: Request) {
     }
     const session = sessionCookie.value;
     const decryptedSession = await decryptSession(session);
-    if (!decryptSession) {
+    if (!decryptedSession) {
       return NextResponse.json({ success: false, message: "failed to fetch." }, {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
@@ -127,6 +133,19 @@ export async function POST(request: Request) {
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
       var data = await decrypt(decryptedSession.token);
+      const user = await db.collection('users').findOne({ _id: new ObjectId(data) });
+      if (!user) {
+        return NextResponse.json({ success: false, message: "Invalid session token." }, {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      if (user.guest || user.temporary) {
+        return NextResponse.json({ success: false, message: "Guest accounts cannot comment." }, {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
       
       const ticket = await db.collection('tickets').findOne({ _id: new ObjectId(ticketId) });
       if (!ticket) {

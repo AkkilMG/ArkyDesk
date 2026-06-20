@@ -1,4 +1,5 @@
 "use client";
+import Shimmer from '@/components/ui/Shimmer';
 import { owner } from "@/lib/constants";
 import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -7,14 +8,22 @@ import { useState, useEffect } from "react";
 export default function Signin() {
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [guestError, setGuestError] = useState("");
+    const [guestMessage, setGuestMessage] = useState("");
     const [showForgotModal, setShowForgotModal] = useState(false);
     const [forgotEmail, setForgotEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [guestLoading, setGuestLoading] = useState(false);
     const [formData, setFormData] = useState({
         "email": "",
         "password": ""
     });
+    const [guestForm, setGuestForm] = useState({
+        name: "",
+        email: ""
+    });
     const [video, setVideo] = useState(0);
+    const [activeTab, setActiveTab] = useState<"signin" | "guest">("signin");
     const router = useRouter();
     
     async function handleAdmin() {
@@ -59,6 +68,68 @@ export default function Signin() {
             [event.target.id]: event.target.value
         });
     }
+
+    const handleGuestChange = (event: any) => {
+        setGuestForm({
+            ...guestForm,
+            [event.target.id]: event.target.value
+        });
+    };
+
+    const handleGuestContinue = async () => {
+        setGuestError("");
+        setGuestMessage("");
+
+        if (!guestForm.name.trim() || !guestForm.email.trim()) {
+            setGuestError("Name and email are required for guest access.");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(guestForm.email)) {
+            setGuestError("Please enter a valid email address.");
+            return;
+        }
+
+        setGuestLoading(true);
+
+        try {
+            const response = await fetch('/api/guest/login-link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: guestForm.name,
+                    email: guestForm.email,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                setGuestError(data.message || 'Unable to start guest session.');
+                return;
+            }
+
+            setGuestMessage('Guest session created. Redirecting you now.');
+            if (data.loginUrl) {
+                window.location.href = data.loginUrl;
+                return;
+            }
+
+            if (data.sent) {
+                setGuestMessage('Check your email for the guest login link.');
+            } else {
+                setGuestMessage('Guest login link created. Open the email link or ask support to resend it.');
+            }
+        } catch (error) {
+            console.error('Guest login error:', error);
+            setGuestError('An error occurred while creating the guest session.');
+        } finally {
+            setGuestLoading(false);
+        }
+    };
 
     const handleForgotPassword = async () => {
         if (!forgotEmail.trim()) {
@@ -141,7 +212,7 @@ export default function Signin() {
             <main className="flex flex-col">
                 <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
                     <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
-                        <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='SangrahDB' /></a>
+                        <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
                     </div>
                 </header>
                 <div className="flex flex-row flex-grow">
@@ -156,72 +227,172 @@ export default function Signin() {
                     </div>
                     <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 h-screen lg:h-auto pb-10">
                         <div className="w-full max-w-md">
-                            <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign in to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='SangrahDB' /></h2>
-                            <form action={submit}> {/** form */}
-                                <div className="mb-4">
-                                    <label className="block mb-2 font-bold text-gray-700 text-sl"> Email </label>
-                                    <input value={formData.email} onChange={handleChange} id="email" type="email" 
-                                    className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2" />
-                                </div>
-                                <div className="mb-6">
-                                    <span className="flex items-center justify-between mb-2 font-sans font-bold text-gray-700 text-sl">
-                                        Password
-                                        <button 
-                                            type="button"
-                                            onClick={(e) => setShowForgotModal(true)}
-                                            className="font-sans text-sm font-normal text-blue-600 hover:text-blue-800 underline cursor-pointer transition-colors"
-                                        >
-                                            Forgot Password?
-                                        </button>
-                                    </span>
-                                    <input value={formData.password} onChange={handleChange} id="password" type="password" 
-                                    className="w-full px-3 py-2 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" />
-                                </div>
-                                { error && (<div className="mb-6">
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                        <div className="flex items-center">
-                                            <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span className="text-sm font-medium text-red-700">{error}</span>
-                                        </div>
+                            <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign in to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='Arkynox' /></h2>
+
+                            <div className="flex gap-3 mb-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("signin")}
+                                    className={`flex-1 h-12 rounded-xl font-bold transition-colors duration-200 flex items-center justify-center ${activeTab === "signin" ? "bg-[#0D0C22] text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"}`}
+                                >
+                                    Sign In
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("guest")}
+                                    className={`flex-1 h-12 rounded-xl font-bold transition-colors duration-200 flex items-center justify-center ${activeTab === "guest" ? "bg-[#0D0C22] text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"}`}
+                                >
+                                    Guest SignIn
+                                </button>
+                            </div>
+
+                            {activeTab === "signin" ? (
+                                <form action={submit}>
+                                    <div className="mb-4">
+                                        <label className="block mb-2 font-bold text-gray-700 text-sl"> Email </label>
+                                        <input value={formData.email} onChange={handleChange} id="email" type="email" 
+                                        className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2" />
                                     </div>
-                                </div> )}
-                                
-                                { successMessage && (<div className="mb-6">
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                        <div className="flex items-center">
-                                            <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span className="text-sm font-medium text-green-700">{successMessage}</span>
-                                        </div>
+                                    <div className="mb-6">
+                                        <span className="flex items-center justify-between mb-2 font-sans font-bold text-gray-700 text-sl">
+                                            Password
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => setShowForgotModal(true)}
+                                                className="font-sans text-sm font-normal text-blue-600 hover:text-blue-800 underline cursor-pointer transition-colors"
+                                            >
+                                                Forgot Password?
+                                            </button>
+                                        </span>
+                                        <input value={formData.password} onChange={handleChange} id="password" type="password" 
+                                        className="w-full px-3 py-2 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" />
                                     </div>
-                                </div> )}
-                                <div>
-                                    <button 
-                                        type="submit" 
-                                        disabled={isLoading}
-                                        className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    { error && (<div className="mb-6">
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                            <div className="flex items-center">
+                                                <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                Signing In...
-                                            </>
-                                        ) : (
-                                            'Sign In'
-                                        )}
-                                    </button>
+                                                <span className="text-sm font-medium text-red-700">{error}</span>
+                                            </div>
+                                        </div>
+                                    </div> )}
+                                    
+                                    { successMessage && (<div className="mb-6">
+                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                            <div className="flex items-center">
+                                                <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span className="text-sm font-medium text-green-700">{successMessage}</span>
+                                            </div>
+                                        </div>
+                                    </div> )}
+                                    <div>
+                                        <button 
+                                            type="submit" 
+                                            disabled={isLoading}
+                                            className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                            <div className="inline-block -ml-1 mr-3">
+                                                                <Shimmer className="h-5 w-5 bg-white/80 rounded-full" shape="circle" />
+                                                            </div>
+                                                            Signing In...
+                                                </>
+                                            ) : (
+                                                'Sign In'
+                                            )}
+                                        </button>
+                                    </div>
+                                    <p className="mt-4 text-sm text-center text-gray-600">
+                                        Don't have an account?<span> </span>
+                                        <a href="/signup" className="font-sans text-sm text-gray-600 underline cursor-pointer">Sign up </a>
+                                    </p>
+                                </form>
+                            ) : (
+                                <div>
+                                    <div className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                                        <div className="flex items-start space-x-3">
+                                            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-indigo-900">Guest Access</h3>
+                                                <p className="mt-1 text-sm text-indigo-700">
+                                                    Submit bug reports without creating an account. Guest sessions are limited and some features will be restricted until you sign up.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block mb-2 font-bold text-gray-700 text-sl">Guest name</label>
+                                        <input
+                                            id="name"
+                                            value={guestForm.name}
+                                            onChange={handleGuestChange}
+                                            type="text"
+                                            placeholder="Enter your display name"
+                                            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"
+                                        />
+                                    </div>
+                                    <div className="mb-6">
+                                        <label className="block mb-2 font-bold text-gray-700 text-sl">Guest email</label>
+                                        <input
+                                            id="email"
+                                            value={guestForm.email}
+                                            onChange={handleGuestChange}
+                                            type="email"
+                                            placeholder="name@example.com"
+                                            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"
+                                        />
+                                    </div>
+                                    {guestError && (
+                                        <div className="mb-6">
+                                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                                <div className="flex items-center">
+                                                    <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span className="text-sm font-medium text-red-700">{guestError}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {guestMessage && (
+                                        <div className="mb-6">
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                <div className="flex items-center">
+                                                    <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span className="text-sm font-medium text-green-700">{guestMessage}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <button
+                                            type="button"
+                                            onClick={handleGuestContinue}
+                                            disabled={guestLoading}
+                                            className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+                                        >
+                                            {guestLoading ? (
+                                                <>
+                                                    <div className="inline-block -ml-1 mr-3">
+                                                        <Shimmer className="h-5 w-5 bg-white/80 rounded-full" shape="circle" />
+                                                    </div>
+                                                    Starting guest session...
+                                                </>
+                                            ) : (
+                                                'Continue as Guest'
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="mt-4 text-sm text-center text-gray-600">
-                                    Don't have an account?<span> </span>
-                                    <a href="/signup" className="font-sans text-sm text-gray-600 underline cursor-pointer">Sign up </a>
-                                </p>
-                            </form> {/* form*/}
+                            )}
                         </div>
                     </div>
                 </div>
@@ -311,10 +482,9 @@ export default function Signin() {
                                     >
                                         {isLoading ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
+                                                    <div className="inline-block -ml-1 mr-2">
+                                                        <Shimmer className="h-4 w-4 bg-white/80 rounded-full inline-block" shape="circle" />
+                                                    </div>
                                                 Sending...
                                             </>
                                         ) : (

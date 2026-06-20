@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { UserDetails, Message } from "@/types/settings";
+import Shimmer from "../ui/Shimmer";
 
 interface UserManagementProps {
   settings: boolean;
@@ -128,7 +129,7 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
         <div className="flex-1 px-4 py-4 pt-5 md:px-8 md:py-4 h-full overflow-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h2 className="text-xl font-bold hidden sm:block">User Management</h2>
-                <button 
+                <button
                     onClick={fetchUsers}
                     disabled={loading}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800 disabled:text-gray-400 self-end sm:self-auto"
@@ -137,18 +138,12 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                 </button>
             </div>
 
-            {/* Message Display */}
             {message.text && (
-                <div className={`mb-4 p-3 rounded ${
-                    message.type === 'success' 
-                        ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : 'bg-red-100 text-red-700 border border-red-200'
-                }`}>
+                <div className={`mb-4 p-3 rounded ${message.type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
                     {message.text}
                 </div>
             )}
 
-            {/* Search and Filters */}
             <div className="mb-6 flex flex-col gap-3">
                 <input
                     type="text"
@@ -169,7 +164,6 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                 </select>
             </div>
 
-            {/* Pending Actions */}
             {pendingActions.length > 0 && (
                 <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-yellow-800 mb-3">Pending Actions</h3>
@@ -181,29 +175,15 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                                         <div className="flex flex-wrap items-center gap-2 mb-2">
                                             <span className="font-medium text-sm">{action.user.name}</span>
                                             <span className="text-gray-500 text-xs">({action.user.email})</span>
-                                            <span className={`px-2 py-1 text-xs rounded ${
-                                                action.type === 'flag' ? 'bg-orange-100 text-orange-800' :
-                                                action.type === 'admin' ? 'bg-blue-100 text-blue-800' :
-                                                'bg-red-100 text-red-800'
-                                            }`}>
+                                            <span className={`px-2 py-1 text-xs rounded ${action.type === 'flag' ? 'bg-orange-100 text-orange-800' : action.type === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
                                                 {action.type.toUpperCase()}
                                             </span>
                                         </div>
                                         {action.reason && <div className="text-sm text-gray-600">Reason: {action.reason}</div>}
                                     </div>
                                     <div className="flex gap-2 justify-end">
-                                        <button
-                                            onClick={(e) => handleApproveReject(action.id, true)}
-                                            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                                        >
-                                            Approve
-                                        </button>
-                                        <button
-                                            onClick={(e) => handleApproveReject(action.id, false)}
-                                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-                                        >
-                                            Reject
-                                        </button>
+                                        <button onClick={() => handleApproveReject(action.id, true)} className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Approve</button>
+                                        <button onClick={() => handleApproveReject(action.id, false)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Reject</button>
                                     </div>
                                 </div>
                             </div>
@@ -212,80 +192,57 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                 </div>
             )}
 
-            {/* Users List - Mobile Cards / Desktop Table */}
             <div className="bg-white rounded-lg border overflow-hidden">
-                {/* Mobile View - Cards */}
                 <div className="block sm:hidden">
-                    {filteredUsers.length === 0 ? (
+                    {loading ? (
+                        <div className="p-4 space-y-3">
+                            {[1, 2, 3, 4].map((item) => (
+                                <div key={item} className="p-4 rounded-lg border border-gray-200 bg-white shadow-sm space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <Shimmer className="h-12 w-12 rounded-full" shape="circle" />
+                                        <div className="flex-1 space-y-2">
+                                            <Shimmer className="h-4 w-2/3 rounded" />
+                                            <Shimmer className="h-3 w-1/2 rounded" />
+                                            <div className="flex gap-2 pt-1">
+                                                <Shimmer className="h-5 w-16 rounded-full" />
+                                                <Shimmer className="h-5 w-16 rounded-full" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Shimmer className="h-8 flex-1 rounded" />
+                                        <Shimmer className="h-8 flex-1 rounded" />
+                                        <Shimmer className="h-8 flex-1 rounded" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : filteredUsers.length === 0 ? (
                         <div className="p-4 text-center text-gray-500">No users found</div>
                     ) : (
                         <div className="divide-y divide-gray-200">
                             {filteredUsers.map((user) => (
                                 <div key={user._id} className="p-4">
                                     <div className="flex items-start gap-3 mb-3">
-                                        <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            {user.name?.charAt(0).toUpperCase() || '?'}
-                                        </div>
+                                        <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">{user.name?.charAt(0).toUpperCase() || '?'}</div>
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium text-sm text-gray-900 truncate">{user.name}</div>
                                             <div className="text-xs text-gray-500 truncate">{user.email}</div>
                                             <div className="flex flex-wrap gap-1 mt-2">
-                                                {user.admin && (
-                                                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                        Admin
-                                                    </span>
-                                                )}
-                                                {user.flagged && (
-                                                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                                        Flagged
-                                                    </span>
-                                                )}
-                                                {!user.admin && !user.flagged && (
-                                                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                        Active
-                                                    </span>
-                                                )}
+                                                {user.admin && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Admin</span>}
+                                                {user.flagged && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Flagged</span>}
+                                                {!user.admin && !user.flagged && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="text-xs text-gray-600 mb-3">
                                         <div>Tickets: {user.tickets || 0} total / {user.closedTickets || 0} closed</div>
-                                        <div>Joined: {user._id ? new Date(parseInt(user._id.substring(0,8), 16)*1000).toLocaleDateString() : 'Unknown'}</div>
+                                        <div>Joined: {user._id ? new Date(parseInt(user._id.substring(0, 8), 16) * 1000).toLocaleDateString() : 'Unknown'}</div>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {!user.flagged && !user.admin && (
-                                            <button
-                                                onClick={(e) => {
-                                                    setSelectedUser(user);
-                                                    setActionType('flag');
-                                                }}
-                                                className="flex-1 min-w-0 text-orange-600 hover:text-orange-900 text-xs bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded border border-orange-200"
-                                            >
-                                                Flag
-                                            </button>
-                                        )}
-                                        {!user.admin && (
-                                            <button
-                                                onClick={(e) => {
-                                                    setSelectedUser(user);
-                                                    setActionType('admin');
-                                                }}
-                                                className="flex-1 min-w-0 text-blue-600 hover:text-blue-900 text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded border border-blue-200"
-                                            >
-                                                Make Admin
-                                            </button>
-                                        )}
-                                        {!user.admin && (
-                                            <button
-                                                onClick={(e) => {
-                                                    setSelectedUser(user);
-                                                    setActionType('delete');
-                                                }}
-                                                className="flex-1 min-w-0 text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-2 py-1 rounded border border-red-200"
-                                            >
-                                                Delete
-                                            </button>
-                                        )}
+                                        {!user.flagged && !user.admin && <button onClick={() => { setSelectedUser(user); setActionType('flag'); }} className="flex-1 min-w-0 text-orange-600 hover:text-orange-900 text-xs bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded border border-orange-200">Flag</button>}
+                                        {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('admin'); }} className="flex-1 min-w-0 text-blue-600 hover:text-blue-900 text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded border border-blue-200">Make Admin</button>}
+                                        {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('delete'); }} className="flex-1 min-w-0 text-red-600 hover:text-red-900 text-xs bg-red-50 hover:bg-red-100 px-2 py-1 rounded border border-red-200">Delete</button>}
                                     </div>
                                 </div>
                             ))}
@@ -293,98 +250,71 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
                     )}
                 </div>
 
-                {/* Desktop View - Table */}
                 <div className="hidden sm:block overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tickets</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredUsers.map((user) => (
-                                <tr key={user._id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                                                {user.name?.charAt(0).toUpperCase() || '?'}
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                <div className="text-sm text-gray-500">{user.email}</div>
-                                            </div>
+                    {loading ? (
+                        <div className="p-4 space-y-3">
+                            {[1, 2, 3, 4, 5].map((item) => (
+                                <div key={item} className="grid grid-cols-5 gap-4 items-center p-4 border-b border-gray-100">
+                                    <div className="col-span-2 flex items-center gap-3">
+                                        <Shimmer className="h-10 w-10 rounded-full" shape="circle" />
+                                        <div className="space-y-2 flex-1">
+                                            <Shimmer className="h-4 w-40 rounded" />
+                                            <Shimmer className="h-3 w-56 rounded" />
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex flex-col gap-1">
-                                            {user.admin && (
-                                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                    Admin
-                                                </span>
-                                            )}
-                                            {user.flagged && (
-                                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                                    Flagged
-                                                </span>
-                                            )}
-                                            {!user.admin && !user.flagged && (
-                                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                    Active
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {user.tickets || 0} total / {user.closedTickets || 0} closed
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {user._id ? new Date(parseInt(user._id.substring(0,8), 16)*1000).toLocaleDateString() : 'Unknown'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex justify-end gap-2">
-                                            {!user.flagged && !user.admin && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        setSelectedUser(user);
-                                                        setActionType('flag');
-                                                    }}
-                                                    className="text-orange-600 hover:text-orange-900 text-sm"
-                                                >
-                                                    Flag
-                                                </button>
-                                            )}
-                                            {!user.admin && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        setSelectedUser(user);
-                                                        setActionType('admin');
-                                                    }}
-                                                    className="text-blue-600 hover:text-blue-900 text-sm"
-                                                >
-                                                    Make Admin
-                                                </button>
-                                            )}
-                                            {!user.admin && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        setSelectedUser(user);
-                                                        setActionType('delete');
-                                                    }}
-                                                    className="text-red-600 hover:text-red-900 text-sm"
-                                                >
-                                                    Delete
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                    <Shimmer className="h-6 w-20 rounded-full" />
+                                    <Shimmer className="h-4 w-24 rounded" />
+                                    <div className="flex justify-end gap-2">
+                                        <Shimmer className="h-8 w-16 rounded" />
+                                        <Shimmer className="h-8 w-20 rounded" />
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    ) : (
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tickets</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredUsers.map((user) => (
+                                    <tr key={user._id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">{user.name?.charAt(0).toUpperCase() || '?'}</div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                                    <div className="text-sm text-gray-500">{user.email}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col gap-1">
+                                                {user.admin && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Admin</span>}
+                                                {user.flagged && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Flagged</span>}
+                                                {!user.admin && !user.flagged && <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.tickets || 0} total / {user.closedTickets || 0} closed</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user._id ? new Date(parseInt(user._id.substring(0, 8), 16) * 1000).toLocaleDateString() : 'Unknown'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex justify-end gap-2">
+                                                {!user.flagged && !user.admin && <button onClick={() => { setSelectedUser(user); setActionType('flag'); }} className="text-orange-600 hover:text-orange-900 text-sm">Flag</button>}
+                                                {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('admin'); }} className="text-blue-600 hover:text-blue-900 text-sm">Make Admin</button>}
+                                                {!user.admin && <button onClick={() => { setSelectedUser(user); setActionType('delete'); }} className="text-red-600 hover:text-red-900 text-sm">Delete</button>}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
 

@@ -6,12 +6,14 @@ interface LoadingSpinnerProps {
   subText?: string;
 }
 
+import Shimmer from './Shimmer';
+
 export default function LoadingSpinner({ 
   size = 'md', 
   text = 'Loading...', 
   subText 
 }: LoadingSpinnerProps) {
-  const sizeClasses = {
+  const sizeClasses: any = {
     sm: 'h-6 w-6',
     md: 'h-10 w-10',
     lg: 'h-12 w-12'
@@ -19,7 +21,7 @@ export default function LoadingSpinner({
 
   return (
     <div className="flex flex-col items-center justify-center p-8">
-      <div className={`animate-spin rounded-full border-b-2 border-blue-600 ${sizeClasses[size]} mb-4`}></div>
+      <Shimmer className={`${sizeClasses[size]} mb-4`} shape="circle" />
       {text && (
         <p className="text-gray-600 font-medium mb-2">{text}</p>
       )}

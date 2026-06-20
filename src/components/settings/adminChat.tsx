@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { UserDetails, Message } from "@/types/settings";
+import Shimmer from "../ui/Shimmer";
 
 interface AdminChatProps {
   settings: boolean;
@@ -218,7 +219,7 @@ export default function AdminChat({ settings, setSettings, isMobile, currentUser
                 <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold hidden sm:block">Admin Chat</h2>
                     <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
+                        <Shimmer className={`w-3 h-3 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} shape="circle" />
                         <span className={`text-sm ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
                             {isConnected ? 'Connected' : 'Reconnecting...'}
                         </span>
@@ -237,9 +238,22 @@ export default function AdminChat({ settings, setSettings, isMobile, currentUser
                 className="flex-1 bg-gradient-to-b from-gray-50 to-white rounded-lg p-4 overflow-y-auto mb-4 min-h-0 border shadow-inner"
             >
                 {loading ? (
-                    <div className="text-center text-gray-500 mt-8">
-                        <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                        <div className="text-sm">Loading messages...</div>
+                    <div className="space-y-3 mt-2">
+                        {[1, 2, 3, 4].map((item) => (
+                            <div key={item} className={`flex ${item % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                                <div className="max-w-xs lg:max-w-md space-y-2">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Shimmer className="h-6 w-6 rounded-full" shape="circle" />
+                                        <Shimmer className="h-3 w-24 rounded" />
+                                    </div>
+                                    <div className={`p-4 rounded-2xl ${item % 2 === 0 ? 'ml-auto' : ''}`}>
+                                        <Shimmer className="h-3 w-56 rounded mb-2" />
+                                        <Shimmer className="h-3 w-44 rounded" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        <div className="text-center text-gray-500 text-sm">Loading messages...</div>
                     </div>
                 ) : messages.length === 0 ? (
                     <div className="text-center text-gray-500 mt-8">
@@ -399,7 +413,7 @@ export default function AdminChat({ settings, setSettings, isMobile, currentUser
                         className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
                     >
                         {sending ? (
-                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                            <Shimmer className="w-4 h-4 bg-white/40" shape="circle" />
                         ) : (
                             <>
                                 <span className="hidden sm:inline">Send</span>
@@ -414,8 +428,11 @@ export default function AdminChat({ settings, setSettings, isMobile, currentUser
 
             {/* Connection status */}
             {!isConnected && (
-                <div className="mt-2 text-sm text-red-600 text-center animate-pulse">
-                    Connection lost. Attempting to reconnect...
+                <div className="mt-2 text-sm text-red-600 text-center">
+                    <span className="inline-flex items-center justify-center">
+                        <Shimmer className="inline-block h-3 w-3 bg-red-600 rounded-full mr-2" shape="circle" />
+                        Connection lost. Attempting to reconnect...
+                    </span>
                 </div>
             )}
 

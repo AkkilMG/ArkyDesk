@@ -5,8 +5,10 @@ import AccountSettings from "@/components/settings/settings";
 import TicketDetails from "@/components/ticket/details";
 import TicketsLists from "@/components/ticket/list";
 import TicketCreate from "@/components/ticket/create";
+import GuestCreate from "@/components/ticket/guestCreate";
 import SideNav from "@/components/dashboard/sideNav";
 import { useRealtime } from "@/lib/RealtimeContext";
+import Shimmer from "@/components/ui/Shimmer";
 // import TicketInfo from "@/components/ticket/info";
 
 
@@ -273,14 +275,53 @@ export default function TicketsPage() {
 
     if (loading || detailsLoading || !details) {
         return (
-            <div className="flex h-screen items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading tickets...</p>
-                    <p className="text-gray-400 text-sm mt-2">Please wait while we fetch your data</p>
-                    {!isConnected && (
-                        <p className="text-yellow-600 text-sm mt-1">Establishing real-time connection...</p>
-                    )}
+            <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
+                <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-4 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <Shimmer className="h-12 w-12 rounded-full" shape="circle" variant="avatar" />
+                            <div className="space-y-2 flex-1">
+                                <Shimmer className="h-4 w-32 rounded" variant="list" />
+                                <Shimmer className="h-3 w-20 rounded" variant="list" />
+                            </div>
+                        </div>
+                        <Shimmer className="h-12 w-full rounded-xl" variant="banner" />
+                        <div className="space-y-3">
+                            {[1, 2, 3, 4].map((item) => (
+                                <div key={item} className="p-3 border border-gray-200 rounded-xl space-y-2">
+                                    <div className="flex justify-between items-start gap-3">
+                                        <Shimmer className="h-4 w-2/3 rounded" variant="list" />
+                                        <Shimmer className="h-3 w-16 rounded" variant="list" />
+                                    </div>
+                                    <Shimmer className="h-3 w-full rounded" variant="list" />
+                                    <Shimmer className="h-3 w-5/6 rounded" variant="list" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                        <div className="flex items-center justify-between gap-4">
+                            <Shimmer className="h-6 w-48 rounded" variant="card" />
+                            <Shimmer className="h-9 w-24 rounded-full" variant="avatar" />
+                        </div>
+                        <Shimmer className="h-4 w-32 rounded" variant="list" />
+                        <div className="space-y-3">
+                            <Shimmer className="h-4 w-full rounded" variant="list" />
+                            <Shimmer className="h-4 w-11/12 rounded" variant="list" />
+                            <Shimmer className="h-4 w-10/12 rounded" variant="list" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <Shimmer className="h-24 rounded-xl" variant="card" />
+                            <Shimmer className="h-24 rounded-xl" variant="card" />
+                            <Shimmer className="h-24 rounded-xl" variant="card" />
+                            <Shimmer className="h-24 rounded-xl" variant="card" />
+                        </div>
+                        {!isConnected && (
+                            <p className="text-yellow-600 text-sm mt-1">Establishing real-time connection...</p>
+                        )}
+                        <p className="text-gray-600 font-medium">Loading tickets...</p>
+                        <p className="text-gray-400 text-sm">Please wait while we fetch your data</p>
+                    </div>
                 </div>
             </div>
         );
@@ -315,7 +356,25 @@ export default function TicketsPage() {
     return (
         <>
         {create && (
-            <TicketCreate create={create} setCreate={setCreate} />  
+            details?.guest || details?.temporary ? (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center z-50 px-4">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-semibold text-gray-800">Submit Bug Report</h2>
+                            <button 
+                                type="button" 
+                                className="text-gray-500 hover:text-gray-900 shadow-lg rounded-lg p-1 transition-smooth"
+                                onClick={() => setCreate(false)}
+                            >
+                                <img src="/icons/close.svg" className="h-4 w-4" alt="Close" />
+                            </button>
+                        </div>
+                        <GuestCreate showHeader={false} />
+                    </div>
+                </div>
+            ) : (
+                <TicketCreate create={create} setCreate={setCreate} />  
+            )
         )}
         { <AccountSettings details={details} settings={settings} setSettings={setSettings} /> }
         <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -350,7 +409,7 @@ export default function TicketsPage() {
                     <div className="p-3 sm:p-4 h-full overflow-y-auto relative">
                         {isRefreshing && (
                             <div className="absolute top-2 right-2 z-10">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                <Shimmer className="h-4 w-4" shape="circle" variant="avatar" />
                             </div>
                         )}
                         <TicketsLists 
@@ -364,6 +423,7 @@ export default function TicketsPage() {
                             setFilter={setFilter}
                             search={search}
                             setSearch={setSearch}
+                            loading={loading}
                         />
                     </div>
                 </div>

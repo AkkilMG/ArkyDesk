@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Shimmer from '@/components/ui/Shimmer';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PrivacySettings from "../ui/PrivacySettings";
@@ -49,6 +50,7 @@ function MenuContent({ create, setCreate, settings, setSettings, setIsMobileMenu
     }
 
     const [details, setDetails] = useState<Details | null>(null);
+    const [loadingDetails, setLoadingDetails] = useState(true);
     const router = useRouter();
 
     async function getDetails() {
@@ -62,11 +64,14 @@ function MenuContent({ create, setCreate, settings, setSettings, setIsMobileMenu
             const data = await res.json();
             if (data.success) {
                 setDetails(data.details);
+                setLoadingDetails(false);
             } else {
                 console.error("details failed:", data.message);
+                setLoadingDetails(false);
             }
         } catch (error) {
             console.error("Error during details:", error);
+            setLoadingDetails(false);
         }
     }
     useEffect(() => {
@@ -124,12 +129,27 @@ function MenuContent({ create, setCreate, settings, setSettings, setIsMobileMenu
         <div className="h-full flex flex-col">
             <div className="flex items-center justify-between space-x-2 mb-4">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-400 flex items-center justify-center text-white font-semibold text-base sm:text-lg flex-shrink-0">
-                        {details?.name ? details?.name?.charAt(0).toUpperCase() : '!'}
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0">
+                        {loadingDetails ? (
+                            <Shimmer className="h-10 w-10 rounded-full" shape="circle" />
+                        ) : (
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-400 flex items-center justify-center text-white font-semibold text-base sm:text-lg">
+                                {details?.name ? details?.name?.charAt(0).toUpperCase() : '!'}
+                            </div>
+                        )}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h2 className="font-semibold text-sm sm:text-base truncate">{details?.name ? details?.name : 'Mr. Customer'}</h2>
-                        <p className="text-xs sm:text-sm text-green-500">Online</p>
+                        {loadingDetails ? (
+                            <div className="space-y-1">
+                                <Shimmer className="h-4 w-32 rounded" />
+                                <Shimmer className="h-3 w-20 rounded" />
+                            </div>
+                        ) : (
+                            <>
+                                <h2 className="font-semibold text-sm sm:text-base truncate">{details?.name ? details?.name : 'Mr. Customer'}</h2>
+                                <p className="text-xs sm:text-sm text-green-500">Online</p>
+                            </>
+                        )}
                     </div>
                 </div>
                 {isMobileMenuOpen !== undefined && (
@@ -145,7 +165,9 @@ function MenuContent({ create, setCreate, settings, setSettings, setIsMobileMenu
             <div onClick={() => setCreate(true)} className="p-3 border-dashed border-2 border-green-600 bg-green-400 rounded-lg mb-4 cursor-pointer transition-all duration-200 hover:bg-green-500 hover:border-green-700 hover:shadow-md">
                 <div className="flex items-center justify-center space-x-2">
                     <img src="/icons/plus-circle.svg" alt="create" className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <p className="font-medium text-base sm:text-lg text-white">Create ticket</p>
+                    <p className="font-medium text-base sm:text-lg text-white">
+                        {details?.guest || details?.temporary ? 'Report an Issue' : 'Create Ticket'}
+                    </p>
                 </div>
             </div>
 
@@ -205,17 +227,9 @@ function MenuContent({ create, setCreate, settings, setSettings, setIsMobileMenu
                             <span>Settings</span>
                         </div>
                     </li>
-                    <li>
-                        <Link href="/policy" className="flex items-center space-x-3 text-gray-600 hover:text-purple-600 p-3 rounded-lg hover:bg-purple-50 transition-all duration-200 text-sm sm:text-base group">
-                            <svg className="h-4 w-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span>Policies</span>
-                        </Link>
-                    </li>
-                    <li>
+                    {/* <li>
                         <PrivacySettings />
-                    </li>
+                    </li> */}
                     <li onClick={signOut} className="cursor-pointer">
                         <div className="flex items-center space-x-3 text-gray-600 hover:text-red-600 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 text-sm sm:text-base group">
                             <img src="/icons/signout.svg" className="h-4 group-hover:scale-110 transition-transform" />

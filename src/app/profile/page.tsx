@@ -3,7 +3,9 @@
 import SideNav from "@/components/dashboard/sideNav";
 import AccountSettings from "@/components/settings/settings";
 import TicketCreate from "@/components/ticket/create";
+import TicketsLists from '@/components/ticket/list';
 import { use, useEffect, useState } from "react";
+import Shimmer from '@/components/ui/Shimmer';
 
 
 export default function ProfileCard() {
@@ -11,6 +13,10 @@ export default function ProfileCard() {
     const [settings, setSettings] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [details, setDetails] = useState<{ name?: string; tickets?: number; closedTickets?: number } | null>(null);
+    const [ticketsData, setTicketsData] = useState<any[]>([]);
+    const [ticketsLoading, setTicketsLoading] = useState(true);
+    const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState('');
 
     async function getDetails() {
         try {
@@ -31,18 +37,39 @@ export default function ProfileCard() {
         }
     }
 
+    async function fetchTickets() {
+        try {
+            setTicketsLoading(true);
+            const res = await fetch('/api/dashboard/tickets', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTicketsData(data.tickets || []);
+            } else {
+                setTicketsData([]);
+            }
+        } catch (err) {
+            console.error('Error fetching tickets on profile:', err);
+            setTicketsData([]);
+        } finally {
+            setTicketsLoading(false);
+        }
+    }
+
     useEffect(() => {
         getDetails();
+        fetchTickets();
     }, []);
 
     if (!details) {
         return <div className="flex h-screen items-center justify-center bg-gray-100">
             <div className="text-center">
                 <div className="mt-4">
-                    <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                    </svg>
+                        <div className="mx-auto">
+                            <Shimmer className="h-10 w-10 bg-blue-200/80" shape="circle" variant="avatar" />
+                        </div>
                 </div>
             </div>
         </div>

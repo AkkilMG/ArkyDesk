@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface RealtimeUpdate {
   type: 'ticket_update' | 'comment_update' | 'connected' | 'heartbeat';
@@ -47,12 +48,14 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const [shouldConnect, setShouldConnect] = useState(true);
+  const pathname = usePathname();
 
   const maxReconnectAttempts = 5;
   const reconnectDelay = (attempt: number) => Math.min(1000 * Math.pow(2, attempt), 30000);
+  const isRealtimeRoute = pathname.startsWith('/tickets') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
 
   const connect = useCallback(() => {
-    if (!shouldConnect) return;
+    if (!shouldConnect || !isRealtimeRoute) return;
 
     // Close existing connection
     if (eventSource) {
@@ -116,7 +119,7 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
       setConnectionError('Failed to create real-time connection');
       setIsConnected(false);
     }
-  }, [shouldConnect, reconnectAttempts, eventSource]);
+  }, [shouldConnect, reconnectAttempts, eventSource, isRealtimeRoute]);
 
   const disconnect = useCallback(() => {
     setShouldConnect(false);
@@ -136,8 +139,10 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
   }, [connect]);
 
   useEffect(() => {
-    if (shouldConnect) {
+    if (shouldConnect && isRealtimeRoute) {
       connect();
+    } else {
+      disconnect();
     }
 
     return () => {
@@ -145,7 +150,7 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
         eventSource.close();
       }
     };
-  }, [shouldConnect]);
+  }, [shouldConnect, isRealtimeRoute, connect, disconnect]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -159,6 +164,7 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
   // Handle page visibility change to manage connections
   useEffect(() => {
     const handleVisibilityChange = () => {
+      if (!isRealtimeRoute) return;
       if (document.hidden) {
         // Page is hidden, disconnect to save resources
         disconnect();
@@ -174,7 +180,7 @@ export const RealtimeProvider: React.FC<RealtimeProviderProps> = ({ children }) 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [connect, disconnect]);
+  }, [connect, disconnect, isRealtimeRoute]);
 
   const value: RealtimeContextType = {
     isConnected,

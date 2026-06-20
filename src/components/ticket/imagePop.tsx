@@ -1,5 +1,6 @@
 // components/ImagePopup.tsx
 import React, { useState, useEffect } from 'react';
+import Shimmer from '@/components/ui/Shimmer';
 
 interface ImagePopupProps {
   imageUrl: string;
@@ -83,7 +84,7 @@ const ImagePopup: React.FC<ImagePopupProps> = ({ imageUrl, onClose }) => {
         <div className="overflow-auto max-h-[calc(90vh-120px)] flex items-center justify-center bg-gray-50 rounded-lg">
           {isLoading && (
             <div className="flex flex-col items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <Shimmer className="h-8 w-8" shape="circle" />
               <p className="mt-2 text-sm text-gray-600">Loading image...</p>
             </div>
           )}

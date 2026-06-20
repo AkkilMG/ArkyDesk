@@ -6,6 +6,7 @@ import SideNav from "@/components/dashboard/sideNav";
 import AccountSettings from "@/components/settings/settings";
 import UserManagement from "@/components/settings/userManagement";
 import type { UserDetails } from "@/types/settings";
+import Shimmer from "@/components/ui/Shimmer";
 
 export default function AdminUsersPage() {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -58,8 +59,14 @@ export default function AdminUsersPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="text-center space-y-3">
+                    <div className="flex items-center justify-center gap-3">
+                        <Shimmer className="h-10 w-10 rounded-full" shape="circle" />
+                        <div className="space-y-2">
+                            <Shimmer className="h-4 w-40 rounded" />
+                            <Shimmer className="h-3 w-28 rounded" />
+                        </div>
+                    </div>
                     <p className="mt-2 text-gray-600">Verifying access...</p>
                 </div>
             </div>

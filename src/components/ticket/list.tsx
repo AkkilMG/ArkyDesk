@@ -1,6 +1,7 @@
 "use client"
 import { useState, useMemo } from "react";
 import TicketItem from "./ticketItem";
+import Shimmer from "../ui/Shimmer";
 
 
 export default function TicketsLists({
@@ -13,7 +14,8 @@ export default function TicketsLists({
     filter, 
     setFilter, 
     search, 
-    setSearch
+    setSearch,
+    loading = false
 }: any) {
     
     function handleSearch(e: any) {
@@ -104,7 +106,7 @@ export default function TicketsLists({
                     </div>
 
                     {/* Results info */}
-                    {search.trim() && (
+                    {search.trim() && !loading && (
                         <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
                             Found {filteredData.length} ticket{filteredData.length !== 1 ? 's' : ''} for "{search}"
                         </div>
@@ -112,7 +114,25 @@ export default function TicketsLists({
                     
                     {/* Tickets list */}
                     <div className="space-y-3" style={{scrollBehavior: 'smooth'}}>
-                        {filteredData.length > 0 ? (
+                        {loading ? (
+                            <div className="space-y-3">
+                                {[1, 2, 3, 4].map((item) => (
+                                    <div key={item} className="p-3 sm:p-4 border-l-4 rounded-lg bg-white border-gray-200 shadow-sm">
+                                        <div className="flex justify-between items-start mb-2 gap-3">
+                                            <Shimmer className="h-4 w-2/3 rounded" variant="list" />
+                                            <Shimmer className="h-3 w-16 rounded" variant="list" />
+                                        </div>
+                                        <Shimmer className="h-3 w-full rounded mb-2" variant="list" />
+                                        <Shimmer className="h-3 w-5/6 rounded mb-3" variant="list" />
+                                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                                            <Shimmer className="h-5 w-14 rounded-full" variant="avatar" />
+                                            <Shimmer className="h-5 w-18 rounded-full" variant="avatar" />
+                                            <Shimmer className="h-5 w-16 rounded-full" variant="avatar" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : filteredData.length > 0 ? (
                             filteredData.map((ticket: any, index: number) => (
                                 <div key={ticket._id} 
                                     // className={`fade-in ${selectedTicketId === ticket._id ? 'ring-2 ring-blue-400 bg-blue-50' : ''}`} 

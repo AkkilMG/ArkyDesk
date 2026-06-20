@@ -96,7 +96,20 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     // Parse the request body
     const body = await request.json();
-    const { subject, description, attachment, problem, product, files } = body;
+    const { z } = await import('zod');
+    const schema = z.object({
+      subject: z.string().min(3).max(200),
+      description: z.string().min(10).max(10000),
+      attachment: z.array(z.any()).optional(),
+      problem: z.string().min(1).max(100),
+      product: z.string().min(1).max(100),
+      files: z.any().optional()
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, message: 'Invalid input' }, { status: 400 });
+    }
+    const { subject, description, attachment, problem, product, files } = parsed.data;
     const db = await getMongoClient();
     const sessionCookie = cookies().get('session');
     if (!sessionCookie) {
@@ -115,6 +128,23 @@ export async function POST(request: Request) {
     }
     if (decryptedSession && typeof decryptedSession.token === 'string') {
       var data = await decrypt(decryptedSession.token);
+      
+      // Check if user is guest and prevent access to authenticated endpoint
+      const user = await db.collection('users').findOne({ _id: new ObjectId(data) });
+      if (!user) {
+        return NextResponse.json({ success: false, message: "Invalid user." }, {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      if (user.guest || user.temporary) {
+        return NextResponse.json({ success: false, message: "Guest accounts must use the guest report endpoint." }, {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
       var result = await db.collection('tickets').insertOne({
         subject: subject,
         description: description,

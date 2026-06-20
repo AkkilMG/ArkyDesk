@@ -17,13 +17,16 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, email, password } = body;
-        if (!name || !email || !password) {
+        const { z } = await import('zod');
+        const schema = z.object({ name: z.string().min(2).max(100), email: z.string().email().max(254), password: z.string().min(8).max(128) });
+        const parsed = schema.safeParse(body);
+        if (!parsed.success) {
             return NextResponse.json({ success: false, message: 'Invalid input' }, {
-                status: 201,
+                status: 400,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
+        const { name, email, password } = parsed.data;
          const db = await getMongoClient();
          var hashPassword = await encryptCode(password);
          var result;

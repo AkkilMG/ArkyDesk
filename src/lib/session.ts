@@ -4,25 +4,31 @@ import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
 import { Session } from '@/types/auth'
 
-const secretKey = process.env.SESSION_SECRET
-const encodedKey = new TextEncoder().encode(secretKey)
- 
+function getEncodedKey() {
+  const secretKey = process.env.SESSION_SECRET;
+  if (!secretKey) throw new Error('SESSION_SECRET is not defined in environment variables');
+  return new TextEncoder().encode(secretKey);
+}
+
 export async function encryptSession(payload: Session) {
+  const encodedKey = getEncodedKey();
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
     .sign(encodedKey)
 }
- 
+
 export async function decryptSession(session: string | undefined = '') {
   try {
+    const encodedKey = getEncodedKey();
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ['HS256'],
     })
     return payload
   } catch (error) {
-    console.log('Failed to verify session')
+    console.log('Failed to verify session', error)
+    return null;
   }
 }
  

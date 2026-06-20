@@ -45,7 +45,15 @@ export async function GET(request: Request) {
         .toArray();
       
       // Get all unique user IDs from tickets
-      const userIds = Array.from(new Set(tickets.map(ticket => ticket.user)));
+      const userIds = Array.from(new Set(
+        tickets.map(ticket => {
+          // Handle both ObjectId objects and strings
+          if (typeof ticket.user === 'object' && ticket.user._id) {
+            return ticket.user._id.toString();
+          }
+          return String(ticket.user);
+        }).filter(id => id && id.length === 24) // Filter valid 24-char hex strings
+      ));
       
       // Batch fetch user data for better performance
       const users = await db.collection('users').find(
@@ -75,7 +83,11 @@ export async function GET(request: Request) {
         });
       }
       const ticketData = tickets.map(ticket => {
-        const ticketUser = userMap[ticket.user] || null;
+        // Convert ticket.user to string format for lookup
+        const userId = typeof ticket.user === 'object' && ticket.user._id 
+          ? ticket.user._id.toString() 
+          : String(ticket.user);
+        const ticketUser = userMap[userId] || null;
         return {
           _id: ticket._id.toString(),
           user: ticketUser?.name || 'Unknown User', // Show actual ticket creator, not admin

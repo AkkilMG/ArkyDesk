@@ -3,6 +3,7 @@
 import { colorTags, fileColor } from "@/types/color";
 import { getFileIcon, formatFileSize, truncateFilename } from "@/lib/fileUtils";
 import { useState, useEffect } from "react";
+import Shimmer from '@/components/ui/Shimmer';
 import ImagePopup from "./imagePop";
 
 function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, onBack }: any) {
@@ -12,6 +13,7 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
   const [comment, setComment] = useState('');
   const [isCommenting, setIsCommenting] = useState(false);
   const [isClosingTicket, setIsClosingTicket] = useState(false);
+  const isGuestUser = Boolean(userInfo?.guest || userInfo?.temporary);
 
   const handleImageOpen = (imageUrl: string) => {
     setSelectedImage(imageUrl);
@@ -174,20 +176,20 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
                 </div>
               </div>
             </div>
-            {admin && data.status === 'open' && (
+                    {admin && data.status === 'open' && (
               <button 
                 onClick={closeTicket} 
                 disabled={isClosingTicket}
                 className="text-sm sm:text-md text-red-600 px-3 py-2 rounded-lg hover:bg-red-600 hover:text-white border-2 border-red-600 transition-smooth btn-hover disabled:bg-gray-400 disabled:border-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed w-full sm:w-auto"
               >
-                {isClosingTicket ? (
-                  <span className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                    <span>Closing...</span>
-                  </span>
-                ) : (
-                  'Mark as Solved'
-                )}
+                  {isClosingTicket ? (
+                    <span className="flex items-center justify-center space-x-2">
+                      <Shimmer className="h-4 w-4 bg-current" shape="circle" />
+                      <span>Closing...</span>
+                    </span>
+                  ) : (
+                    'Mark as Solved'
+                  )}
               </button>
             )}
           </div>
@@ -272,46 +274,64 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
 
         <div>
           <p className="font-semibold text-sm text-gray-700 mb-3">Reply to this ticket</p>
-          <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-3 mb-4">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-blue-200 bg-blue-50 flex items-center justify-center text-blue-600 text-sm font-semibold flex-shrink-0 self-start sm:mt-0">
-              {userInfo?.name ? userInfo.name?.charAt(0).toUpperCase() : '!'}
-            </div>
-            <div className="flex-1 bg-white border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-300 focus-within:border-blue-400 transition-smooth">
-              <textarea 
-                onChange={e => setComment(e.target.value)} 
-                value={comment} 
-                rows={3} 
-                placeholder={data.status === 'closed' ? 'This ticket is closed' : 'Type your response here...'}
-                disabled={data.status === 'closed'}
-                className="w-full text-sm text-black bg-transparent border-none p-3 focus:outline-none resize-none disabled:text-gray-400 disabled:bg-gray-50" 
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && data.status !== 'closed') {
-                    e.preventDefault();
-                    sendComment();
-                  }
-                }}
-              />
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 pt-0 space-y-2 sm:space-y-0">
-                <span className="text-xs text-gray-500 order-2 sm:order-1">
-                  {data.status === 'closed' ? 'Ticket is closed' : 'Press Ctrl+Enter to send'}
-                </span>
-                <button 
-                  className={`bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-smooth btn-hover disabled:bg-gray-400 disabled:cursor-not-allowed order-1 sm:order-2 ${data.status === 'closed' ? 'cursor-not-allowed' : ''}`}
-                  onClick={sendComment} 
-                  disabled={!comment.trim() || isCommenting || data.status === 'closed'}
-                >
-                  {isCommenting ? (
-                    <span className="flex items-center justify-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Sending...</span>
-                    </span>
-                  ) : (
-                    'Send Reply'
-                  )}
-                </button>
+          {userInfo && Object.keys(userInfo).length > 0 && !isGuestUser ? (
+            <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-3 mb-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-blue-200 bg-blue-50 flex items-center justify-center text-blue-600 text-sm font-semibold flex-shrink-0 self-start sm:mt-0">
+                {userInfo?.name ? userInfo.name?.charAt(0).toUpperCase() : '!'}
+              </div>
+              <div className="flex-1 bg-white border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-300 focus-within:border-blue-400 transition-smooth">
+                <textarea 
+                  onChange={e => setComment(e.target.value)} 
+                  value={comment} 
+                  rows={3} 
+                  placeholder={data.status === 'closed' ? 'This ticket is closed' : 'Type your response here...'}
+                  disabled={data.status === 'closed'}
+                  className="w-full text-sm text-black bg-transparent border-none p-3 focus:outline-none resize-none disabled:text-gray-400 disabled:bg-gray-50" 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && data.status !== 'closed') {
+                      e.preventDefault();
+                      sendComment();
+                    }
+                  }}
+                />
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 pt-0 space-y-2 sm:space-y-0">
+                  <span className="text-xs text-gray-500 order-2 sm:order-1">
+                    {data.status === 'closed' ? 'Ticket is closed' : 'Press Ctrl+Enter to send'}
+                  </span>
+                  <button 
+                    className={`bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-smooth btn-hover disabled:bg-gray-400 disabled:cursor-not-allowed order-1 sm:order-2 ${data.status === 'closed' ? 'cursor-not-allowed' : ''}`}
+                    onClick={sendComment} 
+                    disabled={!comment.trim() || isCommenting || data.status === 'closed'}
+                  >
+                    {isCommenting ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <Shimmer className="h-4 w-4 bg-white/60" shape="circle" />
+                        <span>Sending...</span>
+                      </span>
+                    ) : (
+                      'Send Reply'
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          ) : userInfo && Object.keys(userInfo).length > 0 && isGuestUser ? (
+            <div className="p-4 bg-amber-50 rounded border border-amber-200">
+              <p className="text-sm text-amber-800">Guest accounts can submit reports, but commenting is available only after you create a full account.</p>
+              <div className="mt-3 flex space-x-2">
+                <a href="/signin" className="px-3 py-2 bg-blue-600 text-white rounded">Sign in</a>
+                <a href="/signup" className="px-3 py-2 bg-white border rounded">Upgrade account</a>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 bg-gray-50 rounded border border-dashed border-gray-200">
+              <p className="text-sm text-gray-600">You must be signed in to comment on this ticket.</p>
+              <div className="mt-3 flex space-x-2">
+                <a href="/signin" className="px-3 py-2 bg-blue-600 text-white rounded">Sign in</a>
+                <a href="/signup" className="px-3 py-2 bg-white border rounded">Create account</a>
+              </div>
+            </div>
+          )}
         </div>
 
         <div>

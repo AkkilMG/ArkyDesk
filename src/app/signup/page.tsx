@@ -91,7 +91,7 @@ export default function Signup() {
     <main className="flex flex-col">
       <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
         <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
-          <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='SangrahDB' /></a>
+          <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
         </div>
       </header>
       <div className="flex flex-row flex-grow">
@@ -106,7 +106,7 @@ export default function Signup() {
         </div>
         <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 h-screen lg:h-auto pb-10">
           <div className="w-full max-w-md">
-            <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign up to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='SangrahDB' /></h2>
+            <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign up to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='Arkynox' /></h2>
             <form action={submit}> {/**form*/}
               <div className="mb-4">
                 <label className="block mb-2 font-bold text-gray-700 text-sl"> Name </label>

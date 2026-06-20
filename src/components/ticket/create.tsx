@@ -4,6 +4,7 @@ import { basicGrievances } from "@/types/grievances";
 import { allProducts } from "@/types/products";
 import { getFileInfo, formatFileSize, getFileIcon, truncateFilename, validateFile } from "@/lib/fileUtils";
 import ImagePopup from "./imagePop";
+import Shimmer from "@/components/ui/Shimmer";
 import axios from "axios";
 import { useState } from "react";
 
@@ -267,8 +268,17 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 ))}
                             </select>
                             <label htmlFor="attachment" className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-100 cursor-pointer transition-smooth btn-hover">
-                                <img src={uploading ? "/icons/loading.gif" : "/icons/clip.svg"} className="h-5 w-5 pr-2 -ml-2" /> 
-                                <span className="pr-2 whitespace-nowrap">{uploading ? 'Uploading...' : 'Attachment'}</span>
+                                {uploading ? (
+                                    <div className="flex items-center gap-2">
+                                        <Shimmer className="h-4 w-4 rounded-full" shape="circle" />
+                                        <span className="pr-2 whitespace-nowrap">Uploading...</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <img src="/icons/clip.svg" className="h-5 w-5 pr-2 -ml-2" />
+                                        <span className="pr-2 whitespace-nowrap">Attachment</span>
+                                    </>
+                                )}
                                 <input 
                                     type="file" 
                                     id="attachment" 
@@ -363,8 +373,15 @@ export default function TicketCreate({ create, setCreate }: any) {
                     
                     <div className="flex justify-end mt-4 w-full">
                         <button type="button" onClick={createTicket} disabled={!subject.trim() || !description.trim() || !problem || !product || uploading}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-smooth btn-hover w-full">
-                            {uploading ? 'Please wait...' : 'Create Ticket'}
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-smooth btn-hover w-full flex items-center justify-center gap-2">
+                            {uploading ? (
+                                <>
+                                    <Shimmer className="h-4 w-4 rounded-full" shape="circle" />
+                                    <span>Please wait...</span>
+                                </>
+                            ) : (
+                                'Create Ticket'
+                            )}
                         </button>
                     </div>
                 </form>

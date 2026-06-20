@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
+import Shimmer from '@/components/ui/Shimmer';
 import { useRouter } from "next/navigation";
 import SideNav from "@/components/dashboard/sideNav";
 import AccountSettings from "@/components/settings/settings";
@@ -59,7 +60,9 @@ export default function AdminChatPage() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <div className="mx-auto">
+                        <Shimmer className="h-8 w-8" shape="circle" />
+                    </div>
                     <p className="mt-2 text-gray-600">Verifying access...</p>
                 </div>
             </div>

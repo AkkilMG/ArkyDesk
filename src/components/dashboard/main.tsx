@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Shimmer from '@/components/ui/Shimmer';
 import Link from "next/link";
 import ConsentBanner from '../ui/ConsentBanner';
 
@@ -13,8 +14,12 @@ export default function MainLayout({ isMobileMenuOpen, setIsMobileMenuOpen }: an
     ];
 
     const [displayCounts, setDisplayCounts] = useState<number[]>(Array(stats.length).fill(0));
+    const [loadingStats, setLoadingStats] = useState(true);
 
     useEffect(() => {
+        // show shimmer briefly for polish
+        const t = setTimeout(() => setLoadingStats(false), 650);
+
         const maxCount = Math.max(...stats.map((stat) => stat.count));
         const intervals: NodeJS.Timeout[] = [];
 
@@ -41,6 +46,7 @@ export default function MainLayout({ isMobileMenuOpen, setIsMobileMenuOpen }: an
 
         return () => {
             intervals.forEach(interval => clearInterval(interval));
+            clearTimeout(t);
         };
     }, []);
 
@@ -112,12 +118,21 @@ export default function MainLayout({ isMobileMenuOpen, setIsMobileMenuOpen }: an
                     </h3>
                     <div className="grid grid-cols-2 gap-2 sm:gap-4">
                         {stats.map((stat, index) => (
-                            <div key={index} className="text-center bg-white p-2 sm:p-3 rounded-lg shadow-sm hover:shadow-md transition-smooth">
-                                <span className="text-lg sm:text-2xl font-bold text-purple-600 block">
-                                    {displayCounts[index]}
-                                    <span className="text-sm sm:text-lg">{stat.suffix}</span>
-                                </span>
-                                <span className="text-xs sm:text-sm text-gray-600 mt-1 block">{stat.label}</span>
+                            <div key={index} className="text-center bg-white p-2 sm:p-3 rounded-lg shadow-sm hover:shadow-md transition-all transform-gpu hover:-translate-y-1">
+                                {loadingStats ? (
+                                    <div className="space-y-2 py-2">
+                                        <Shimmer className="h-8 w-24 mx-auto rounded" />
+                                        <Shimmer className="h-3 w-16 mx-auto rounded" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <span className="text-lg sm:text-2xl font-bold text-purple-600 block">
+                                            {displayCounts[index]}
+                                            <span className="text-sm sm:text-lg">{stat.suffix}</span>
+                                        </span>
+                                        <span className="text-xs sm:text-sm text-gray-600 mt-1 block">{stat.label}</span>
+                                    </>
+                                )}
                             </div>
                         ))}
                     </div>
