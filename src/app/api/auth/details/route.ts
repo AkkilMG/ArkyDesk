@@ -1,69 +1,64 @@
-import { decrypt, encrypt, encryptCode } from "@/lib/crypto";
 import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
-import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import { requireApiUser, apiJson } from "@/lib/api-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// export const runtime = "edge";
+/**
+ * Returns the signed-in user's profile plus ticket counters.
+ *
+ * SECURITY FIX: this route previously returned the raw `users` document, which
+ * meant the SHA-256 `password` hash was serialised straight to the browser
+ * (ISO 27001:2022 A.8.24 cryptography, A.8.11 data leakage). It now assembles
+ * the response field by field from the already-projected session user, so
+ * adding a sensitive column to the collection can never leak it by default.
+ */
+export async function GET() {
+  const auth = await requireApiUser();
+  if (!auth.ok) return auth.response;
 
-export async function GET(request: Request) {
-  const sessionCookie = cookies().get('session');
-  if (sessionCookie) {
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ success: false, message: "failed to fetch." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    if (decryptedSession && typeof decryptedSession.token === 'string') {
-      const data = await decrypt(decryptedSession.token);
-      const db = await getMongoClient();
-      const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
-      if (!check) {
-        return NextResponse.json({ success: false, message: "Invalid session token." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+  const { user } = auth;
 
-      const ticketStats = await db.collection('tickets').aggregate([
-        { $match: { user: data } },
-        {
-          $group: {
-            _id: null,
-            totalTickets: { $sum: 1 },
-            closedTickets: {
-              $sum: {
-                $cond: [{ $eq: ["$status", "closed"] }, 1, 0]
-              }
-            }
-          }
-        }
-      ]).toArray();
+  const db = await getMongoClient();
+  const ticketStats = await db
+    .collection("tickets")
+    .aggregate([
+      { $match: { user: user.id } },
+      {
+        $group: {
+          _id: null,
+          totalTickets: { $sum: 1 },
+          closedTickets: {
+            $sum: { $cond: [{ $eq: ["$status", "closed"] }, 1, 0] },
+          },
+        },
+      },
+    ])
+    .toArray();
 
-      check.tickets = ticketStats[0]?.totalTickets || 0;
-      check.closedTickets = ticketStats[0]?.closedTickets || 0;
-      return NextResponse.json({ success: true, details: check }, {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      console.log('Invalid decrypted session or token');
-      return NextResponse.json({ success: false, message: "Invalid session token." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  } else {
-    console.log('No session cookie found');
-    return NextResponse.json({success: false, message: "User has not logged in."}, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
+  return apiJson(
+    {
+      success: true,
+      details: {
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        admin: user.admin,
+        guest: user.guest,
+        temporary: user.temporary,
+        verify: user.verify,
+        createdAt: user.createdAt,
+        tickets: ticketStats[0]?.totalTickets || 0,
+        closedTickets: ticketStats[0]?.closedTickets || 0,
+      },
+    },
+    200
+  );
+}
+
+/** This endpoint is read-only. */
+export async function POST() {
+  return apiJson(
+    { success: false, message: "Use GET to read account details." },
+    405
+  );
 }

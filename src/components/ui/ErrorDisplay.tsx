@@ -1,42 +1,63 @@
 "use client";
 
-interface ErrorDisplayProps {
+import Button from "@/components/ui/Button";
+import { cn } from "@/lib/cn";
+
+type ErrorDisplayProps = {
   title?: string;
   message: string;
   onRetry?: () => void;
   showRetry?: boolean;
-}
+  className?: string;
+};
 
-export default function ErrorDisplay({ 
-  title = 'Something went wrong', 
-  message, 
+/**
+ * Shared error state.
+ *
+ * Previously unused, and every page had hand-rolled its own red box with its own
+ * copy. Using the `destructive` token plus the `Button` primitive here is what
+ * keeps error styling identical everywhere, and `role="alert"` means the message
+ * is announced rather than silently swapped in.
+ */
+export default function ErrorDisplay({
+  title = "Something went wrong",
+  message,
   onRetry,
-  showRetry = true 
+  showRetry = true,
+  className,
 }: ErrorDisplayProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
-      <div className="text-red-400 mb-4">
-        <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
-          />
+    <div
+      role="alert"
+      className={cn(
+        "mx-auto flex max-w-md flex-col items-center justify-center rounded-2xl border border-destructive/25 bg-destructive/5 p-8 text-center",
+        className
+      )}
+    >
+      <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          className="size-6"
+          aria-hidden="true"
+        >
+          <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
         </svg>
       </div>
-      
-      <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600 mb-6 text-sm leading-relaxed">{message}</p>
-      
-      {showRetry && onRetry && (
-        <button 
-          onClick={onRetry}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-smooth btn-hover focus:outline-none focus:ring-2 focus:ring-blue-300"
-        >
-          Try Again
-        </button>
-      )}
+
+      <h3 className="mb-2 text-lg font-semibold tracking-tight text-foreground">
+        {title}
+      </h3>
+      <p className="mb-6 text-sm leading-relaxed text-muted-foreground">{message}</p>
+
+      {showRetry && onRetry ? (
+        <Button variant="secondary" onClick={onRetry}>
+          Try again
+        </Button>
+      ) : null}
     </div>
   );
 }

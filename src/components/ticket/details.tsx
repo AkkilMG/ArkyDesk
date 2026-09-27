@@ -147,11 +147,12 @@ function TicketDetailsAvailable({ fetchComment, data, userInfo, onTicketUpdate, 
           {/* Mobile-first responsive header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-2 mb-4">
             <div className="flex items-center space-x-2">
-              <button 
+              <button
                 onClick={onBack}
+                aria-label="Back to ticket list"
                 className="focus:outline-none p-1 mt-1 hover:bg-gray-100 rounded-lg transition-smooth flex-shrink-0"
               >
-                <img src="/icons/back.svg" alt="Back" className="w-6 h-6 sm:w-8 sm:h-8" />
+                <img src="/icons/back.svg" alt="" aria-hidden="true" className="w-6 h-6 sm:w-8 sm:h-8" />
               </button>
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-800 break-words">

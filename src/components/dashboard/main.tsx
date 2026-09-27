@@ -75,16 +75,18 @@ export default function MainLayout({ isMobileMenuOpen, setIsMobileMenuOpen }: an
                     <p className="text-gray-500 mt-1 text-sm sm:text-base">Manage your tickets and track progress</p>
                 </div>
                 <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-                    <button className="focus:outline-none p-2 pl-3 border border-gray-300 rounded-lg sm:hidden hover:bg-gray-50 transition-smooth" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Toggle menu">
-                        <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="Menu Toggle" className="h-6 w-6" />
+                    <button className="focus:outline-none p-2 pl-3 border border-gray-300 rounded-lg sm:hidden hover:bg-gray-50 transition-smooth" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} aria-expanded={isMobileMenuOpen}>
+                        <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="" aria-hidden="true" className="h-6 w-6" />
                     </button>
                     <div className="relative flex-1 sm:flex-initial">
-                        <input 
-                            type="text" 
-                            className="bg-gray-100 border border-gray-300 rounded-full py-2 px-4 pr-10 w-full sm:w-64 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition-smooth text-sm sm:text-base" 
-                            placeholder="Search Dashboard" 
+                        <label htmlFor="dashboard-search" className="sr-only">Search dashboard</label>
+                        <input
+                            id="dashboard-search"
+                            type="text"
+                            className="bg-gray-100 border border-gray-300 rounded-full py-2 px-4 pr-10 w-full sm:w-64 focus:ring-2 focus:ring-blue-300 focus:ring-blue-400 transition-smooth text-sm sm:text-base"
+                            placeholder="Search Dashboard"
                         />
-                        <img src="/icons/search.svg" className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" alt="Search" />
+                        <img src="/icons/search.svg" className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" alt="" aria-hidden="true" />
                     </div>
                 </div>
             </header>
@@ -125,12 +127,16 @@ export default function MainLayout({ isMobileMenuOpen, setIsMobileMenuOpen }: an
                     <div className="flex items-center space-x-2 sm:space-x-3">
                         {[1, 2, 3, 4].map((member, index) => (
                             <div key={index} className="relative">
-                                <img 
-                                    src={`https://ui-avatars.com/api/?name=Member${member}&background=random`} 
-                                    alt={`team member ${member}`} 
-                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full ring-2 ring-white hover:ring-purple-300 transition-smooth cursor-pointer" 
-                                />
-                                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                                {/* Rendered locally: the previous `ui-avatars.com`
+                                    request leaked page visits to a third party. */}
+                                <span
+                                    aria-hidden="true"
+                                    className="flex w-10 h-10 sm:w-12 sm:h-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground ring-1 ring-border"
+                                >
+                                    M{index + 1}
+                                </span>
+                                <span className="sr-only">Team member {member}</span>
+                                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-success border-2 border-card rounded-full"></div>
                             </div>
                         ))}
                         <button className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-semibold text-base sm:text-lg transition-smooth btn-hover flex items-center justify-center">

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import type { UserDetails, Message } from "@/types/settings";
+import Button from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
 import Shimmer from "../ui/Shimmer";
 
 interface UserManagementProps {
@@ -7,6 +9,8 @@ interface UserManagementProps {
   setSettings: (value: boolean) => void;
   isMobile: boolean;
 }
+
+type ActionType = 'flag' | 'admin' | 'delete';
 
 interface UserAction {
   id: string;
@@ -17,6 +21,29 @@ interface UserAction {
   user: UserDetails;
   reason?: string;
 }
+
+/** Copy for the three administrative actions, kept in one place so the
+ *  confirm dialog reads the same regardless of which action triggered it. */
+const ACTION_COPY: Record<
+  ActionType,
+  { title: string; confirm: string; body: (name?: string) => string }
+> = {
+  flag: {
+    title: 'Flag user',
+    confirm: 'Flag user',
+    body: (name) => `Are you sure you want to flag ${name}?`,
+  },
+  admin: {
+    title: 'Make administrator',
+    confirm: 'Promote',
+    body: (name) => `Are you sure you want to promote ${name} to administrator?`,
+  },
+  delete: {
+    title: 'Delete user',
+    confirm: 'Delete',
+    body: (name) => `Are you sure you want to delete ${name}?`,
+  },
+};
 
 export default function UserManagement({ settings, setSettings, isMobile }: UserManagementProps) {
     const [users, setUsers] = useState<UserDetails[]>([]);
@@ -319,54 +346,74 @@ export default function UserManagement({ settings, setSettings, isMobile }: User
             </div>
 
             {/* Action Modal */}
-            {selectedUser && actionType && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                        <h3 className="text-lg font-semibold mb-4">
-                            {actionType === 'flag' ? 'Flag User' : 
-                             actionType === 'admin' ? 'Make Administrator' : 'Delete User'}
-                        </h3>
-                        <p className="text-gray-600 mb-4 text-sm">
-                            Are you sure you want to {actionType} <strong>{selectedUser.name}</strong>?
-                            {actionType === 'delete' && ' This action will preserve their email and tickets but deactivate the account.'}
-                        </p>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Reason (optional)
-                            </label>
-                            <textarea
-                                value={actionReason}
-                                onChange={(e) => setActionReason(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg focus:border-blue-500 focus:outline-none text-sm"
-                                rows={3}
-                                placeholder="Provide a reason for this action..."
-                            />
-                        </div>
-                        <div className="flex flex-col sm:flex-row justify-end gap-3">
-                            <button
-                                onClick={(e) => {
-                                    setSelectedUser(null);
-                                    setActionType(null);
-                                    setActionReason('');
-                                }}
-                                className="px-4 py-3 sm:py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded text-sm"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={(e) => handleUserAction(actionType, selectedUser, actionReason)}
-                                className={`px-4 py-3 sm:py-2 text-white rounded text-sm ${
-                                    actionType === 'flag' ? 'bg-orange-600 hover:bg-orange-700' :
-                                    actionType === 'admin' ? 'bg-blue-600 hover:bg-blue-700' :
-                                    'bg-red-600 hover:bg-red-700'
-                                }`}
-                            >
-                                Confirm {actionType === 'flag' ? 'Flag' : actionType === 'admin' ? 'Promote' : 'Delete'}
-                            </button>
-                        </div>
-                    </div>
+            <Dialog
+                open={!!selectedUser && !!actionType}
+                onClose={() => {
+                    setSelectedUser(null);
+                    setActionType(null);
+                    setActionReason('');
+                }}
+                title={ACTION_COPY[actionType ?? 'delete'].title}
+                size="sm"
+                role={actionType === 'delete' ? 'alertdialog' : 'dialog'}
+                footer={
+                    <>
+                        <Button
+                            variant="secondary"
+                            onClick={() => {
+                                setSelectedUser(null);
+                                setActionType(null);
+                                setActionReason('');
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant={
+                                actionType === 'flag'
+                                    ? 'secondary'
+                                    : actionType === 'admin'
+                                      ? 'primary'
+                                      : 'destructive'
+                            }
+                            onClick={() =>
+                                handleUserAction(
+                                    actionType!,
+                                    selectedUser!,
+                                    actionReason
+                                )
+                            }
+                            data-autofocus
+                        >
+                            {ACTION_COPY[actionType ?? 'delete'].confirm}
+                        </Button>
+                    </>
+                }
+            >
+                <p className="text-sm text-muted-foreground">
+                    {ACTION_COPY[actionType ?? 'delete'].body(selectedUser?.name)}{' '}
+                    {actionType === 'delete'
+                        ? 'Their email and tickets are preserved, but the account is deactivated.'
+                        : null}
+                </p>
+
+                <div className="mt-4 space-y-1.5">
+                    <label
+                        htmlFor="action-reason"
+                        className="block text-sm font-medium text-foreground"
+                    >
+                        Reason <span className="text-muted-foreground">(optional)</span>
+                    </label>
+                    <textarea
+                        id="action-reason"
+                        value={actionReason}
+                        onChange={(e) => setActionReason(e.target.value)}
+                        rows={3}
+                        placeholder="Provide a reason for this action…"
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15"
+                    />
                 </div>
-            )}
+            </Dialog>
         </div>
     );
 }

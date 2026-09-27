@@ -1,117 +1,102 @@
-import { decrypt, encryptCode, decryptCode } from "@/lib/crypto";
-import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
 import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import { z } from "zod";
 
-export const dynamic = 'force-dynamic';
+import { getMongoClient } from "@/lib/mongodb";
+import { encryptCode, decryptCode } from "@/lib/crypto";
+import { requireApiRegisteredUser, apiJson } from "@/lib/api-auth";
+import { checkRateLimit, clientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { logSecurityEvent } from "@/lib/security-log";
 
-// export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
+const schema = z
+  .object({
+    currentPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(8).max(128),
+    confirmPassword: z.string().min(1).max(128),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "New passwords do not match.",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "The new password must differ from the current one.",
+    path: ["newPassword"],
+  });
+
+/**
+ * Changes the caller's password after re-authenticating with the current one.
+ *
+ * Re-entering the existing password is the step-up check that stops a hijacked
+ * session from silently taking over an account (ISO 27001:2022 A.8.5 secure
+ * authentication). Guest records have no password to change and are refused.
+ */
 export async function PUT(request: Request) {
+  const auth = await requireApiRegisteredUser();
+  if (!auth.ok) return auth.response;
+
   try {
-    const sessionCookie = cookies().get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Not authenticated" 
-      }, { status: 401 });
+    const limit = checkRateLimit(
+      `pwchange:${clientIp(request)}`,
+      RATE_LIMITS.write
+    );
+    if (!limit.allowed) {
+      return apiJson(
+        { success: false, message: "Too many attempts. Please try again later." },
+        429
+      );
     }
 
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid session" 
-      }, { status: 401 });
+    const parsed = schema.safeParse(await request.json().catch(() => ({})));
+    if (!parsed.success) {
+      return apiJson(
+        { success: false, message: parsed.error.issues[0]?.message ?? "Invalid input." },
+        400
+      );
     }
 
-    if (typeof decryptedSession.token !== 'string') {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid session token" 
-      }, { status: 401 });
-    }
+    const { currentPassword, newPassword } = parsed.data;
 
-    const userId = await decrypt(decryptedSession.token);
-    if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid user token" 
-      }, { status: 401 });
-    }
-
-    const { currentPassword, newPassword } = await request.json();
-
-    // Validate input
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Current password and new password are required" 
-      }, { status: 400 });
-    }
-
-    if (newPassword.length < 6) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "New password must be at least 6 characters long" 
-      }, { status: 400 });
-    }
-
-    // Connect to database
     const db = await getMongoClient();
-    
-    // Get user and verify current password
-    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(auth.user.id) }, { projection: { password: 1 } });
+
     if (!user) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "User not found" 
-      }, { status: 404 });
+      return apiJson({ success: false, message: "User not found." }, 404);
     }
 
-    // Verify current password
-    const isCurrentPasswordValid = await decryptCode(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Current password is incorrect" 
-      }, { status: 400 });
+    if (!user.password || !(await decryptCode(currentPassword, user.password))) {
+      logSecurityEvent("auth.signin_failed", {
+        userId: auth.user.id,
+        reason: "bad_password",
+        flow: "change_password",
+      });
+      return apiJson({ success: false, message: "Current password is incorrect." }, 400);
     }
 
-    // Hash new password
-    const hashedNewPassword = await encryptCode(newPassword);
-
-    // Update password
-    const result = await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
-      { 
-        $set: { 
-          password: hashedNewPassword,
-          updatedAt: new Date()
-        } 
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(auth.user.id) },
+      {
+        $set: {
+          password: encryptCode(newPassword),
+          updatedAt: new Date(),
+          passwordChangedAt: new Date(),
+        },
       }
     );
 
-    if (result.modifiedCount === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Failed to update password" 
-      }, { status: 500 });
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      message: "Password changed successfully" 
+    logSecurityEvent("account.password_changed", {
+      userId: auth.user.id,
+      flow: "self_service",
     });
 
+    return apiJson(
+      { success: true, message: "Password changed successfully." },
+      200
+    );
   } catch (error) {
-    console.error('Error changing password:', error);
-    return NextResponse.json({ 
-      success: false, 
-      message: "Internal server error" 
-    }, { status: 500 });
+    console.error("Error changing password:", error);
+    return apiJson({ success: false, message: "Internal server error." }, 500);
   }
 }

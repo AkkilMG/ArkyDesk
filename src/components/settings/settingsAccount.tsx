@@ -24,8 +24,10 @@
 
 
 // settingsAccount
-import { useState } from "react";
+import { useState } from 'react';
 import type { UserDetails, Message, PasswordChangeForm } from "@/types/settings";
+import Field from '@/components/ui/Field';
+
 
 interface SettingsAccountProps {
   details: UserDetails | null;
@@ -43,6 +45,9 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
     });
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<Message>({ type: '', text: '' });
+    // One eye for the whole change-password form: the three values are
+    // transient and comparing them by eye is the point of a reveal control.
+    const [revealed, setRevealed] = useState(false);
 
     const handlePasswordChange = () => {
         setIsChangingPassword(true);
@@ -190,38 +195,56 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
                 <div className="bg-gray-50 p-4 rounded-lg mb-6">
                     <h3 className="text-lg font-medium mb-4">Change Password</h3>
                     <form onSubmit={handlePasswordSubmit}>
-                        <div className="mb-4">
-                            <label className="block text-sm text-gray-600 mb-1">Current Password</label>
-                            <input 
-                                type="password" 
-                                className="w-full mt-1 p-2 border rounded focus:border-blue-500 focus:outline-none" 
+                        {/* These three were bare `<input>`s inside `<label>`s
+                            with no `htmlFor`/`id` pairing, so they had no
+                            programmatic name. `Field` fixes that and brings the
+                            shared reveal eye. */}
+                        <div className="auth-stack mb-4">
+                            <Field
+                                label="Current Password"
+                                id="currentPassword"
+                                name="currentPassword"
+                                autoComplete="current-password"
                                 value={passwordForm.currentPassword}
                                 onChange={(e) => handleInputChange('currentPassword', e.target.value)}
                                 placeholder="Enter your current password"
+                                disabled={isLoading}
+                                revealable
+                                revealed={revealed}
+                                onRevealChange={setRevealed}
                                 required
                             />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm text-gray-600 mb-1">New Password</label>
-                            <input 
-                                type="password" 
-                                className="w-full mt-1 p-2 border rounded focus:border-blue-500 focus:outline-none" 
+                            <Field
+                                label="New Password"
+                                id="newPassword"
+                                name="newPassword"
+                                autoComplete="new-password"
+                                hint="Minimum 6 characters"
                                 value={passwordForm.newPassword}
                                 onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                                placeholder="Enter your new password (min 6 characters)"
+                                placeholder="Enter your new password"
                                 minLength={6}
+                                maxLength={128}
+                                disabled={isLoading}
+                                revealable
+                                revealed={revealed}
+                                onRevealChange={setRevealed}
                                 required
                             />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm text-gray-600 mb-1">Confirm New Password</label>
-                            <input 
-                                type="password" 
-                                className="w-full mt-1 p-2 border rounded focus:border-blue-500 focus:outline-none" 
+                            <Field
+                                label="Confirm New Password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                autoComplete="new-password"
                                 value={passwordForm.confirmPassword}
                                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                                 placeholder="Confirm your new password"
                                 minLength={6}
+                                maxLength={128}
+                                disabled={isLoading}
+                                revealable
+                                revealed={revealed}
+                                onRevealChange={setRevealed}
                                 required
                             />
                         </div>
@@ -251,7 +274,7 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
                 <ul className="text-xs text-blue-700 space-y-1">
                     <li>• Use a strong password with at least 8 characters</li>
                     <li>• Include numbers, letters, and special characters</li>
-                    <li>• Don't share your password with others</li>
+                    <li>• Don&apos;t share your password with others</li>
                     <li>• Change your password regularly</li>
                 </ul>
             </div>

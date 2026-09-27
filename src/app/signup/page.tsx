@@ -1,202 +1,300 @@
 "use client";
-import { owner } from '@/lib/constants';
-import React, { useEffect, useState } from 'react';
-import TermsAcceptance from '@/components/ui/TermsAcceptance';
-import { useConsent } from '@/lib/ConsentContext';
-import Shimmer from '@/components/ui/Shimmer';
+
+import Link from "next/link";
+import { useState } from "react";
+
+import AuthShell, { AuthTitle } from "@/components/auth/AuthShell";
+import FormMessage from "@/components/auth/FormMessage";
+import Button from "@/components/ui/Button";
+import Field from "@/components/ui/Field";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import TermsAcceptance from "@/components/ui/TermsAcceptance";
+import { useConsent } from "@/lib/ConsentContext";
+
+type FormData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+const EMPTY: FormData = { name: "", email: "", password: "", confirmPassword: "" };
+
+/** Human labels for validation messages. Previously the raw state key was shown
+ *  to users, producing copy like "confirmPassword is required". */
+const FIELD_LABELS: Record<keyof FormData, string> = {
+  name: "Name",
+  email: "Email",
+  password: "Password",
+  confirmPassword: "Password confirmation",
+};
+
+/** Must match the server's zod rule in `app/api/auth/signup/route.ts`
+ *  (`z.string().min(8).max(128)`), so users are not told "too short" only after
+ *  a round-trip. */
+const PASSWORD_MIN = 8;
+const PASSWORD_MAX = 128;
 
 export default function Signup() {
-  const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    "name": "",
-    "email": "",
-    "password": "",
-    "confirmPassword": ""
-  });
+  const [formData, setFormData] = useState<FormData>(EMPTY);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [formError, setFormError] = useState("");
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [video, setVideo] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { hasValidConsent, updateConsent } = useConsent();
+  // One eye for both password fields: they hold the same secret, so toggling
+  // one to plain text while the other stayed masked would be misleading.
+  const [revealed, setRevealed] = useState(false);
+  const { hasValidConsent } = useConsent();
 
-  useEffect(() => {
-      setVideo(Math.floor(Math.random() * owner.length));
-  }, []);
-
-  const handleChange = (event: any) => {
-    setFormData({
-      ...formData,
-      [event.target.id]: event.target.value
-    });
-  }
-
-  const handleTermsAccept = () => {
-    setShowTermsModal(false);
-    // Consent is already handled by TermsAcceptance component
-    proceedWithSignup();
+  const update = (key: keyof FormData) => (value: string) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+    // Clear the field's error as soon as the user edits it, so the form stops
+    // shouting at someone who has started fixing it.
+    setFieldErrors(prev => (prev[key] ? { ...prev, [key]: undefined } : prev));
   };
 
-  const handleTermsDecline = () => {
-    setShowTermsModal(false);
-    setError("You must accept the terms and conditions to create an account");
+  const validate = (): boolean => {
+    const errors: Partial<Record<keyof FormData, string>> = {};
+
+    (Object.keys(formData) as (keyof FormData)[]).forEach(key => {
+      if (formData[key].trim() === "") {
+        errors[key] = `${FIELD_LABELS[key]} is required`;
+      }
+    });
+
+    if (!errors.password) {
+      if (formData.password.length < PASSWORD_MIN) {
+        errors.password = `Password must be at least ${PASSWORD_MIN} characters`;
+      } else if (formData.password.length > PASSWORD_MAX) {
+        errors.password = `Password must be at most ${PASSWORD_MAX} characters`;
+      }
+    }
+
+    if (!errors.confirmPassword && formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords don't match";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const proceedWithSignup = async () => {
+    setIsLoading(true);
+    setFormError("");
+
     try {
-      setIsLoading(true);
-      const response = await fetch(`/api/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
           termsAccepted: true,
-          consentTimestamp: new Date().toISOString()
+          consentTimestamp: new Date().toISOString(),
         }),
       });
-      const responseData: any = await response.json();
-      if (response.ok && responseData.success && typeof window !== "undefined") {
-        if (responseData.upgraded) {
-          window.location.href = "/signin?upgraded=1";
-        } else {
-          window.location.href = "/signin";
-        }
-      } else {
-        setError(responseData.message);
+
+      const responseData = (await response.json()) as {
+        success?: boolean;
+        upgraded?: boolean;
+        message?: string;
+      };
+
+      if (!response.ok || !responseData.success) {
+        setFormError(responseData.message || "We couldn't create your account. Please try again.");
         setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setError("An error occurred during signup. Please try again.");
+
+      // Full navigation on purpose: the session cookie was just set and the app
+      // shell must not be reused from this route's client bundle.
+      window.location.href = responseData.upgraded ? "/signin?upgraded=1" : "/signin";
+    } catch (caught) {
+      console.error("Signup error:", caught);
+      setFormError("An error occurred during signup. Please try again.");
       setIsLoading(false);
     }
   };
 
-  const submit = async () => {
-    // Validate form fields
-    for (const [key, value] of Object.entries(formData)) {
-      if (value === "") {
-        setError(`${key} is required`)
-        return;
-      }
-    }
-    
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords don't match")
-      return;
-    }
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // Without this the browser would navigate away and reload the page.
+    event.preventDefault();
 
-    // Check if user has already accepted terms
+    if (isLoading) return;
+    setFormError("");
+
+    if (!validate()) return;
+
     if (hasValidConsent()) {
-      proceedWithSignup();
+      void proceedWithSignup();
     } else {
-      // Show terms acceptance modal
       setShowTermsModal(true);
     }
-  }
-  
+  };
+
   return (
     <>
-    <main className="flex flex-col">
-      <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
-        <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
-          <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
-        </div>
-      </header>
-      <div className="flex flex-row flex-grow">
-        <div className="hidden lg:block lg:w-1/3">
-          <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-            <video className="object-cover w-full h-full border-none no-drag" autoPlay muted loop>
-            <source src={`/assets/video/${video}.mp4`} type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
-            <a href={`https://dribbble.com/${owner[video]}`} className="font-bold text-center text-white" style={{ position: 'absolute', bottom: 0, width: '100%', marginBottom: '20px' }}>@{owner[video]}</a>
-          </div>
-        </div>
-        <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 min-h-screen lg:min-h-0 pb-10">
-          <div className="w-full max-w-md">
-            <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign up to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='Arkynox' /></h2>
-            <form action={submit}> {/**form*/}
-              <div className="mb-4">
-                <label className="block mb-2 font-bold text-gray-700 text-sl"> Name </label>
-                <input value={formData.name} onChange={handleChange} id="name" type="text" 
-                  className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"/>
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2 font-bold text-gray-700 text-sl"> Email </label>
-                <input value={formData.email} onChange={handleChange} id="email" type="email" 
-                    className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2" />
-              </div>
-              <div className="mb-4">
-                <span className="flex items-center justify-between mb-2 font-sans font-bold text-gray-700 text-sl">
-                  Password
-                </span>
-                <input value={formData.password} onChange={handleChange} id="password" type="password" 
-                    placeholder='8+ characters' className="w-full px-3 py-2 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" />
-              </div>
-              <div className="mb-4">
-                <span className="flex items-center justify-between mb-2 font-sans font-bold text-gray-700 text-sl">
-                  Confirm Password
-                </span>
-                <input value={formData.confirmPassword} onChange={handleChange} id="confirmPassword" type="password" 
-                    placeholder='8+ characters' className="w-full px-3 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" />
-              </div>
-                <div className="flex items-center mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg w-full">
-                    <div className="flex items-start space-x-3">
-                      <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <div>
-                        <h4 className="font-medium text-blue-900 mb-1">Terms & Privacy Agreement</h4>
-                        <p className="text-sm text-blue-800">
-                          By creating an account, you'll be asked to review and accept our{' '}
-                          <a href="/policy/terms-and-condition" target="_blank" className="underline hover:text-blue-900">
-                            Terms & Conditions
-                          </a>{' '}
-                          and{' '}
-                          <a href="/policy/privacy-policy" target="_blank" className="underline hover:text-blue-900">
-                            Privacy Policy
-                          </a>.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              { error && (<div className="mb-6" role="alert">
-                <span className="flex items-center justify-between mb-2 font-sans text-lg font-bold text-red-700">
-                  {error}
-                </span>
-              </div> )}
-              <div>
-                <button type='submit' disabled={isLoading} className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center">
-                  {isLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Shimmer className="h-5 w-5 rounded-full" shape="circle" variant="button" />
-                      Creating Account...
-                    </span>
-                  ) : (
-                    'Create Account'
-                  )}
-                </button>
-              </div>
-              <p className="mt-4 text-sm text-center text-gray-600">
-                Already have an account?<span> </span>
-                <a href="/signin" className="font-sans text-sm text-gray-600 underline cursor-pointer">Sign in </a>
-              </p>
-            </form>{/**form*/}
-          </div>
-        </div>
-      </div>
+      <AuthShell>
+        <AuthTitle verb="Sign up" />
 
-      {/* Terms Acceptance Modal */}
-      <TermsAcceptance 
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="auth-stack">
+            <Field
+              label="Name"
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              value={formData.name}
+              onChange={e => update("name")(e.target.value)}
+              error={fieldErrors.name}
+              disabled={isLoading}
+              required
+            />
+
+            <Field
+              label="Email"
+              id="email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@arkynox.com"
+              value={formData.email}
+              onChange={e => update("email")(e.target.value)}
+              error={fieldErrors.email}
+              disabled={isLoading}
+              required
+            />
+
+            <Field
+              label="Password"
+              id="password"
+              name="password"
+              autoComplete="new-password"
+              hint={`${PASSWORD_MIN}+ characters`}
+              value={formData.password}
+              onChange={e => update("password")(e.target.value)}
+              error={fieldErrors.password}
+              disabled={isLoading}
+              minLength={PASSWORD_MIN}
+              maxLength={PASSWORD_MAX}
+              revealable
+              revealed={revealed}
+              onRevealChange={setRevealed}
+              required
+            />
+
+            <Field
+              label="Confirm password"
+              id="confirmPassword"
+              name="confirmPassword"
+              autoComplete="new-password"
+              value={formData.confirmPassword}
+              onChange={e => update("confirmPassword")(e.target.value)}
+              error={fieldErrors.confirmPassword}
+              disabled={isLoading}
+              revealable
+              revealed={revealed}
+              onRevealChange={setRevealed}
+              required
+            />
+          </div>
+
+          <div
+            className="mt-[var(--auth-block)] flex items-start gap-3 rounded-xl bg-muted p-3"
+          >
+            <svg
+              className="mt-0.5 size-5 shrink-0 text-muted-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+              />
+            </svg>
+            {/* The heading was a separate <h2> above the paragraph, which cost
+                24px of vertical budget on the tallest page for no information
+                gain — the label is now a bold lead-in on the same paragraph. */}
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">Terms &amp; privacy agreement. </span>
+              By creating an account, you&apos;ll be asked to review and accept our{" "}
+              <Link
+                href="/policy/terms-and-condition"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary underline underline-offset-4"
+              >
+                Terms &amp; Conditions
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/policy/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary underline underline-offset-4"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+
+          {formError ? (
+            <FormMessage tone="error" className="mt-[var(--auth-block)]">
+              {formError}
+            </FormMessage>
+          ) : null}
+
+          <div className="mt-[var(--auth-block)]">
+            <Button
+              type="submit"
+              variant="brand"
+              size="lg"
+              fullWidth
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  Creating account…
+                </>
+              ) : (
+                "Create account"
+              )}
+            </Button>
+          </div>
+
+          <p className="mt-[var(--auth-block)] text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/signin"
+              className="font-medium text-primary underline underline-offset-4"
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
+      </AuthShell>
+
+      <TermsAcceptance
         isOpen={showTermsModal}
-        onAccept={handleTermsAccept}
-        onDecline={handleTermsDecline}
+        onAccept={() => {
+          setShowTermsModal(false);
+          void proceedWithSignup();
+        }}
+        onDecline={() => {
+          setShowTermsModal(false);
+          setFormError("You must accept the terms and conditions to create an account.");
+        }}
         userEmail={formData.email}
       />
-    </main>
     </>
   );
-};
+}

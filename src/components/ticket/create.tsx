@@ -4,6 +4,7 @@ import { basicGrievances } from "@/types/grievances";
 import { allProducts } from "@/types/products";
 import { formatFileSize, truncateFilename, validateFile } from "@/lib/fileUtils";
 import ImagePopup from "./imagePop";
+import Dialog from "@/components/ui/Dialog";
 import axios from "axios";
 import { useState } from "react";
 
@@ -189,6 +190,18 @@ export default function TicketCreate({ create, setCreate }: any) {
         }
     };
 
+    // Single source of truth for dismissing the dialog: clears the draft state
+    // so reopening never shows the previous submission's errors or attachments.
+    // Guarded on `uploading` so an in-flight upload cannot be orphaned.
+    const closeDialog = () => {
+        if (uploading) return;
+        setAttachment([]);
+        setPreviewImages({});
+        setError('');
+        setSuccess('');
+        setCreate(false);
+    };
+
     return (
         <>
         {image && (
@@ -197,65 +210,38 @@ export default function TicketCreate({ create, setCreate }: any) {
                 onClose={() => setImage(null)} 
             />
         )}
-        <div
-            className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 transition-all duration-300 ${create ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
-            style={{ zIndex: 1000 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Create ticket"
-            onClick={() => { if (!uploading) { setAttachment([]); setPreviewImages({}); setError(''); setSuccess(''); setCreate(false) }}}
+        <Dialog
+            open={create}
+            onClose={closeDialog}
+            title="Create ticket"
+            description="Submit a new support request"
+            size="lg"
+            bodyClassName="p-0"
         >
+            {/* Drag-and-drop lives on this wrapper rather than the dialog panel so
+                dropping anywhere over the form still registers. */}
             <div
-                className={`relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col transition-all duration-300 ${
-                    create ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'
-                } ${isDragOver ? 'ring-4 ring-blue-400 ring-opacity-50' : ''}`}
-                onClick={(e) => e.stopPropagation()}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                className="relative"
             >
                 {/* Drag overlay */}
                 {isDragOver && (
-                    <div className="absolute inset-0 bg-blue-50/95 border-2 border-dashed border-blue-400 rounded-2xl flex items-center justify-center z-20">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/95 backdrop-blur-sm">
                         <div className="text-center">
-                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
+                                <svg className="size-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
                             </div>
-                            <p className="text-lg font-semibold text-blue-600">Drop your file here</p>
-                            <p className="text-sm text-blue-500 mt-1">Supports images, PDFs, and documents up to 10MB</p>
+                            <p className="text-lg font-semibold text-foreground">Drop your file here</p>
+                            <p className="mt-1 text-sm text-muted-foreground">Supports images, PDFs, and documents up to 10MB</p>
                         </div>
                     </div>
                 )}
 
-                {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10 flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Create Ticket</h2>
-                            <p className="text-xs text-gray-500">Submit a new support request</p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-smooth flex-shrink-0"
-                        onClick={() => {setAttachment([]); setPreviewImages({}); setError(''); setSuccess(''); setCreate(false)}}
-                        aria-label="Close"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Scrollable form body */}
-                <div className="p-4 sm:p-6 space-y-5 overflow-y-auto">
+                <div className="space-y-5 p-4 sm:p-6">
                     {/* Error Message */}
                     {error && (
                         <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
@@ -508,7 +494,7 @@ export default function TicketCreate({ create, setCreate }: any) {
                     </button>
                 </div>
             </div>
-        </div>
+        </Dialog>
         </>
     );
 }

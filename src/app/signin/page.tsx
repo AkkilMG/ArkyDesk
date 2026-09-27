@@ -1,556 +1,498 @@
 "use client";
-import Shimmer from '@/components/ui/Shimmer';
-import { owner } from "@/lib/constants";
-import { redirect } from "next/navigation";
+
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import AuthShell, { AuthTitle } from "@/components/auth/AuthShell";
+import FormMessage from "@/components/auth/FormMessage";
+import Button from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
+import Field from "@/components/ui/Field";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Shimmer from "@/components/ui/Shimmer";
+import Tabs from "@/components/ui/Tabs";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type Banner = { tone: "error" | "success"; text: string } | null;
 
 export default function Signin() {
-    const [error, setError] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
-    const [guestError, setGuestError] = useState("");
-    const [guestMessage, setGuestMessage] = useState("");
-    const [showForgotModal, setShowForgotModal] = useState(false);
-    const [forgotEmail, setForgotEmail] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [guestLoading, setGuestLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        "email": "",
-        "password": ""
-    });
-    const [guestForm, setGuestForm] = useState({
-        name: "",
-        email: ""
-    });
-    const [video, setVideo] = useState(0);
-    const [activeTab, setActiveTab] = useState<"signin" | "guest">("signin");
-    const [checkingSession, setCheckingSession] = useState(true);
-    const router = useRouter();
-    
-    async function handleAdmin() {
-        try {
-            const res = await fetch('/api/auth/verify', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await res.json();
-            if (data.success) {
-                if (!data.admin) {
-                    router.push("/tickets");
-                } else {
-                    router.push("/dashboard");
-                }
-                return;
-            } else {
-                console.error('Verify failed:', data.message);
-            }
-        } catch (error) {
-            console.error('Error verify out:', error);
-        }
-        setCheckingSession(false);
+  const [banner, setBanner] = useState<Banner>(null);
+  const [guestBanner, setGuestBanner] = useState<Banner>(null);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [guestForm, setGuestForm] = useState({ name: "", email: "" });
+  const [activeTab, setActiveTab] = useState<"signin" | "guest">("signin");
+  const [checkingSession, setCheckingSession] = useState(true);
+  const router = useRouter();
+
+  /** Send an already-signed-in visitor to the surface their role allows. */
+  async function handleAdmin() {
+    try {
+      const res = await fetch("/api/auth/verify", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.success) {
+        router.push(data.admin ? "/dashboard" : "/tickets");
+        return;
+      }
+      console.error("Verify failed:", data.message);
+    } catch (error) {
+      console.error("Error verify out:", error);
+    }
+    setCheckingSession(false);
+  }
+
+  useEffect(() => {
+    if (document.cookie) {
+      void handleAdmin();
+    } else {
+      setCheckingSession(false);
     }
 
-    useEffect(() => {
-        const handleRefresh = () => {
-            setVideo(Math.floor(Math.random() * owner.length));
-        };
-        if (typeof document !== 'undefined' && document.cookie) {
-            handleAdmin();
-        } else {
-            setCheckingSession(false);
-        }
-        // Show upgrade success message if redirected from signup
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('upgraded') === '1') {
-                setSuccessMessage('Your guest account has been upgraded successfully! Sign in with your new password.');
-            }
-        }
-        window.addEventListener('load', handleRefresh);
-        return () => {
-            window.removeEventListener('load', handleRefresh);
-        };
-    }, []);
-
-    if (checkingSession) {
-        return (
-            <main className="flex flex-col">
-                <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
-                    <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
-                        <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
-                    </div>
-                </header>
-                <div className="flex flex-row flex-grow">
-                    <div className="hidden lg:block lg:w-1/3">
-                        <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-                            <Shimmer className="w-full h-full" />
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 min-h-screen lg:min-h-0 pb-10">
-                        <div className="w-full max-w-md space-y-6">
-                            <Shimmer className="h-8 w-48 rounded" variant="card" />
-                            <div className="flex gap-3">
-                                <Shimmer className="h-12 flex-1 rounded-xl" variant="card" />
-                                <Shimmer className="h-12 flex-1 rounded-xl" variant="card" />
-                            </div>
-                            <div className="space-y-4">
-                                <Shimmer className="h-4 w-16 rounded" variant="list" />
-                                <Shimmer className="h-14 w-full rounded-lg" variant="card" />
-                                <Shimmer className="h-4 w-16 rounded" variant="list" />
-                                <Shimmer className="h-14 w-full rounded-lg" variant="card" />
-                                <Shimmer className="h-14 w-full rounded-3xl" variant="card" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        );
+    // Show the upgrade confirmation when redirected back from signup.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgraded") === "1") {
+      setBanner({
+        tone: "success",
+        text: "Your guest account has been upgraded successfully. Sign in with your new password.",
+      });
     }
+  }, []);
 
-    const handleChange = (event: any) => {
-        setFormData({
-            ...formData,
-            [event.target.id]: event.target.value
-        });
-    }
-
-    const handleGuestChange = (event: any) => {
-        setGuestForm({
-            ...guestForm,
-            [event.target.id]: event.target.value
-        });
-    };
-
-    const handleGuestContinue = async () => {
-        setGuestError("");
-        setGuestMessage("");
-
-        if (!guestForm.name.trim() || !guestForm.email.trim()) {
-            setGuestError("Name and email are required for guest access.");
-            return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(guestForm.email)) {
-            setGuestError("Please enter a valid email address.");
-            return;
-        }
-
-        setGuestLoading(true);
-
-        try {
-            const response = await fetch('/api/guest/login-link', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: guestForm.name,
-                    email: guestForm.email,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                setGuestError(data.message || 'Unable to start guest session.');
-                return;
-            }
-
-            setGuestMessage('Guest session created. Redirecting you now.');
-            if (data.loginUrl) {
-                window.location.href = data.loginUrl;
-                return;
-            }
-
-            if (data.sent) {
-                setGuestMessage('Check your email for the guest login link.');
-            } else {
-                setGuestMessage('Guest login link created. Open the email link or ask support to resend it.');
-            }
-        } catch (error) {
-            console.error('Guest login error:', error);
-            setGuestError('An error occurred while creating the guest session.');
-        } finally {
-            setGuestLoading(false);
-        }
-    };
-
-    const handleForgotPassword = async () => {
-        if (!forgotEmail.trim()) {
-            setError("Please enter your email address");
-            return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(forgotEmail)) {
-            setError("Please enter a valid email address");
-            return;
-        }
-
-        setIsLoading(true);
-        setError("");
-
-        try {
-            const response = await fetch('/api/auth/forgot-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: forgotEmail }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                setSuccessMessage("Password reset instructions have been sent to your email address. Please check your inbox and spam folder.");
-                setShowForgotModal(false);
-                setForgotEmail("");
-            } else {
-                setError(data.message || "Failed to send password reset email. Please try again.");
-            }
-        } catch (error) {
-            console.error('Forgot password error:', error);
-            setError("An error occurred. Please try again later.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const submit = async () => {
-        setError("");
-        setSuccessMessage("");
-        
-        for (const [key, value] of Object.entries(formData)) {
-            if (value === "") {
-                setError(`${key} is required`);
-                return;
-            }
-        }
-        
-        setIsLoading(true);
-        
-        try {
-            const response = await fetch(`/api/auth/signin`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-            const responseData: any = await response.json();
-            if (response.ok && responseData.success) {
-                handleAdmin();
-            } else {
-                setError(responseData.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            setError("An error occurred during sign in. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
+  if (checkingSession) {
     return (
-        <>
-            <main className="flex flex-col">
-                <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
-                    <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
-                        <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
-                    </div>
-                </header>
-                <div className="flex flex-row flex-grow">
-                    <div className="hidden lg:block lg:w-1/3">
-                        <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-                            <video className="object-cover w-full h-full border-none no-drag" autoPlay muted loop>
-                                <source src={`/assets/video/${video}.mp4`} type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                            <a href={`https://dribbble.com/${owner[video]}`} className="font-bold text-center text-white" style={{ position: 'absolute', bottom: 0, width: '100%', marginBottom: '20px' }}>@{owner[video]}</a>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 min-h-screen lg:min-h-0 pb-10">
-                        <div className="w-full max-w-md">
-                            <h2 className="flex flex-row mb-6 text-2xl font-bold">Sign in to <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag' alt='Arkynox' /></h2>
-
-                            <div className="flex gap-3 mb-6">
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab("signin")}
-                                    className={`flex-1 h-12 rounded-xl font-bold transition-colors duration-200 flex items-center justify-center ${activeTab === "signin" ? "bg-[#0D0C22] text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"}`}
-                                >
-                                    Sign In
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab("guest")}
-                                    className={`flex-1 h-12 rounded-xl font-bold transition-colors duration-200 flex items-center justify-center ${activeTab === "guest" ? "bg-[#0D0C22] text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"}`}
-                                >
-                                    Guest Access
-                                </button>
-                            </div>
-
-                            {activeTab === "signin" ? (
-                                    <form action={submit} aria-label="Sign in form">
-                                        <div className="mb-4">
-                                            <label className="block mb-2 font-bold text-gray-700 text-sl" htmlFor="email"> Email </label>
-                                        <input value={formData.email} onChange={handleChange} id="email" type="email" 
-                                        className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2" />
-                                    </div>
-                                    <div className="mb-6">
-                                        <span className="flex items-center justify-between mb-2 font-sans font-bold text-gray-700 text-sl">
-                                            Password
-                                            <button 
-                                                type="button"
-                                                onClick={(e) => setShowForgotModal(true)}
-                                                className="font-sans text-sm font-normal text-blue-600 hover:text-blue-800 underline cursor-pointer transition-colors"
-                                                aria-label="Forgot password"
-                                            >
-                                                Forgot Password?
-                                            </button>
-                                        </span>
-                                        <input value={formData.password} onChange={handleChange} id="password" type="password" 
-                                        className="w-full px-3 py-2 mb-3 leading-tight text-gray-700 border rounded-lg shadow appearance-none focus:border-indifo-500 h-14 focus:outline-none focus:ring" aria-label="Password" />
-                                    </div>
-                                    { error && (<div className="mb-6" role="alert">
-                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span className="text-sm font-medium text-red-700">{error}</span>
-                                            </div>
-                                        </div>
-                                    </div> )}
-                                    
-                                    { successMessage && (<div className="mb-6" role="alert">
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span className="text-sm font-medium text-green-700">{successMessage}</span>
-                                            </div>
-                                        </div>
-                                    </div> )}
-                                    <div>
-                                        <button 
-                                            type="submit" 
-                                            disabled={isLoading}
-                                            className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
-                                        >
-                                            {isLoading ? (
-                                                <span className="flex items-center justify-center gap-2">
-                                                    <Shimmer className="h-5 w-5 rounded-full" shape="circle" variant="button" />
-                                                    Signing In...
-                                                </span>
-                                            ) : (
-                                                'Sign In'
-                                            )}
-                                        </button>
-                                    </div>
-                                    <p className="mt-4 text-sm text-center text-gray-600">
-                                        Don't have an account?<span> </span>
-                                        <a href="/signup" className="font-sans text-sm text-gray-600 underline cursor-pointer">Sign up </a>
-                                    </p>
-                                </form>
-                            ) : (
-                                <div>
-                                    <div className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-                                        <div className="flex items-start space-x-3">
-                                            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <div>
-                                                <h3 className="text-sm font-semibold text-indigo-900">Guest Access</h3>
-                                                <p className="mt-1 text-sm text-indigo-700">
-                                                    Submit bug reports without creating an account. Guest sessions are limited and some features will be restricted until you sign up.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block mb-2 font-bold text-gray-700 text-sl" htmlFor="guest-name">Guest name</label>
-                                        <input
-                                            id="name"
-                                            value={guestForm.name}
-                                            onChange={handleGuestChange}
-                                            type="text"
-                                            placeholder="Enter your display name"
-                                            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"
-                                            aria-label="Guest name"
-                                        />
-                                    </div>
-                                    <div className="mb-6">
-                                        <label className="block mb-2 font-bold text-gray-700 text-sl" htmlFor="guest-email">Guest email</label>
-                                        <input
-                                            id="email"
-                                            value={guestForm.email}
-                                            onChange={handleGuestChange}
-                                            type="email"
-                                            placeholder="name@example.com"
-                                            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2"
-                                            aria-label="Guest email"
-                                        />
-                                    </div>
-                                    {guestError && (
-                                        <div className="mb-6" role="alert">
-                                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                                <div className="flex items-center">
-                                                    <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    <span className="text-sm font-medium text-red-700">{guestError}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {guestMessage && (
-                                        <div className="mb-6" role="alert">
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                                <div className="flex items-center">
-                                                    <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    <span className="text-sm font-medium text-green-700">{guestMessage}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <button
-                                            type="button"
-                                            onClick={handleGuestContinue}
-                                            disabled={guestLoading}
-                                            className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
-                                        >
-                                            {guestLoading ? (
-                                                <span className="flex items-center justify-center gap-2">
-                                                    <Shimmer className="h-5 w-5 rounded-full" shape="circle" variant="button" />
-                                                    Starting guest session...
-                                                </span>
-                                            ) : (
-                                                'Continue as Guest'
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Forgot Password Modal */}
-                {showForgotModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Reset password">
-                        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={(e) => setShowForgotModal(false)} />
-                        
-                        <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md">
-                            {/* Header */}
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-xl">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-xl font-bold">Reset Your Password</h3>
-                                        <p className="text-blue-100 text-sm mt-1">Enter your email to receive reset instructions</p>
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            setShowForgotModal(false);
-                                            setError("");
-                                            setForgotEmail("");
-                                        }}
-                                        className="text-white hover:text-gray-200 transition-colors"
-                                    >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Content */}
-                            <div className="p-6">
-                                <div className="mb-6">
-                                    <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg mb-4">
-                                        <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
-                                        <div>
-                                            <h4 className="font-medium text-blue-900">How it works</h4>
-                                            <p className="text-sm text-blue-700">We'll send you a secure link to reset your password. The link expires in 1 hour for security.</p>
-                                        </div>
-                                    </div>
-
-                                    <label className="block mb-2 font-medium text-gray-700">
-                                        Email Address
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={forgotEmail}
-                                        onChange={(e) => setForgotEmail(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleForgotPassword()}
-                                        placeholder="Enter your registered email address"
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                {error && (
-                                    <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-                                        <div className="flex items-center">
-                                            <svg className="w-4 h-4 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span className="text-sm text-red-700">{error}</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex space-x-3">
-                                    <button
-                                        onClick={(e) => {
-                                            setShowForgotModal(false);
-                                            setError("");
-                                            setForgotEmail("");
-                                        }}
-                                        className="flex-1 px-4 py-3 text-gray-600 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
-                                        disabled={isLoading}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleForgotPassword}
-                                        disabled={isLoading || !forgotEmail.trim()}
-                                        className="flex-1 px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                    >
-                                        {isLoading ? (
-                                            <span className="flex items-center justify-center gap-2">
-                                                <Shimmer className="h-4 w-4 rounded-full" shape="circle" variant="button" />
-                                                Sending...
-                                            </span>
-                                        ) : (
-                                            'Send Reset Link'
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="bg-gray-50 px-6 py-4 rounded-b-xl">
-                                <div className="flex items-center text-sm text-gray-600">
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                    <span>Your privacy is protected. We'll only use your email for password reset.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </main>
-        </>
+      <AuthShell>
+        <div className="auth-stack" aria-busy="true" aria-label="Loading sign in">
+          <Shimmer className="h-8 w-48 rounded" variant="card" />
+          <div className="flex gap-3">
+            <Shimmer className="h-10 flex-1 rounded-xl" variant="card" />
+            <Shimmer className="h-10 flex-1 rounded-xl" variant="card" />
+          </div>
+          <div className="auth-stack">
+            <Shimmer className="h-4 w-16 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-lg" variant="card" />
+            <Shimmer className="h-4 w-16 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-lg" variant="card" />
+            <Shimmer className="h-11 w-full rounded-3xl" variant="card" />
+          </div>
+        </div>
+      </AuthShell>
     );
+  }
+
+  const handleChange = (key: "email" | "password") => (value: string) =>
+    setFormData(prev => ({ ...prev, [key]: value }));
+
+  const handleGuestChange = (key: "name" | "email") => (value: string) =>
+    setGuestForm(prev => ({ ...prev, [key]: value }));
+
+  const handleGuestContinue = async () => {
+    setGuestBanner(null);
+
+    if (!guestForm.name.trim() || !guestForm.email.trim()) {
+      setGuestBanner({ tone: "error", text: "Name and email are required for guest access." });
+      return;
+    }
+
+    if (!EMAIL_RE.test(guestForm.email)) {
+      setGuestBanner({ tone: "error", text: "Please enter a valid email address." });
+      return;
+    }
+
+    setGuestLoading(true);
+
+    try {
+      const response = await fetch("/api/guest/login-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: guestForm.name, email: guestForm.email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setGuestBanner({ tone: "error", text: data.message || "Unable to start guest session." });
+        return;
+      }
+
+      if (data.loginUrl) {
+        window.location.href = data.loginUrl;
+        return;
+      }
+
+      setGuestBanner({
+        tone: "success",
+        text: data.sent
+          ? "Check your email for the guest login link."
+          : "Guest login link created. Open the email link or ask support to resend it.",
+      });
+    } catch (error) {
+      console.error("Guest login error:", error);
+      setGuestBanner({ tone: "error", text: "An error occurred while creating the guest session." });
+    } finally {
+      setGuestLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail.trim()) {
+      setBanner({ tone: "error", text: "Please enter your email address." });
+      return;
+    }
+
+    if (!EMAIL_RE.test(forgotEmail)) {
+      setBanner({ tone: "error", text: "Please enter a valid email address." });
+      return;
+    }
+
+    setIsLoading(true);
+    setBanner(null);
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setShowForgotModal(false);
+        setForgotEmail("");
+        setBanner({
+          tone: "success",
+          text: "Password reset instructions have been sent to your email address. Please check your inbox and spam folder.",
+        });
+      } else {
+        setBanner({
+          tone: "error",
+          text: data.message || "Failed to send password reset email. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      setBanner({ tone: "error", text: "An error occurred. Please try again later." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /** Single dismissal path for the reset dialog: closes it and clears the
+   *  previous attempt's error and email so reopening starts clean. */
+  const closeForgotModal = () => {
+    setShowForgotModal(false);
+    setBanner(null);
+    setForgotEmail("");
+  };
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    // Without this the browser navigates and reloads instead of signing in.
+    event.preventDefault();
+    if (isLoading) return;
+
+    setBanner(null);
+
+    if (!formData.email.trim()) {
+      setBanner({ tone: "error", text: "Email is required." });
+      return;
+    }
+    if (!formData.password) {
+      setBanner({ tone: "error", text: "Password is required." });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const responseData = await response.json();
+
+      if (response.ok && responseData.success) {
+        await handleAdmin();
+      } else {
+        setBanner({
+          tone: "error",
+          text: responseData.message || "We couldn't sign you in. Please try again.",
+        });
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setBanner({ tone: "error", text: "An error occurred during sign in. Please try again." });
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <AuthShell>
+        <AuthTitle verb="Sign in" />
+
+        <Tabs
+          label="Sign in or continue as guest"
+          value={activeTab}
+          onValueChange={v => setActiveTab(v as "signin" | "guest")}
+          fullWidth
+          className="mb-[var(--auth-block)]"
+          items={[
+            { value: "signin", label: "Sign in" },
+            { value: "guest", label: "Guest access" },
+          ]}
+        >
+          {activeTab === "signin" ? (
+            <form onSubmit={submit} noValidate>
+              {banner ? (
+                <div className="mb-[var(--auth-block)]">
+                  <FormMessage tone={banner.tone}>{banner.text}</FormMessage>
+                </div>
+              ) : null}
+
+              <div className="auth-stack">
+                <Field
+                  label="Email"
+                  id="email"
+                  name="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="you@arkynox.com"
+                  value={formData.email}
+                  onChange={e => handleChange("email")(e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
+
+                {/* The forgot-password link used to be a hand-rolled label row
+                    wrapping a bare <input> with no `<label>`; the `action` slot
+                    folds it into the primitive. */}
+                <Field
+                  label="Password"
+                  id="password"
+                  name="password"
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={e => handleChange("password")(e.target.value)}
+                  disabled={isLoading}
+                  revealable
+                  required
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(true)}
+                      className="shrink-0 rounded text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20"
+                    >
+                      Forgot password?
+                    </button>
+                  }
+                />
+              </div>
+
+              <div className="mt-[var(--auth-block)]">
+                <Button
+                  type="submit"
+                  variant="brand"
+                  size="lg"
+                  fullWidth
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      Signing in…
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
+                </Button>
+              </div>
+
+              <p className="mt-[var(--auth-block)] text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="font-medium text-primary underline underline-offset-4">
+                  Sign up
+                </Link>
+              </p>
+            </form>
+          ) : (
+            <div>
+              <div
+                className="mb-[var(--auth-block)] flex items-start gap-3 rounded-xl bg-muted p-3"
+              >
+                <svg
+                  className="mt-0.5 size-5 shrink-0 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+                  />
+                </svg>
+                <div>
+                  <h2 className="mb-1 text-sm font-semibold text-foreground">Guest access</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Submit bug reports without creating an account. Guest sessions are limited
+                    and some features stay restricted until you sign up.
+                  </p>
+                </div>
+              </div>
+
+              <div className="auth-stack">
+                <Field
+                  label="Guest name"
+                  id="guest-name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Enter your display name"
+                  value={guestForm.name}
+                  onChange={e => handleGuestChange("name")(e.target.value)}
+                  disabled={guestLoading}
+                  required
+                />
+
+                <Field
+                  label="Guest email"
+                  id="guest-email"
+                  name="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="name@example.com"
+                  value={guestForm.email}
+                  onChange={e => handleGuestChange("email")(e.target.value)}
+                  disabled={guestLoading}
+                  required
+                />
+              </div>
+
+              {guestBanner ? (
+                <div className="mt-[var(--auth-block)]">
+                  <FormMessage tone={guestBanner.tone}>{guestBanner.text}</FormMessage>
+                </div>
+              ) : null}
+
+              <div className="mt-[var(--auth-block)]">
+                <Button
+                  type="button"
+                  onClick={handleGuestContinue}
+                  variant="brand"
+                  size="lg"
+                  fullWidth
+                  disabled={guestLoading}
+                >
+                  {guestLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      Starting guest session…
+                    </>
+                  ) : (
+                    "Continue as guest"
+                  )}
+                </Button>
+              </div>
+
+              <p className="mt-[var(--auth-block)] text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="font-medium text-primary underline underline-offset-4">
+                  Sign up
+                </Link>
+              </p>
+            </div>
+          )}
+        </Tabs>
+      </AuthShell>
+
+      <Dialog
+        open={showForgotModal}
+        onClose={closeForgotModal}
+        title="Reset your password"
+        description="Enter your email to receive reset instructions"
+        size="sm"
+        dismissible={!isLoading}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeForgotModal} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleForgotPassword}
+              disabled={isLoading || !forgotEmail.trim()}
+              data-autofocus
+            >
+              {isLoading ? "Sending…" : "Send reset link"}
+            </Button>
+          </>
+        }
+      >
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            if (!isLoading && forgotEmail.trim()) void handleForgotPassword();
+          }}
+          className="space-y-4"
+        >
+          <div className="flex items-start gap-3 rounded-lg bg-muted p-4">
+            <svg
+              className="mt-0.5 size-6 shrink-0 text-muted-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 4.26a2 2 0 0 0 2.22 0L21 8M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"
+              />
+            </svg>
+            <div>
+              <h3 className="font-medium text-foreground">How it works</h3>
+              <p className="text-sm text-muted-foreground">
+                We&apos;ll send you a secure link to reset your password. The link expires in 1
+                hour for security.
+              </p>
+            </div>
+          </div>
+
+          <Field
+            label="Email address"
+            id="forgot-email"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="you@arkynox.com"
+            value={forgotEmail}
+            onChange={e => setForgotEmail(e.target.value)}
+            disabled={isLoading}
+          />
+
+          {banner ? <FormMessage tone="error">{banner.text}</FormMessage> : null}
+
+          {/* The footer buttons submit; this keeps Enter in the field working. */}
+          <button type="submit" className="sr-only" tabIndex={-1} aria-hidden="true">
+            Send reset link
+          </button>
+        </form>
+      </Dialog>
+    </>
+  );
 }

@@ -1,53 +1,72 @@
-import { decrypt, encrypt, encryptCode } from "@/lib/crypto";
 import { getMongoClient } from "@/lib/mongodb";
 import { decryptSession, updateSession } from "@/lib/session";
+import { getApiUser, apiJson } from "@/lib/api-auth";
+import { logSecurityEvent } from "@/lib/security-log";
 import { ObjectId } from "mongodb";
 import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// export const runtime = "edge";
+/**
+ * Session introspection.
+ *
+ * This is the single endpoint the client uses to answer "am I signed in, as
+ * what, and may I go where?". It returns a self-contained payload so callers no
+ * longer need to chain it with `/api/auth/details` (which used to leak the
+ * password hash to the browser).
+ *
+ * Contract:
+ *   401 — no cookie, or the cookie does not resolve to a live user.
+ *   200 — { success: true, user: {...} }
+ *
+ * The previous implementation returned HTTP 200 with `success: false` when no
+ * cookie was present, which made status-based guarding impossible to write
+ * correctly on the client.
+ */
+export async function GET() {
+  try {
+    const user = await getApiUser();
 
-export async function GET(request: Request) {
-  const sessionCookie = cookies().get('session');
-  if (sessionCookie) {
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ success: false, message: "failed to fetch." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    if (!user) {
+      return apiJson(
+        { success: false, message: "Authentication required." },
+        401
+      );
     }
-    if (decryptedSession && typeof decryptedSession.token === 'string') {
-      const data = await decrypt(decryptedSession.token);
-      const db = await getMongoClient();
-      const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
-      if (!check) {
-        return NextResponse.json({ success: false, message: "Invalid session token." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      // Slide session expiry on each verify call
-      await updateSession();
-      return NextResponse.json({ success: true, admin: check.admin ? check.admin : false }, {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      console.log('Invalid decrypted session or token');
-      return NextResponse.json({ success: false, message: "Invalid session token." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  } else {
-    console.log('No session cookie found');
-    return NextResponse.json({success: false, message: "User has not logged in."}, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+
+    // Slide the expiry on each successful verify so an active user is never
+    // logged out mid-session.
+    await updateSession();
+
+    return apiJson(
+      {
+        success: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          admin: user.admin,
+          guest: user.guest,
+          temporary: user.temporary,
+          verify: user.verify,
+          createdAt: user.createdAt,
+        },
+        // Flattened for backwards compatibility with existing call sites.
+        admin: user.admin,
+        guest: user.guest,
+      },
+      200
+    );
+  } catch (error) {
+    console.error("Session verification failed:", error);
+    return apiJson({ success: false, message: "Verification failed." }, 401);
   }
+}
+
+/** Explicitly refuse writes: this endpoint is idempotent read-only. */
+export async function POST() {
+  return apiJson(
+    { success: false, message: "Use GET to verify a session." },
+    405
+  );
 }

@@ -1,201 +1,181 @@
-import { decrypt } from "@/lib/crypto";
-import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
 import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import { z } from "zod";
 
+import { getMongoClient } from "@/lib/mongodb";
+import {
+  requireApiUser,
+  requireApiRegisteredUser,
+  apiJson,
+} from "@/lib/api-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// export const runtime = "edge";
+/**
+ * A caller may read a ticket's thread when they own it or are an administrator.
+ * Guests may read threads on tickets they own, so a guest can still follow their
+ * own conversation.
+ *
+ * `status` is part of the projection because the POST path below refuses to
+ * comment on a closed ticket. Omitting it made that guard unreachable: the
+ * field was always `undefined` and the check silently passed forever.
+ */
+async function assertCanAccessTicket(userId: string, isAdmin: boolean, ticketId: string) {
+  const db = await getMongoClient();
+  const ticket = await db
+    .collection("tickets")
+    .findOne(
+      { _id: new ObjectId(ticketId) },
+      { projection: { user: 1, status: 1 } }
+    );
 
+  if (!ticket) return { ok: false as const, status: 404 as const, ticket: null };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const ticketId = searchParams.get('ticketId');
-  if (!ticketId) {
-    return NextResponse.json({ success: false, message: "ticketId is required." }, {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  const ownerId =
+    ticket.user && typeof ticket.user === "object" && "_id" in (ticket.user as object)
+      ? String((ticket.user as { _id: unknown })._id)
+      : String(ticket.user);
+
+  if (!isAdmin && ownerId !== userId) {
+    return { ok: false as const, status: 403 as const, ticket };
   }
 
-  const sessionCookie = cookies().get('session');
-  if (sessionCookie) {
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ success: false, message: "failed to fetch." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    if (decryptedSession && typeof decryptedSession.token === 'string') {
-      const data = await decrypt(decryptedSession.token);
-      const db = await getMongoClient();
-      const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
-      if (!check) {
-        return NextResponse.json({ success: false, message: "Invalid session token." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      const ticket = await db.collection('tickets').findOne({ _id: new ObjectId(ticketId) });
-      if (!ticket) {
-        return NextResponse.json({ success: false, message: "Invalid ticket id." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      const comments = await db.collection('comments').find({ 
-        ticket: new ObjectId(ticketId) 
-      }).sort({ createdAt: 1 }).toArray();
-      
-      if (!comments || comments.length === 0) {
-        return NextResponse.json({ success: true, comments: [] }, {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+  return { ok: true as const, status: 200 as const, ticket };
+}
 
-      // Batch fetch user data for better performance
-      const userIds = Array.from(new Set(comments.map(comment => comment.user)));
-      const users = await db.collection('users').find(
-        { _id: { $in: userIds.map(id => new ObjectId(id)) } },
-        { projection: { name: 1, _id: 1 } }
-      ).toArray();
-      
-      const userMap = users.reduce((acc, user) => {
-        acc[user._id.toString()] = user;
-        return acc;
-      }, {} as any);
+/**
+ * SECURITY FIX — horizontal privilege escalation (ISO 27001:2022 A.8.3):
+ * this endpoint previously fetched the ticket by id alone and returned its whole
+ * comment thread, so any signed-in user could read every other customer's support
+ * conversation by editing `ticketId`. Access is now checked against the ticket
+ * owner or an administrator flag taken from the session.
+ */
+export async function GET(request: Request) {
+  const auth = await requireApiUser();
+  if (!auth.ok) return auth.response;
 
-      // Attach user data to comments more efficiently
-      const commentsWithUsers = comments.map(comment => ({
-        ...comment,
-        user: userMap[comment.user] || null,
-        createdAt: new Date(comment.createdAt).toLocaleString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
-      }));
-      return NextResponse.json({ success: true, comments: commentsWithUsers }, {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      console.log('Invalid decrypted session or token');
-      return NextResponse.json({ success: false, message: "Invalid session token." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+  const ticketId = new URL(request.url).searchParams.get("ticketId");
+  if (!ticketId || !ObjectId.isValid(ticketId)) {
+    return apiJson({ success: false, message: "A valid ticketId is required." }, 400);
+  }
+
+  try {
+    const access = await assertCanAccessTicket(auth.user.id, auth.user.admin, ticketId);
+    if (!access.ok) {
+      return apiJson(
+        access.status === 404
+          ? { success: false, message: "Ticket not found." }
+          : { success: false, message: "Access denied." },
+        access.status
+      );
     }
-    
-  } else {
-    console.log('No session cookie found');
-    return NextResponse.json({success: false, message: "User has not logged in."}, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+
+    const db = await getMongoClient();
+    const comments = await db
+      .collection("comments")
+      .find({ ticket: new ObjectId(ticketId) })
+      .sort({ createdAt: 1 })
+      .toArray();
+
+    if (comments.length === 0) {
+      return apiJson({ success: true, comments: [] }, 200);
+    }
+
+    // Resolve comment authors in one batched query.
+    const authorIds = Array.from(
+      new Set(
+        comments
+          .map((comment) => comment.user)
+          .filter((id): id is string => typeof id === "string")
+          .filter((id) => ObjectId.isValid(id))
+      )
+    );
+
+    const authors = await db
+      .collection("users")
+      .find(
+        { _id: { $in: authorIds.map((id) => new ObjectId(id)) } },
+        { projection: { name: 1 } }
+      )
+      .toArray();
+
+    const nameMap = new Map(authors.map((a) => [a._id.toString(), a.name]));
+
+    const commentsWithUsers = comments.map((comment) => ({
+      ...comment,
+      user: { name: nameMap.get(String(comment.user)) ?? "Unknown" },
+      createdAt: new Date(comment.createdAt).toLocaleString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    }));
+
+    return apiJson({ success: true, comments: commentsWithUsers }, 200);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return apiJson({ success: false, message: "Internal server error." }, 500);
   }
 }
 
-     
+const createSchema = z.object({
+  comment: z.string().trim().min(1).max(2000),
+  ticketId: z.string().min(1).max(64),
+});
+
+/** Posts a comment. Guests are refused; ownership is enforced. */
 export async function POST(request: Request) {
-    // Parse the request body
-    const body = await request.json();
-    const { z } = await import('zod');
-    const schema = z.object({ comment: z.string().min(1).max(2000), ticketId: z.string().min(1) });
-    const parsed = schema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, message: 'Invalid input' }, { status: 400 });
+  const auth = await requireApiRegisteredUser();
+  if (!auth.ok) return auth.response;
+
+  try {
+    const parsed = createSchema.safeParse(await request.json().catch(() => ({})));
+    if (!parsed.success || !ObjectId.isValid(parsed.data.ticketId)) {
+      return apiJson({ success: false, message: "Invalid input." }, 400);
     }
+
     const { comment, ticketId } = parsed.data;
     const db = await getMongoClient();
-    const sessionCookie = cookies().get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ success: false, message: "User session is not available." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ success: false, message: "failed to fetch." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    if (decryptedSession && typeof decryptedSession.token === 'string') {
-      const data = await decrypt(decryptedSession.token);
-      const user = await db.collection('users').findOne({ _id: new ObjectId(data) });
-      if (!user) {
-        return NextResponse.json({ success: false, message: "Invalid session token." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      if (user.guest || user.temporary) {
-        return NextResponse.json({ success: false, message: "Guest accounts cannot comment." }, {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      
-      const ticket = await db.collection('tickets').findOne({ _id: new ObjectId(ticketId) });
-      if (!ticket) {
-        return NextResponse.json({ success: false, message: "Invalid ticket id." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      if (ticket.status === 'closed') {
-        return NextResponse.json({ success: false, message: "Ticket is closed." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      
-      // Use countDocuments for better performance instead of loading all comments
-      const commentCount = await db.collection('comments').countDocuments({ 
-        ticket: new ObjectId(ticketId) 
-      });
-      
-      const result = await db.collection('comments').insertOne({
-        comment: comment,
-        ticket: new ObjectId(ticketId),
-        user: data,
-        order: commentCount + 1,
-        createdAt: new Date(),
-      });
-      if (!result) {
-         return NextResponse.json({ success: false, message: 'Invalid id' }, {
-             status: 401,
-             headers: { 'Content-Type': 'application/json' }
-         });
-      }
 
-      // Broadcast real-time update
-      try {
-        const { broadcastCommentUpdate } = await import('@/lib/realtime');
-        await broadcastCommentUpdate(ticketId, result.insertedId.toString(), 'created');
-      } catch (error) {
-        console.error('Error broadcasting comment update:', error);
-      }
-
-      return NextResponse.json({ success: true }, {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      return NextResponse.json({ success: false, message: "Invalid session token." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    const access = await assertCanAccessTicket(auth.user.id, auth.user.admin, ticketId);
+    if (!access.ok) {
+      return apiJson(
+        access.status === 404
+          ? { success: false, message: "Ticket not found." }
+          : { success: false, message: "Access denied." },
+        access.status
+      );
     }
+
+    // Re-read the status from the projected document rather than trusting a
+    // cast, so a closed ticket can never be commented on.
+    if (access.ticket?.status === "closed") {
+      return apiJson({ success: false, message: "This ticket is closed." }, 409);
+    }
+
+    const commentCount = await db
+      .collection("comments")
+      .countDocuments({ ticket: new ObjectId(ticketId) });
+
+    const result = await db.collection("comments").insertOne({
+      comment,
+      ticket: new ObjectId(ticketId),
+      user: auth.user.id,
+      order: commentCount + 1,
+      createdAt: new Date(),
+    });
+
+    try {
+      const { broadcastCommentUpdate } = await import("@/lib/realtime");
+      await broadcastCommentUpdate(ticketId, result.insertedId.toString(), "created");
+    } catch (error) {
+      console.error("Error broadcasting comment update:", error);
+    }
+
+    return apiJson({ success: true, commentId: result.insertedId.toString() }, 201);
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    return apiJson({ success: false, message: "Internal server error." }, 500);
+  }
 }

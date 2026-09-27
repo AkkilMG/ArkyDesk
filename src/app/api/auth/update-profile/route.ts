@@ -1,106 +1,45 @@
-import { decrypt } from "@/lib/crypto";
-import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
 import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import { z } from "zod";
 
-export const dynamic = 'force-dynamic';
+import { getMongoClient } from "@/lib/mongodb";
+import { requireApiRegisteredUser, apiJson } from "@/lib/api-auth";
+import { logSecurityEvent } from "@/lib/security-log";
 
-// export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
+const schema = z.object({
+  name: z.string().trim().min(1).max(100),
+});
+
+/** Updates the caller's display name. */
 export async function PUT(request: Request) {
+  const auth = await requireApiRegisteredUser();
+  if (!auth.ok) return auth.response;
+
   try {
-    const sessionCookie = cookies().get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Not authenticated" 
-      }, { status: 401 });
+    const parsed = schema.safeParse(await request.json().catch(() => ({})));
+    if (!parsed.success) {
+      return apiJson({ success: false, message: "Enter a name between 1 and 100 characters." }, 400);
     }
 
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid session" 
-      }, { status: 401 });
-    }
-
-    if (typeof decryptedSession.token !== 'string') {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid session token" 
-      }, { status: 401 });
-    }
-
-    const userId = await decrypt(decryptedSession.token);
-    if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid user token" 
-      }, { status: 401 });
-    }
-
-    const { name } = await request.json();
-
-    // Validate input
-    if (!name || typeof name !== 'string') {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Name is required and must be a string" 
-      }, { status: 400 });
-    }
-
-    const trimmedName = name.trim();
-    if (trimmedName.length < 1 || trimmedName.length > 100) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Name must be between 1 and 100 characters" 
-      }, { status: 400 });
-    }
-
-    // Connect to database
     const db = await getMongoClient();
-    
-    // Verify user exists
-    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-    if (!user) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "User not found" 
-      }, { status: 404 });
-    }
-
-    // Update user name
-    const result = await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
-      { 
-        $set: { 
-          name: trimmedName,
-          updatedAt: new Date()
-        } 
-      }
+    const result = await db.collection("users").updateOne(
+      { _id: new ObjectId(auth.user.id) },
+      { $set: { name: parsed.data.name, updatedAt: new Date() } }
     );
 
-    if (result.modifiedCount === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Failed to update profile" 
-      }, { status: 500 });
+    if (result.matchedCount === 0) {
+      return apiJson({ success: false, message: "User not found." }, 404);
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Profile updated successfully" 
+    logSecurityEvent("access.denied", {
+      userId: auth.user.id,
+      flow: "profile_updated",
     });
 
+    return apiJson({ success: true, message: "Profile updated successfully." }, 200);
   } catch (error) {
-    console.error('Error updating profile:', error);
-    return NextResponse.json({ 
-      success: false, 
-      message: "Internal server error" 
-    }, { status: 500 });
+    console.error("Error updating profile:", error);
+    return apiJson({ success: false, message: "Internal server error." }, 500);
   }
 }

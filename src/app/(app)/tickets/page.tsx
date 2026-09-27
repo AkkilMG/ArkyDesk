@@ -8,18 +8,26 @@ import TicketCreate from "@/components/ticket/create";
 import GuestCreate from "@/components/ticket/guestCreate";
 import SideNav from "@/components/dashboard/sideNav";
 import { useRealtime } from "@/lib/RealtimeContext";
+import { useSession } from "@/lib/useSession";
 import Shimmer from "@/components/ui/Shimmer";
-import { useRouter } from "next/navigation";
-// import TicketInfo from "@/components/ticket/info";
+import Dialog from "@/components/ui/Dialog";
 
 
 export default function TicketsPage() {
-    const router = useRouter();
     const [create, setCreate] = useState(false);
     const [settings, setSettings] = useState(false);
     const [ticketId, setTicketId] = useState('');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    
+
+    /*
+     * Authentication and role come from the shared session provided by
+     * `(app)/layout.tsx`. The page used to run its own `/api/auth/verify` here,
+     * duplicating the request the server layout had already resolved, and then
+     * pushed the visitor to /signin client-side. Guests are admitted — this
+     * page is one of the two routes they may use.
+     */
+    const { isAdmin, isGuest, loading: sessionLoading } = useSession();
+
     // Get real-time connection
     const { isConnected, connectionError, lastUpdate, reconnect } = useRealtime();
     
@@ -51,29 +59,6 @@ export default function TicketsPage() {
         }
     }, [search]);
 
-    const [admin, setAdmin] = useState<boolean | null>(null);
-    const handleAdmin = useCallback(async () => {
-        try {
-            const res = await fetch('/api/auth/verify', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await res.json();
-            if (data.success) {
-                setAdmin(data.admin || false);
-            } else {
-                console.error('Verify failed:', data.message);
-                router.push('/signin');
-            }
-        } catch (error) {
-            console.error('Error verify out:', error);
-            router.push('/signin');
-        }
-    }, [router]);
-  
-
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -87,7 +72,7 @@ export default function TicketsPage() {
             } else {
                 setIsRefreshing(true);
             }
-            const response = await fetch(admin ? '/api/admin-dashboard/tickets' : '/api/dashboard/tickets', {
+            const response = await fetch(isAdmin ? '/api/admin-dashboard/tickets' : '/api/dashboard/tickets', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -117,7 +102,7 @@ export default function TicketsPage() {
                 setIsRefreshing(false);
             }
         }
-    }, [admin]);
+    }, [isAdmin]);
 
     const [details, setDetails] = useState<any>(null);
     const [detailsLoading, setDetailsLoading] = useState(true);
@@ -196,15 +181,10 @@ export default function TicketsPage() {
     }, []);
 
     useEffect(() => {
-        handleAdmin();
-    }, []);
-
-    useEffect(() => {
-        if (admin !== null) { // Only fetch when admin state is determined
-            fetchTickets();
-            getDetails();
-        }
-    }, [admin, fetchTickets, getDetails]);
+        if (sessionLoading) return;
+        fetchTickets();
+        getDetails();
+    }, [sessionLoading, isAdmin, fetchTickets, getDetails]);
     
     useEffect(() => {
         if (ticketId) {
@@ -363,9 +343,8 @@ export default function TicketsPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Unable to Load Tickets</h3>
                     <p className="text-gray-600 mb-4">{error}</p>
-                    <button 
-                        onClick={(e) => {
-                            handleAdmin();
+                    <button
+                        onClick={() => {
                             fetchTickets();
                             getDetails();
                         }}
@@ -381,39 +360,28 @@ export default function TicketsPage() {
     return (
         <>
         {create && (
-            details?.guest || details?.temporary ? (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center z-50 px-4">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-semibold text-gray-800">Submit Bug Report</h2>
-                            <button 
-                                type="button" 
-                                className="text-gray-500 hover:text-gray-900 shadow-lg rounded-lg p-1 transition-smooth"
-                                onClick={() => setCreate(false)}
-                            >
-                                <img src="/icons/close.svg" className="h-4 w-4" alt="Close" />
-                            </button>
-                        </div>
-                        <GuestCreate showHeader={false} />
-                    </div>
-                </div>
+            isGuest ? (
+                <Dialog
+                    open={create}
+                    onClose={() => setCreate(false)}
+                    title="Submit a bug report"
+                    size="lg"
+                >
+                    <GuestCreate showHeader={false} />
+                </Dialog>
             ) : (
-                <TicketCreate create={create} setCreate={setCreate} />  
+                <TicketCreate create={create} setCreate={setCreate} />
             )
         )}
         { <AccountSettings details={details} settings={settings} setSettings={setSettings} /> }
-        <div className="flex h-screen bg-gray-50 overflow-hidden">
+        <div className="flex h-screen overflow-hidden bg-muted">
             {/* Sidebar — handles both desktop sidebar and mobile overlay */}
-            <div className="hidden sm:block sm:w-1/4 md:w-1/4 lg:w-1/5 xl:w-1/5 2xl:w-1/5 shadow-xl bg-white">
-                <SideNav 
-                    create={create} 
-                    setCreate={setCreate} 
-                    settings={settings} 
-                    setSettings={setSettings} 
-                    isMobileMenuOpen={isMobileMenuOpen} 
-                    setIsMobileMenuOpen={setIsMobileMenuOpen} 
-                />
-            </div>
+            <SideNav
+                setCreate={setCreate}
+                setSettings={setSettings}
+                isMobileMenuOpen={isMobileMenuOpen}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
 
             {/* Main content */}
             <div className="w-full flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-50 h-screen overflow-hidden">

@@ -1,185 +1,130 @@
-import { decrypt } from "@/lib/crypto";
+import { z } from "zod";
+
 import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
-import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import {
+  requireApiUser,
+  requireApiRegisteredUser,
+  apiJson,
+} from "@/lib/api-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// export const runtime = "edge";
+/**
+ * Ticket listing.
+ *
+ * Administrators see the open queue; everybody else sees only their own
+ * tickets, filtered by the caller's id taken from the session — never from a
+ * request parameter, so one user cannot read another's history by editing a
+ * query string.
+ */
+export async function GET() {
+  const auth = await requireApiUser();
+  if (!auth.ok) return auth.response;
 
-export async function GET(request: Request) {
-  const sessionCookie = cookies().get('session');
-  if (sessionCookie) {
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession) {
-      return NextResponse.json({ success: false, message: "failed to fetch." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+  try {
+    const db = await getMongoClient();
+    const { user } = auth;
+
+    const tickets = user.admin
+      ? await db
+          .collection("tickets")
+          .find({ status: { $in: ["open", "ignore"] } })
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .toArray()
+      : await db
+          .collection("tickets")
+          .find({ user: user.id })
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .toArray();
+
+    if (tickets.length === 0) {
+      return apiJson({ success: true, tickets: [] }, 200);
     }
-    if (decryptedSession && typeof decryptedSession.token === 'string') {
-      const data = await decrypt(decryptedSession.token);
-      const db = await getMongoClient();
-      const check = await db.collection('users').findOne({ _id: new ObjectId(data) });
-      if (!check) {
-        return NextResponse.json({ success: false, message: "Invalid session token." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      let tickets;
-      if (check.admin) {
-        // Admin sees all tickets, but limit to recent ones for performance
-        tickets = await db.collection('tickets').find({ 
-          status: { $in: ['open', 'ignore'] } 
-        }).sort({ createdAt: -1 }).limit(100).toArray();
-      } else {
-        // Users see only their tickets
-        tickets = await db.collection('tickets').find({ 
-          user: data 
-        }).sort({ createdAt: -1 }).limit(50).toArray();
-      }
-      const currentDate = new Date();
-      tickets.forEach(ticket => {
-        ticket.tags = [ticket.product, ticket.status, ticket.problem];
-        const createdAt = new Date(ticket.createdAt);
-        const oneWeekAgo = new Date(currentDate);
-        oneWeekAgo.setDate(currentDate.getDate() - 7);
-        if (createdAt < oneWeekAgo) {
-          ticket.tags.push('ignore');
-        }
-      });
-      if (!tickets) {
-        return NextResponse.json({ success: false, message: "No tickets found." }, {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      const ticketData = tickets.map(ticket => {
-        return {
-          _id: ticket._id.toString(),
-          user: check.name,
-          subject: ticket.subject,
-          description: ticket.description,
-          attachment: ticket.attachment,
-          files: ticket.files,
-          createdAt: ticket.createdAt,
-          tags: ticket.tags,
-          status: ticket.status,
-        };
-      });
-      return NextResponse.json({ success: true, tickets: ticketData }, {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      console.log('Invalid decrypted session or token');
-      return NextResponse.json({ success: false, message: "Invalid session token." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
-  } else {
-    console.log('No session cookie found');
-    return NextResponse.json({success: false, message: "User has not logged in."}, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const ticketData = tickets.map((ticket) => {
+      const createdAt = new Date(ticket.createdAt);
+      const tags = [ticket.product, ticket.status, ticket.problem];
+      if (createdAt < oneWeekAgo) tags.push("ignore");
+
+      return {
+        _id: ticket._id.toString(),
+        user: user.name,
+        subject: ticket.subject,
+        description: ticket.description,
+        attachment: ticket.attachment,
+        files: ticket.files,
+        createdAt: ticket.createdAt,
+        tags,
+        status: ticket.status,
+      };
     });
+
+    return apiJson({ success: true, tickets: ticketData }, 200);
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+    return apiJson({ success: false, message: "Internal server error." }, 500);
   }
 }
 
-     
+const createSchema = z.object({
+  subject: z.string().trim().min(3).max(200),
+  description: z.string().trim().min(10).max(10000),
+  attachment: z.array(z.any()).optional(),
+  problem: z.string().min(1).max(100),
+  product: z.string().min(1).max(100),
+  files: z.any().optional(),
+});
+
+/**
+ * Creates a ticket for the signed-in user.
+ *
+ * Guest sessions are refused with 403 and pointed at the anonymous intake
+ * endpoint: a guest record has no password and its identity rests entirely on
+ * a magic-link email, so it must not be able to open a full ticket record.
+ */
 export async function POST(request: Request) {
-    // Parse the request body
-    const body = await request.json();
-    const { z } = await import('zod');
-    const schema = z.object({
-      subject: z.string().min(3).max(200),
-      description: z.string().min(10).max(10000),
-      attachment: z.array(z.any()).optional(),
-      problem: z.string().min(1).max(100),
-      product: z.string().min(1).max(100),
-      files: z.any().optional()
-    });
-    const parsed = schema.safeParse(body);
+  const auth = await requireApiRegisteredUser();
+  if (!auth.ok) return auth.response;
+
+  try {
+    const parsed = createSchema.safeParse(await request.json().catch(() => ({})));
     if (!parsed.success) {
-      return NextResponse.json({ success: false, message: 'Invalid input' }, { status: 400 });
+      return apiJson({ success: false, message: "Invalid input." }, 400);
     }
+
     const { subject, description, attachment, problem, product, files } = parsed.data;
     const db = await getMongoClient();
-    const sessionCookie = cookies().get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ success: false, message: "User session is not available." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptSession) {
-      return NextResponse.json({ success: false, message: "failed to fetch." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    if (decryptedSession && typeof decryptedSession.token === 'string') {
-      const data = await decrypt(decryptedSession.token);
-      
-      // Check if user is guest and prevent access to authenticated endpoint
-      const user = await db.collection('users').findOne({ _id: new ObjectId(data) });
-      if (!user) {
-        return NextResponse.json({ success: false, message: "Invalid user." }, {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      
-      if (user.guest || user.temporary) {
-        return NextResponse.json({ success: false, message: "Guest accounts must use the guest report endpoint." }, {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      
-      const result = await db.collection('tickets').insertOne({
-        subject: subject,
-        description: description,
-        attachment: attachment,
-        problem: problem.toLowerCase(),
-        product: product.toLowerCase(),
-        user: data,
-        files: files,
-        status: 'open',
-        createdAt: new Date(),
-      });
-      if (!result) {
-         return NextResponse.json({ success: false, message: 'Invalid id' }, {
-             status: 401,
-             headers: { 'Content-Type': 'application/json' }
-         });
-      }
 
-      // Broadcast real-time update
-      try {
-        const { broadcastTicketUpdate } = await import('@/lib/realtime');
-        await broadcastTicketUpdate(result.insertedId.toString(), 'created');
-      } catch (error) {
-        console.error('Error broadcasting ticket update:', error);
-      }
+    const result = await db.collection("tickets").insertOne({
+      subject,
+      description,
+      attachment,
+      problem: problem.toLowerCase(),
+      product: product.toLowerCase(),
+      user: auth.user.id,
+      files,
+      status: "open",
+      createdAt: new Date(),
+    });
 
-      return NextResponse.json({ success: true }, {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      return NextResponse.json({ success: false, message: "Invalid session token." }, {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    try {
+      const { broadcastTicketUpdate } = await import("@/lib/realtime");
+      await broadcastTicketUpdate(result.insertedId.toString(), "created");
+    } catch (error) {
+      console.error("Error broadcasting ticket update:", error);
     }
+
+    return apiJson(
+      { success: true, ticketId: result.insertedId.toString() },
+      201
+    );
+  } catch (error) {
+    console.error("Error creating ticket:", error);
+    return apiJson({ success: false, message: "Internal server error." }, 500);
+  }
 }
-

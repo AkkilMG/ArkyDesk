@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import MainLayout from "@/components/dashboard/main";
 import SideNav from "@/components/dashboard/sideNav";
 import AccountSettings from "@/components/settings/settings";
@@ -13,68 +12,18 @@ export default function Dashboard() {
     const [create, setCreate] = useState(false);
     const [settings, setSettings] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const auth = true;
-    const router = useRouter();
-    
-    useEffect(() => {
-        if (!auth) {
-            router.push("/signin");
-        }
-    }, [auth, router]);
 
-    const [admin, setAdmin] = useState(false);
-    const [adminLoading, setAdminLoading] = useState(true);
+    /*
+     * Access control is enforced server-side in `dashboard/layout.tsx`
+     * (`getPageAccess("admin")`), which runs before this component is rendered.
+     * The previous client-only `router.push("/signin")` check here shipped the
+     * whole dashboard markup to the browser and then navigated away, so it was
+     * cosmetic rather than a control.
+     */
     const [pageLoading, setPageLoading] = useState(true);
-    
-    async function handleAdmin() {
-        try {
-            setAdminLoading(true);
-            const res = await fetch('/api/auth/verify', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await res.json();
-            if (data.success) {
-                setAdmin(data.admin || false);
-            } else {
-                console.error('Verify failed:', data.message);
-                router.push('/signin');
-            }
-        } catch (error) {
-            console.error('Error verify out:', error);
-            router.push('/signin');
-        } finally {
-            setAdminLoading(false);
-            setPageLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        handleAdmin();
-    }, []);
-
-    // Periodically refresh session to keep it alive
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            try {
-                await fetch('/api/auth/refresh', { method: 'GET' });
-            } catch {
-                // Silently fail - session will expire eventually
-            }
-        }, 30 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    useEffect(() => {
-        if (!adminLoading && !admin) {
-            router.push("/tickets");
-        }
-    }, [admin, adminLoading, router]);
 
     const [details, setDetails] = useState<any>(null);
-    
+
       async function getDetails() {
         try {
           const res = await fetch("/api/auth/details", {
@@ -96,7 +45,7 @@ export default function Dashboard() {
         }
       }
       useEffect(() => {
-        getDetails();
+        getDetails().finally(() => setPageLoading(false));
       }, []);
 
     if (pageLoading) {
@@ -209,14 +158,12 @@ export default function Dashboard() {
         { 
             <AccountSettings details={details} settings={settings} setSettings={setSettings} />
         }
-        <div className="flex h-screen bg-gray-50 overflow-hidden">
+        <div className="flex h-screen overflow-hidden bg-muted">
             {/* Sidebar — handles both desktop sidebar and mobile overlay */}
-            <div className="hidden sm:block sm:w-64 lg:w-72 xl:w-80 shadow-xl bg-white flex-shrink-0">
-                <SideNav create={create} setCreate={setCreate} settings={settings} setSettings={setSettings} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
-            </div>
+            <SideNav setCreate={setCreate} setSettings={setSettings} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
 
             {/* Main content */}
-            <div className="flex-1 bg-gray-50 h-screen overflow-hidden min-w-0">
+            <div className="min-w-0 flex-1 overflow-hidden bg-muted h-screen">
                 <MainLayout isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
             </div>
 

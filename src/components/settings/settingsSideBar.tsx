@@ -1,106 +1,144 @@
+"use client";
 
+import { cn } from "@/lib/cn";
 
+export const SETTINGS_SECTIONS = ["profile", "account", "danger"] as const;
+export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
-// export default function SettingsSideBar({ profile, setProfile, account, setAccount, dangerous, setDangerous }: any) {
-//     function handleClick(index: number) {
-//         if (index === 0) {
-//             setProfile(true);
-//             setAccount(false);
-//             setDangerous(false);
-//         } else if (index === 1) {
-//             setProfile(false);
-//             setAccount(true);
-//             setDangerous(false);
-//         } else {
-//             setProfile(false);
-//             setAccount(false);
-//             setDangerous(true);
-//         }
-//     }
-//     return (
-//         <div className="w-1/4 p-4 shadow-md">
-//             <h2 className="pl-4 pt-10 mb-6 text-lg font-bold">Account</h2>
-//             <ul className="pl-4 space-y-4 text-gray-700 cursor-pointer">
-//                 <li className={`${ profile ? 'text-green-400' : ''}`} onClick={(e) => handleClick(0)}>Profile</li>
-//                 <li className={`${ account ? 'text-green-400' : ''}`} onClick={e => handleClick(1)}>Account</li>
-//                 <li className="mt-6 font-bold cursor-default">Danger Zone</li>
-//                 <li className={`${ dangerous ? 'text-green-400' : ''}`} onClick={e => handleClick(2)}>Dangerous</li>
-//             </ul>
-//         </div>
-//     )
-// }
+type Props = {
+  section: SettingsSection;
+  onSectionChange: (section: SettingsSection) => void;
+  isAdmin?: boolean;
+};
 
+type Item = {
+  id: SettingsSection;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  destructive?: boolean;
+};
 
+const ITEMS: Item[] = [
+  {
+    id: "profile",
+    label: "Profile",
+    description: "Name and avatar",
+    icon: (
+      <>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.75}
+          d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z"
+        />
+      </>
+    ),
+  },
+  {
+    id: "account",
+    label: "Account",
+    description: "Password and security",
+    icon: (
+      <>
+        <rect x="4" y="10" width="16" height="10" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </>
+    ),
+  },
+  {
+    id: "danger",
+    label: "Delete account",
+    description: "Irreversible",
+    destructive: true,
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.75}
+        d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+      />
+    ),
+  },
+];
 
-// settingsSideBar
-interface SettingsSideBarProps {
-    profile: boolean;
-    setProfile: (value: boolean) => void;
-    account: boolean;
-    setAccount: (value: boolean) => void;
-    dangerous: boolean;
-    setDangerous: (value: boolean) => void;
-    isMobile: boolean;
-    isAdmin?: boolean;
+/**
+ * Settings section switcher.
+ *
+ * Previously three independent booleans (`profile`/`account`/`danger`) were
+ * threaded through two components and every entry point was an `<li onClick>`,
+ * which is unreachable by keyboard and invisible to assistive tech. It is now a
+ * single `section` value rendered as real `<button>`s inside a labelled `nav`,
+ * with `aria-current` marking the active section (WAI-ARIA navigation pattern).
+ */
+export default function SettingsSideBar({ section, onSectionChange, isAdmin }: Props) {
+  return (
+    <nav
+      aria-label="Settings sections"
+      className={cn(
+        "shrink-0 border-border bg-sidebar",
+        // Mobile: a horizontal, scrollable rail above the panel.
+        "w-full border-b",
+        // Desktop: a vertical rail beside the panel.
+        "md:w-64 md:border-b-0 md:border-r"
+      )}
+    >
+      <div className="flex gap-1 overflow-x-auto p-2 md:flex-col md:gap-1 md:overflow-visible md:p-4">
+        {ITEMS.map((item) => {
+          const active = section === item.id;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onSectionChange(item.id)}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "group flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-200 md:flex-none",
+                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15",
+                item.destructive
+                  ? "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                active && !item.destructive && "bg-muted text-foreground",
+                active && item.destructive && "bg-destructive/10 text-destructive"
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                  "bg-muted text-muted-foreground",
+                  active && "bg-primary text-primary-foreground",
+                  active && item.destructive && "bg-destructive text-destructive-foreground"
+                )}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                  className="size-4"
+                >
+                  {item.icon}
+                </svg>
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold">{item.label}</span>
+                <span className="hidden truncate text-xs text-muted-foreground md:block">
+                  {item.description}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {isAdmin ? (
+        <p className="hidden border-t border-border px-4 py-3 text-xs text-muted-foreground md:block">
+          Administrator accounts cannot be deleted here.
+        </p>
+      ) : null}
+    </nav>
+  );
 }
-
-export default function SettingsSideBar({
-    profile,
-    setProfile,
-    account,
-    setAccount,
-    dangerous,
-    setDangerous,
-    isMobile,
-    isAdmin = false,
-}: SettingsSideBarProps) {
-    function handleClick(index: number) {
-      if (index === 0) {
-        setProfile(true);
-        setAccount(false);
-        setDangerous(false);
-      } else if (index === 1) {
-        setProfile(false);
-        setAccount(true);
-        setDangerous(false);
-      } else {
-        setProfile(false);
-        setAccount(false);
-        setDangerous(true);
-      }
-    }
-  
-    return isMobile ? (
-      <div className="w-full border-b md:border-b-0 md:w-1/4 p-4 shadow-md bg-white">
-        <h2 className="pl-6 pt-4 pb-4 md:pt-10 mb-2 md:mb-6 text-xl font-bold">Settings</h2>
-        <ul className="flex justify-center gap-4 sm:gap-0 sm:justify-around md:flex-col sm:pl-4 space-y-0 md:space-y-4 text-gray-700 cursor-pointer">
-          <li className={`${profile ? "text-blue-600 font-semibold" : "hover:text-gray-900"} w-full text-center md:text-left py-3 sm:py-2`} onClick={(e) => handleClick(0)}> 
-            Profile
-          </li>
-          <li className={`${account ? "text-blue-600 font-semibold" : "hover:text-gray-900"} w-full text-center md:text-left py-3 sm:py-2`} onClick={(e) => handleClick(1)}>
-            Account
-          </li>
-          <li className={`${dangerous ? "text-red-600 font-semibold" : "hover:text-red-600"} w-full text-center md:text-left py-3 sm:py-2 md:mt-6 md:border-t md:pt-4`} onClick={(e) => handleClick(2)}>
-            Danger Zone
-          </li>
-        </ul>
-      </div>
-    ) : (
-      <div className="w-1/4 p-4 shadow-md bg-white">
-        <h2 className="pl-4 pt-10 mb-6 text-lg font-bold">Settings</h2>
-        <ul className="pl-4 space-y-4 text-gray-700 cursor-pointer">
-          <li className={`${profile ? "text-blue-600 font-semibold border-r-2 border-blue-600 pr-4" : "hover:text-gray-900"} py-2`} onClick={(e) => handleClick(0)}>
-            Profile
-          </li>
-          <li className={`${account ? "text-blue-600 font-semibold border-r-2 border-blue-600 pr-4" : "hover:text-gray-900"} py-2`} onClick={(e) => handleClick(1)}>
-            Account
-          </li>
-          <li className="mt-6 font-bold cursor-default text-gray-500 border-t pt-4">Danger Zone</li>
-          <li className={`${dangerous ? "text-red-600 font-semibold border-r-2 border-red-600 pr-4" : "hover:text-red-600"} py-3 sm:py-2`} onClick={(e) => handleClick(2)}>
-            Delete Account
-          </li>
-        </ul>
-      </div>
-    );
-  }
-  

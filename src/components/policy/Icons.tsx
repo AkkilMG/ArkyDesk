@@ -2,8 +2,8 @@ import { SVGProps } from 'react';
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number };
 
-const createIcon = (children: React.ReactNode, viewBox = '0 0 24 24') =>
-    ({ size = 24, className, ...props }: IconProps) => (
+const createIcon = (children: React.ReactNode, viewBox = '0 0 24 24') => {
+    const Icon = ({ size = 24, className, ...props }: IconProps) => (
         <svg
             width={size}
             height={size}
@@ -19,6 +19,9 @@ const createIcon = (children: React.ReactNode, viewBox = '0 0 24 24') =>
             {children}
         </svg>
     );
+    Icon.displayName = 'PolicyIcon';
+    return Icon;
+};
 
 export const ZapIcon = createIcon(<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></>);
 export const ClockIcon = createIcon(<><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>);

@@ -53,21 +53,31 @@ export default function TicketsLists({
     return (
             <div className="flex flex-col space-y-4">
                     <div className="flex items-center space-x-2">
-                        <button className="sm:hidden focus:outline-none p-3 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                            <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="Menu Toggle" className="h-6 w-6" />
+                        <button
+                            className="sm:hidden focus:outline-none p-3 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover"
+                            onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                            aria-expanded={isMobileMenuOpen}
+                        >
+                            <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="" aria-hidden="true" className="h-6 w-6" />
                         </button>
                         <div className="relative flex-1">
-                            <input 
-                                type="text" 
-                                placeholder="Search tickets..." 
+                            <label htmlFor="ticket-search" className="sr-only">Search tickets</label>
+                            <input
+                                id="ticket-search"
+                                type="text"
+                                placeholder="Search tickets..."
                                 value={search}
                                 onChange={handleSearch}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 pl-10 hover:border-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 transition-smooth" 
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2 pl-10 hover:border-gray-400 focus:ring-2 focus:ring-blue-300 transition-smooth"
                             />
-                            <img src="/icons/search.svg" alt="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <img src="/icons/search.svg" alt="" aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         </div>
-                        <button className="p-2.5 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover">
-                            <img src="/icons/filter.svg" alt="filter" className="w-6 h-6" />
+                        <button
+                            className="p-2.5 bg-gray-100 border rounded-lg hover:bg-gray-200 transition-smooth btn-hover"
+                            aria-label="Filter tickets"
+                        >
+                            <img src="/icons/filter.svg" alt="" aria-hidden="true" className="w-6 h-6" />
                         </button>
                     </div>
                     
@@ -108,7 +118,7 @@ export default function TicketsLists({
                     {/* Results info */}
                     {search.trim() && !loading && (
                         <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                            Found {filteredData.length} ticket{filteredData.length !== 1 ? 's' : ''} for "{search}"
+                            Found {filteredData.length} ticket{filteredData.length !== 1 ? 's' : ''} for &quot;{search}&quot;
                         </div>
                     )}
                     

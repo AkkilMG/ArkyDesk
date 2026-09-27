@@ -3,14 +3,20 @@
 import SideNav from "@/components/dashboard/sideNav";
 import AccountSettings from "@/components/settings/settings";
 import TicketCreate from "@/components/ticket/create";
-import TicketsLists from '@/components/ticket/list';
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Shimmer from '@/components/ui/Shimmer';
-import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/useSession";
 
 
 export default function ProfileCard() {
-    const router = useRouter();
+    /*
+     * Authentication is resolved server-side by `(app)/layout.tsx`. The page
+     * previously re-checked `/api/auth/verify` on mount and redirected
+     * client-side, which flashed the profile skeleton and shipped a redirect
+     * that the server had already decided against.
+     */
+    const { user } = useSession();
+
     const [create, setCreate] = useState(false);
     const [settings, setSettings] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -63,21 +69,8 @@ export default function ProfileCard() {
     }
 
     useEffect(() => {
-        async function checkAuth() {
-            try {
-                const res = await fetch('/api/auth/verify');
-                const data = await res.json();
-                if (!data.success) {
-                    router.push('/signin');
-                }
-            } catch {
-                router.push('/signin');
-            }
-        }
-        checkAuth();
         getDetails();
-        fetchTickets();
-    }, [router]);
+    }, []);
 
     if (!details) {
         return (
@@ -147,20 +140,23 @@ export default function ProfileCard() {
         
         {details && (<div className="flex h-screen">
             
-            {/* Sidebar */}
-            <div className="hidden md:block md:w-1/4 xl:w-1/5 2xl:w-1/5 shadow-xl">
-                <SideNav create={create} setCreate={setCreate} settings={settings} setSettings={setSettings} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
-            </div>
+            {/* Sidebar — handles both desktop sidebar and mobile overlay */}
+            <SideNav setCreate={setCreate} setSettings={setSettings} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
             <div className="flex-1 w-full md:w-3/4 xl:w-4/5 2xl:w-4/5 p-4 sm:p-8 md:p-12 mx-auto bg-gray-200 shadow-lg">
                 <div className="rounded-lg bg-white">
                     <div className="relative h-40">
                         <div className="absolute top-2 left-2">
-                            <button className="focus:outline-none p-2 text-white border border-white shadow-lg rounded-lg sm:hidden" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                                <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="Menu Toggle" className="h-6 w-6" />
+                            <button
+                                className="focus:outline-none p-2 text-white border border-white shadow-lg rounded-lg sm:hidden"
+                                onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                                aria-expanded={isMobileMenuOpen}
+                            >
+                                <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="" aria-hidden="true" className="h-6 w-6" />
                             </button>
                         </div>
                         <img src="/assets/images/fluid.jpg"
-                            alt="Background Banner" className="w-full h-full object-cover rounded-t-lg" width={600} height={160} />
+                            alt="" aria-hidden="true" className="w-full h-full object-cover rounded-t-lg" width={600} height={160} />
                         {/* Profile Image */}
                         <div className="absolute -bottom-12 left-6">
                             <div className="w-24 h-24 rounded-full border-4 border-white bg-blue-400 flex items-center justify-center text-white text-6xl font-bold">

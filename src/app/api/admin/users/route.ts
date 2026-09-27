@@ -1,100 +1,70 @@
-import { decrypt } from "@/lib/crypto";
 import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
-import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import { requireApiAdmin, apiJson } from "@/lib/api-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// export const runtime = "edge";
+/** All users with ticket counts, plus outstanding administrative action requests. */
+export async function GET() {
+  const auth = await requireApiAdmin();
+  if (!auth.ok) return auth.response;
 
-// Get all users and pending actions
-export async function GET(request: Request) {
   try {
-    const sessionCookie = cookies().get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Not authenticated" 
-      }, { status: 401 });
-    }
-
-    const session = sessionCookie.value;
-    const decryptedSession = await decryptSession(session);
-    if (!decryptedSession || typeof decryptedSession.token !== 'string') {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid session" 
-      }, { status: 401 });
-    }
-
-    const userId = await decrypt(decryptedSession.token);
-    if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid user token" 
-      }, { status: 401 });
-    }
-
     const db = await getMongoClient();
-    
-    // Verify user is admin
-    const currentUser = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-    if (!currentUser || !currentUser.admin) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Access denied. Admin privileges required." 
-      }, { status: 403 });
-    }
 
-    // Get all users with their ticket counts
-    const users = await db.collection('users').aggregate([
-      {
-        $lookup: {
-          from: 'tickets',
-          localField: '_id',
-          foreignField: 'user',
-          as: 'userTickets'
-        }
-      },
-      {
-        $addFields: {
-          tickets: { $size: '$userTickets' },
-          closedTickets: {
-            $size: {
-              $filter: {
-                input: '$userTickets',
-                cond: { $eq: ['$$this.status', 'closed'] }
-              }
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          password: 0,
-          userTickets: 0
-        }
-      }
-    ]).toArray();
+    // Explicit allow-list projection rather than `{ password: 0 }`, so a newly
+    // added sensitive column is excluded until it is deliberately included.
+    const users = await db
+      .collection("users")
+      .aggregate([
+        {
+          $lookup: {
+            from: "tickets",
+            localField: "_id",
+            foreignField: "user",
+            as: "userTickets",
+          },
+        },
+        {
+          $addFields: {
+            tickets: { $size: "$userTickets" },
+            closedTickets: {
+              $size: {
+                $filter: {
+                  input: "$userTickets",
+                  cond: { $eq: ["$$this.status", "closed"] },
+                },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            email: 1,
+            admin: 1,
+            guest: 1,
+            temporary: 1,
+            verify: 1,
+            flagged: 1,
+            deleted: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            tickets: 1,
+            closedTickets: 1,
+          },
+        },
+      ])
+      .toArray();
 
-    // Get pending actions
-    const pendingActions = await db.collection('userActions').find({ 
-      status: 'pending' 
-    }).toArray();
+    const pendingActions = await db
+      .collection("userActions")
+      .find({ status: "pending" })
+      .toArray();
 
-    return NextResponse.json({ 
-      success: true, 
-      users,
-      pendingActions
-    });
-
+    return apiJson({ success: true, users, pendingActions }, 200);
   } catch (error) {
-    console.error('Error fetching users:', error);
-    return NextResponse.json({ 
-      success: false, 
-      message: "Internal server error" 
-    }, { status: 500 });
+    console.error("Error fetching users:", error);
+    return apiJson({ success: false, message: "Internal server error" }, 500);
   }
 }

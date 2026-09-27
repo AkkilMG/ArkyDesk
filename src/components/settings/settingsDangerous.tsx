@@ -12,24 +12,32 @@ interface SettingsDangerousProps {
 export default function SettingsDangerous({ settings, setSettings, isMobile }: SettingsDangerousProps) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<Message>({ type: '', text: '' });
 
     const handleDeleteRequest = () => {
         setShowDeleteConfirm(true);
         setDeleteConfirmText('');
+        setPassword('');
         setMessage({ type: '', text: '' });
     };
 
     const handleDeleteCancel = () => {
         setShowDeleteConfirm(false);
         setDeleteConfirmText('');
+        setPassword('');
         setMessage({ type: '', text: '' });
     };
 
     const handleDeleteConfirm = async () => {
         if (deleteConfirmText !== 'DELETE') {
             setMessage({ type: 'error', text: 'Please type "DELETE" to confirm account deletion' });
+            return;
+        }
+
+        if (password.length < 8) {
+            setMessage({ type: 'error', text: 'Enter your current password to confirm.' });
             return;
         }
 
@@ -42,12 +50,15 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                // The server re-authenticates with this before deleting anything.
+                body: JSON.stringify({ password, confirm: password }),
             });
 
             const data = await response.json();
 
             if (data.success) {
-                setMessage({ type: 'success', text: 'Account deletion request submitted. You will be logged out shortly.' });
+                setMessage({ type: 'success', text: 'Account deleted. You will be logged out shortly.' });
+                setPassword('');
                 
                 // Redirect to login after a delay
                 setTimeout(() => {
@@ -123,7 +134,8 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                 ) : (
                     <div className="bg-gray-50 p-4 rounded border">
                         <p className="text-sm text-gray-700 mb-3">
-                            This action cannot be undone. Type <strong>DELETE</strong> below to confirm:
+                            This action cannot be undone. Type <strong>DELETE</strong> and enter your current
+                            password to confirm:
                         </p>
                         <input 
                             type="text"
@@ -131,6 +143,16 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                             onChange={(e) => setDeleteConfirmText(e.target.value)}
                             className="w-full p-2 border rounded mb-3 focus:border-red-500 focus:outline-none"
                             placeholder="Type DELETE to confirm"
+                            aria-label="Type DELETE to confirm"
+                        />
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border rounded mb-3 focus:border-red-500 focus:outline-none"
+                            placeholder="Your current password"
+                            aria-label="Your current password"
+                            autoComplete="current-password"
                         />
                         <div className="flex gap-3">
                             <button 
@@ -141,7 +163,7 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                             </button>
                             <button 
                                 onClick={handleDeleteConfirm}
-                                disabled={isLoading || deleteConfirmText !== 'DELETE'}
+                                disabled={isLoading || deleteConfirmText !== 'DELETE' || password.length < 8}
                                 className="px-4 py-3 sm:py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-red-300 rounded"
                             >
                                 {isLoading ? 'Deleting...' : 'Confirm Deletion'}

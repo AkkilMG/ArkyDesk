@@ -1,19 +1,129 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useConsent } from '@/lib/ConsentContext';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+
+import { useConsent } from '@/lib/ConsentContext';
+import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Dialog from '@/components/ui/Dialog';
+import { cn } from '@/lib/cn';
+
+type ConsentSettings = {
+    functional: boolean;
+    analytics: boolean;
+    marketing: boolean;
+    communications: boolean;
+};
+
+const EMPTY: ConsentSettings = {
+    functional: false,
+    analytics: false,
+    marketing: false,
+    communications: false,
+};
+
+function StatusDot({ tone }: { tone: 'ok' | 'warn' | 'bad' }) {
+    return (
+        <span
+            aria-hidden="true"
+            className={cn(
+                'size-2.5 shrink-0 rounded-full',
+                tone === 'ok' && 'bg-success',
+                tone === 'warn' && 'bg-warning',
+                tone === 'bad' && 'bg-destructive'
+            )}
+        />
+    );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <section className="space-y-3">
+            <h3 className="text-sm font-semibold tracking-tight text-foreground">{title}</h3>
+            {children}
+        </section>
+    );
+}
+
+/**
+ * A labelled checkbox row. The whole row is the `<label>`, so clicking the
+ * description toggles the control and the control itself keeps its own visible
+ * text association — the original used a bare `<input>` with a sibling `<div>`,
+ * which gave the checkbox no accessible name at all.
+ */
+function ToggleRow({
+    label,
+    description,
+    checked,
+    onChange,
+    disabled,
+}: {
+    label: string;
+    description: string;
+    checked: boolean;
+    onChange?: (next: boolean) => void;
+    disabled?: boolean;
+}) {
+    return (
+        <label
+            className={cn(
+                'flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 transition-colors',
+                disabled ? 'opacity-60' : 'hover:bg-muted/60'
+            )}
+        >
+            <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium text-foreground">{label}</span>
+                <span className="mt-1 block text-sm text-muted-foreground">{description}</span>
+            </span>
+            <input
+                type="checkbox"
+                checked={checked}
+                disabled={disabled}
+                onChange={(e) => onChange?.(e.target.checked)}
+                className="mt-0.5 size-5 shrink-0 accent-primary"
+            />
+        </label>
+    );
+}
+
+function AgreementRow({
+    label,
+    accepted,
+    href,
+    cta,
+}: {
+    label: string;
+    accepted?: boolean;
+    href: string;
+    cta: string;
+}) {
+    return (
+        <div className="flex items-center justify-between gap-4 rounded-xl bg-muted p-3">
+            <div className="flex min-w-0 items-center gap-3">
+                <StatusDot tone={accepted ? 'ok' : 'bad'} />
+                <span className="truncate text-sm font-medium text-foreground">{label}</span>
+                <span className="sr-only">{accepted ? 'accepted' : 'not accepted'}</span>
+            </div>
+            <Link
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+                {cta}
+            </Link>
+        </div>
+    );
+}
 
 export default function PrivacySettings() {
     const { consentSettings, updateConsent, getConsentRecord, revokeAllConsent } = useConsent();
     const [isOpen, setIsOpen] = useState(false);
     const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
-    const [localSettings, setLocalSettings] = useState(() => consentSettings ?? {
-        functional: false,
-        analytics: false,
-        marketing: false,
-        communications: false,
-    });
+    const [localSettings, setLocalSettings] = useState<ConsentSettings>(
+        () => consentSettings ?? EMPTY
+    );
 
     useEffect(() => {
         setLocalSettings(consentSettings);
@@ -30,323 +140,240 @@ export default function PrivacySettings() {
         setIsOpen(false);
     };
 
-    const consentRecord = getConsentRecord() ?? { hasValidConsent: false, needsUpdate: false, lastUpdated: null };
+    const consentRecord = getConsentRecord() ?? {
+        hasValidConsent: false,
+        needsUpdate: false,
+        lastUpdated: null as string | null,
+    };
+
+    const set = (key: keyof ConsentSettings) => (next: boolean) =>
+        setLocalSettings(prev => ({ ...prev, [key]: next }));
+
+    const footer = (
+        <div className="flex w-full flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+                Changes take effect immediately and are saved automatically.
+            </p>
+            <div className="flex gap-3">
+                <Button variant="secondary" onClick={() => setIsOpen(false)}>
+                    Cancel
+                </Button>
+                <Button onClick={handleSave}>Save changes</Button>
+            </div>
+        </div>
+    );
 
     return (
         <>
-            {/* Settings Button */}
             <button
-                onClick={(e) => setIsOpen(true)}
+                onClick={() => setIsOpen(true)}
                 data-privacy-settings
-                className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 p-2 rounded-lg hover:bg-purple-50 transition-colors duration-150 text-sm sm:text-base w-full"
+                className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground sm:text-base"
             >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <svg
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"
+                    />
                 </svg>
-                <span>Privacy Settings</span>
+                <span>Privacy settings</span>
             </button>
 
-            {/* Privacy Settings Modal */}
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="fixed inset-0 bg-black bg-opacity-50" onClick={(e) => setIsOpen(false)} />
-                    
-                    <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden" role="dialog" aria-modal="true" aria-label="Privacy and consent settings">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <h2 className="text-2xl font-bold">Privacy & Consent Settings</h2>
-                                    <p className="text-purple-100 mt-1">Manage your data preferences and consent</p>
+            <Dialog
+                open={isOpen}
+                onClose={() => setIsOpen(false)}
+                title="Privacy & consent settings"
+                description="Manage your data preferences and consent"
+                size="xl"
+                footer={footer}
+            >
+                <div className="space-y-8">
+                    <Section title="Consent status">
+                        <div className="grid grid-cols-1 gap-4 rounded-xl bg-muted p-4 md:grid-cols-3">
+                            <div className="rounded-lg bg-card p-4">
+                                <div className="flex items-center gap-2">
+                                    <StatusDot
+                                        tone={consentRecord.hasValidConsent ? 'ok' : 'bad'}
+                                    />
+                                    <span className="text-sm font-medium text-foreground">
+                                        Legal compliance
+                                    </span>
                                 </div>
-                                <button
-                                    onClick={(e) => setIsOpen(false)}
-                                    className="text-white hover:text-gray-200 transition-colors"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {consentRecord.hasValidConsent
+                                        ? 'All required consents provided'
+                                        : 'Missing required consents'}
+                                </p>
+                            </div>
+
+                            <div className="rounded-lg bg-card p-4">
+                                <div className="flex items-center gap-2">
+                                    <StatusDot tone={consentRecord.needsUpdate ? 'warn' : 'ok'} />
+                                    <span className="text-sm font-medium text-foreground">
+                                        Update status
+                                    </span>
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {consentRecord.needsUpdate
+                                        ? 'Consent needs refresh'
+                                        : 'Current and valid'}
+                                </p>
+                            </div>
+
+                            <div className="rounded-lg bg-card p-4">
+                                <div className="flex items-center gap-2">
+                                    <svg
+                                        className="size-4 shrink-0 text-muted-foreground"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+                                        />
                                     </svg>
-                                </button>
+                                    <span className="text-sm font-medium text-foreground">
+                                        Last updated
+                                    </span>
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {consentRecord.lastUpdated
+                                        ? new Date(
+                                              consentRecord.lastUpdated
+                                          ).toLocaleDateString()
+                                        : 'Not set'}
+                                </p>
                             </div>
                         </div>
+                    </Section>
 
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto flex-1 space-y-6">
-                            {/* Consent Status */}
-                            <div className="bg-gray-50 rounded-lg p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Consent Status</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="bg-white rounded-lg p-4">
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-3 h-3 rounded-full ${consentRecord.hasValidConsent ? 'bg-green-500' : 'bg-red-500'}`} />
-                                            <span className="font-medium text-gray-900">Legal Compliance</span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mt-1">
-                                            {consentRecord.hasValidConsent ? 'All required consents provided' : 'Missing required consents'}
-                                        </p>
-                                    </div>
-                                    <div className="bg-white rounded-lg p-4">
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-3 h-3 rounded-full ${consentRecord.needsUpdate ? 'bg-yellow-500' : 'bg-green-500'}`} />
-                                            <span className="font-medium text-gray-900">Update Status</span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mt-1">
-                                            {consentRecord.needsUpdate ? 'Consent needs refresh' : 'Current and valid'}
-                                        </p>
-                                    </div>
-                                    <div className="bg-white rounded-lg p-4">
-                                        <div className="flex items-center space-x-2">
-                                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span className="font-medium text-gray-900">Last Updated</span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mt-1">
-                                            {consentRecord.lastUpdated ? 
-                                                new Date(consentRecord.lastUpdated).toLocaleDateString() : 
-                                                'Not set'
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                    <Section title="Cookie preferences">
+                        <div className="space-y-3">
+                            <ToggleRow
+                                label="Necessary cookies"
+                                description="Essential for the platform to function properly. These cannot be disabled."
+                                checked
+                                disabled
+                            />
+                            <ToggleRow
+                                label="Functional cookies"
+                                description="Remember your preferences and settings for a personalized experience."
+                                checked={!!localSettings.functional}
+                                onChange={set('functional')}
+                            />
+                            <ToggleRow
+                                label="Analytics cookies"
+                                description="Help us understand usage patterns to improve our services. Data is anonymized."
+                                checked={!!localSettings.analytics}
+                                onChange={set('analytics')}
+                            />
+                            <ToggleRow
+                                label="Marketing cookies"
+                                description="Used to show relevant content and advertisements across websites."
+                                checked={!!localSettings.marketing}
+                                onChange={set('marketing')}
+                            />
+                        </div>
+                    </Section>
 
-                            {/* Cookie Preferences */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Cookie Preferences</h3>
-                                <div className="space-y-4">
-                                    {/* Necessary Cookies */}
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h4 className="font-medium text-gray-900">Necessary Cookies</h4>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    Essential for the platform to function properly. These cannot be disabled.
-                                                </p>
-                                            </div>
-                                            <div className="ml-4">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={true}
-                                                    disabled
-                                                    className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                    <Section title="Communication preferences">
+                        <ToggleRow
+                            label="Service notifications"
+                            description="Receive important updates about your tickets, account, and service changes."
+                            checked={!!localSettings.communications}
+                            onChange={set('communications')}
+                        />
+                    </Section>
 
-                                    {/* Functional Cookies */}
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h4 className="font-medium text-gray-900">Functional Cookies</h4>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    Remember your preferences and settings for a personalized experience.
-                                                </p>
-                                            </div>
-                                            <div className="ml-4">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!localSettings.functional}
-                                                    onChange={(e) => setLocalSettings(prev => ({ ...prev, functional: e.target.checked }))}
-                                                    className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                    <Section title="Legal agreements">
+                        <div className="space-y-3">
+                            <AgreementRow
+                                label="Terms & conditions"
+                                accepted={consentSettings?.termsAccepted}
+                                href="/policy/terms-and-condition"
+                                cta="View"
+                            />
+                            <AgreementRow
+                                label="Privacy policy"
+                                accepted={consentSettings?.privacyAccepted}
+                                href="/policy/privacy-policy"
+                                cta="View"
+                            />
+                            <AgreementRow
+                                label="Data processing"
+                                accepted={consentSettings?.dataProcessingAccepted}
+                                href="/policy"
+                                cta="View all"
+                            />
+                        </div>
+                    </Section>
 
-                                    {/* Analytics Cookies */}
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h4 className="font-medium text-gray-900">Analytics Cookies</h4>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    Help us understand usage patterns to improve our services. Data is anonymized.
-                                                </p>
-                                            </div>
-                                            <div className="ml-4">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!localSettings.analytics}
-                                                    onChange={(e) => setLocalSettings(prev => ({ ...prev, analytics: e.target.checked }))}
-                                                    className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Marketing Cookies */}
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h4 className="font-medium text-gray-900">Marketing Cookies</h4>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    Used to show relevant content and advertisements across websites.
-                                                </p>
-                                            </div>
-                                            <div className="ml-4">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!localSettings.marketing}
-                                                    onChange={(e) => setLocalSettings(prev => ({ ...prev, marketing: e.target.checked }))}
-                                                    className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Communication Preferences */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Communication Preferences</h3>
-                                <div className="border border-gray-200 rounded-lg p-4">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <h4 className="font-medium text-gray-900">Service Notifications</h4>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                Receive important updates about your tickets, account, and service changes.
-                                            </p>
-                                        </div>
-                                        <div className="ml-4">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!localSettings.communications}
-                                                onChange={(e) => setLocalSettings(prev => ({ ...prev, communications: e.target.checked }))}
-                                                className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Legal Agreements */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Agreements</h3>
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <div className={`w-3 h-3 rounded-full ${consentSettings?.termsAccepted ? 'bg-green-500' : 'bg-red-500'}`} />
-                                            <span className="font-medium text-gray-900">Terms & Conditions</span>
-                                        </div>
-                                        <Link href="/policy/terms-and-condition" target="_blank" className="text-blue-600 hover:text-blue-800 text-sm underline">
-                                            View
-                                        </Link>
-                                    </div>
-                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <div className={`w-3 h-3 rounded-full ${consentSettings?.privacyAccepted ? 'bg-green-500' : 'bg-red-500'}`} />
-                                            <span className="font-medium text-gray-900">Privacy Policy</span>
-                                        </div>
-                                        <Link href="/policy/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-800 text-sm underline">
-                                            View
-                                        </Link>
-                                    </div>
-                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <div className={`w-3 h-3 rounded-full ${consentSettings?.dataProcessingAccepted ? 'bg-green-500' : 'bg-red-500'}`} />
-                                            <span className="font-medium text-gray-900">Data Processing</span>
-                                        </div>
-                                        <Link href="/policy" target="_blank" className="text-blue-600 hover:text-blue-800 text-sm underline">
-                                            View All
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Data Rights */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Data Rights</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <h4 className="font-medium text-gray-900 mb-2">Access Your Data</h4>
-                                        <p className="text-sm text-gray-600 mb-3">
-                                            Download a copy of all personal data we have about you.
-                                        </p>
-                                        <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                            Request Data Export
-                                        </button>
-                                    </div>
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <h4 className="font-medium text-gray-900 mb-2">Delete Account</h4>
-                                        <p className="text-sm text-gray-600 mb-3">
-                                            Permanently delete your account and associated data.
-                                        </p>
-                                        <button className="text-red-600 hover:text-red-800 text-sm font-medium">
-                                            Delete Account
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Revoke All Consent */}
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-red-900 mb-2">Revoke All Consent</h3>
-                                <p className="text-sm text-red-700 mb-4">
-                                    Withdraw all consent and disable all non-essential features. This will limit platform functionality.
+                    <Section title="Your data rights">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="rounded-xl border border-border p-4">
+                                <h4 className="mb-2 text-sm font-medium text-foreground">
+                                    Access your data
+                                </h4>
+                                <p className="mb-3 text-sm text-muted-foreground">
+                                    Download a copy of all personal data we have about you.
                                 </p>
-                                <button
-                                    onClick={(e) => setShowRevokeConfirm(true)}
-                                    className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                                <Button variant="ghost" size="sm" className="px-0 text-primary hover:bg-transparent hover:underline hover:underline-offset-4">
+                                    Request data export
+                                </Button>
+                            </div>
+                            <div className="rounded-xl border border-border p-4">
+                                <h4 className="mb-2 text-sm font-medium text-foreground">
+                                    Delete account
+                                </h4>
+                                <p className="mb-3 text-sm text-muted-foreground">
+                                    Permanently delete your account and associated data.
+                                </p>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="px-0 text-destructive hover:bg-transparent hover:underline hover:underline-offset-4"
                                 >
-                                    Revoke All Consent
-                                </button>
+                                    Delete account
+                                </Button>
                             </div>
                         </div>
+                    </Section>
 
-                        {/* Footer */}
-                        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex-shrink-0">
-                            <div className="flex justify-between items-center">
-                                <p className="text-sm text-gray-600">
-                                    Changes take effect immediately and are saved automatically.
-                                </p>
-                                <div className="flex space-x-3">
-                                    <button
-                                        onClick={(e) => setIsOpen(false)}
-                                        className="px-4 py-2 text-gray-600 font-medium rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleSave}
-                                        className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Save Changes
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Revoke Confirmation Modal */}
-            {showRevokeConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="fixed inset-0 bg-black bg-opacity-50" />
-                    <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6" role="dialog" aria-modal="true" aria-label="Confirm consent revocation">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Consent Revocation</h3>
-                        <p className="text-gray-600 mb-6">
-                            Are you sure you want to revoke all consent? This will disable most platform features 
-                            and you may need to re-accept terms to continue using the service.
+                    <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+                        <h3 className="mb-2 text-sm font-semibold text-destructive">
+                            Revoke all consent
+                        </h3>
+                        <p className="mb-4 text-sm text-destructive/80">
+                            Withdraw all consent and disable all non-essential features. This will
+                            limit platform functionality.
                         </p>
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={(e) => setShowRevokeConfirm(false)}
-                                className="flex-1 px-4 py-2 text-gray-600 font-medium rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleRevoke}
-                                className="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                Revoke All
-                            </button>
-                        </div>
-                    </div>
+                        <Button variant="destructive" onClick={() => setShowRevokeConfirm(true)}>
+                            Revoke all consent
+                        </Button>
+                    </section>
                 </div>
-            )}
+            </Dialog>
+
+            <ConfirmDialog
+                open={showRevokeConfirm}
+                onClose={() => setShowRevokeConfirm(false)}
+                onConfirm={handleRevoke}
+                title="Confirm consent revocation"
+                description="Are you sure you want to revoke all consent? This will disable most platform features and you may need to re-accept terms to continue using the service."
+                confirmLabel="Revoke all"
+            />
         </>
     );
 }

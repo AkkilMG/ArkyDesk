@@ -1,153 +1,98 @@
-// "use client";
-// import { useState } from "react";
-// import SettingsSideBar from './settingsSideBar';
-// import SettingsAccount from './settingsAccount';
-// import SettingsProfile from './settingsProfile';
-// import SettingsDangerous from './settingsDangerous';
-
-// export default function AccountSettings({ settings, setSettings }: any) {
-//     const [profile, setProfile] = useState(true);
-//     const [account, setAccount] = useState(false);
-//     const [dangerous, setDangerous] = useState(false);
-//     var data = [profile, account, dangerous];
-
-//     return (
-//         <div className={`fixed inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center z-50 ${settings ? 'block': 'hidden'}`} style={{ zIndex: 1000 }}>
-//             <div className="flex w-screen h-screen p-12 rounded-md">
-//                 <div className="flex w-full h-full rounded-2xl bg-white">
-//                     <SettingsSideBar profile={profile} setProfile={setProfile} account={account} setAccount={setAccount} dangerous={dangerous} setDangerous={setDangerous} />
-//                     {profile && (<SettingsProfile settings={settings} setSettings={setSettings} />)}
-//                     {account && (<SettingsAccount settings={settings} setSettings={setSettings} />)}
-//                     {dangerous && (<SettingsDangerous settings={settings} setSettings={setSettings} />)}
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }
-  
-
-// settings
 "use client";
-import { useState, useEffect } from "react";
-import SettingsSideBar from "./settingsSideBar";
-import SettingsAccount from "./settingsAccount";
-import SettingsProfile from "./settingsProfile";
-import SettingsDangerous from "./settingsDangerous";
+
+import { useEffect, useState } from "react";
+
+import Dialog from "@/components/ui/Dialog";
+import SettingsSideBar, {
+  type SettingsSection,
+} from "@/components/settings/settingsSideBar";
+import SettingsAccount from "@/components/settings/settingsAccount";
+import SettingsProfile from "@/components/settings/settingsProfile";
+import SettingsDangerous from "@/components/settings/settingsDangerous";
 import type { UserDetails, SettingsProps } from "@/types/settings";
 
+const TITLES: Record<SettingsSection, string> = {
+  profile: "Profile",
+  account: "Account & security",
+  danger: "Danger zone",
+};
+
+/**
+ * Account settings dialog.
+ *
+ * Mounted by every authenticated page, so it is the most-shared surface in the
+ * app. It previously hand-rolled its own overlay: a full-screen wrapper with a
+ * manual `Escape` listener, a manual `body.style.overflow = "hidden"` that was
+ * cleared to the literal string `"unset"` (so any page that had set its own
+ * overflow lost it), a `role="dialog"` on the *backdrop* rather than the panel,
+ * and no focus trap — Tab walked straight out of the dialog into the page
+ * behind it.
+ *
+ * All of that now comes from the shared `Dialog`, so settings looks and behaves
+ * exactly like every other modal in ArkyDesk.
+ */
 export default function AccountSettings({ details, settings, setSettings }: SettingsProps) {
-  const [profile, setProfile] = useState(true);
-  const [account, setAccount] = useState(false);
-  const [dangerous, setDangerous] = useState(false);
+  const [section, setSection] = useState<SettingsSection>("profile");
   const [isMobile, setIsMobile] = useState(false);
-  
+
   const isAdmin = details?.admin || false;
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768); // Adjust breakpoint as needed
-    };
-
-    handleResize(); // Check initial size
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const query = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
   }, []);
-  
-  // Close modal with escape key
+
+  // Always reopen on the profile section rather than wherever the user left off.
   useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && settings) {
-        setSettings(false);
-      }
-    };
-
-    if (settings) {
-      document.addEventListener('keydown', handleEscapeKey);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-      document.body.style.overflow = 'unset';
-    };
-  }, [settings, setSettings]);
-
-  // Reset to profile tab when opening settings
-  useEffect(() => {
-    if (settings) {
-      setProfile(true);
-      setAccount(false);
-      setDangerous(false);
-    }
+    if (settings) setSection("profile");
   }, [settings]);
 
-  const activeComponent = () => {
-    if (profile) return <SettingsProfile details={details} settings={settings} setSettings={setSettings} isMobile={isMobile} />;
-    if (account) return <SettingsAccount details={details} settings={settings} setSettings={setSettings} isMobile={isMobile} />;
-    if (dangerous) return <SettingsDangerous settings={settings} setSettings={setSettings} isMobile={isMobile} />;
-    return null;
-  };
-
-  // Close modal when clicking outside
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setSettings(false);
-    }
-  };
-
-  if (!settings) return null;
+  const body =
+    section === "profile" ? (
+      <SettingsProfile
+        details={details}
+        settings={settings}
+        setSettings={setSettings}
+        isMobile={isMobile}
+      />
+    ) : section === "account" ? (
+      <SettingsAccount
+        details={details}
+        settings={settings}
+        setSettings={setSettings}
+        isMobile={isMobile}
+      />
+    ) : (
+      <SettingsDangerous
+        settings={settings}
+        setSettings={setSettings}
+        isMobile={isMobile}
+      />
+    );
 
   return (
-    <div 
-      className="fixed inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center z-50"
-      style={{ zIndex: 1000 }}
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Settings"
+    <Dialog
+      open={settings}
+      onClose={() => setSettings(false)}
+      title={TITLES[section]}
+      description="Manage your ArkyDesk account and preferences."
+      size="full"
+      bodyClassName="p-0 overflow-hidden"
     >
-      <div className="flex w-full h-screen p-4 md:p-12 rounded-md">
-        <div className="flex flex-col md:flex-row w-full h-full rounded-2xl bg-white shadow-2xl overflow-hidden relative">
-          {/* Close button - always visible on top right */}
-          <button 
-            onClick={(e) => setSettings(false)} 
-            className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-100 rounded-full p-3 sm:p-2 shadow-lg transition-all duration-200"
-          >
-            <img src="/icons/close.svg" className="h-5 w-5" alt="Close" />
-          </button>
-          
-          {isMobile ? (
-            <>
-              <SettingsSideBar 
-                profile={profile} 
-                setProfile={setProfile} 
-                account={account} 
-                setAccount={setAccount} 
-                dangerous={dangerous} 
-                setDangerous={setDangerous} 
-                isMobile={isMobile}
-                isAdmin={isAdmin}
-              />
-              <div className="w-full overflow-y-auto">{activeComponent()}</div>
-            </>
-          ) : (
-            <>
-              <SettingsSideBar 
-                profile={profile} 
-                setProfile={setProfile} 
-                account={account} 
-                setAccount={setAccount} 
-                dangerous={dangerous} 
-                setDangerous={setDangerous} 
-                isMobile={isMobile}
-                isAdmin={isAdmin}
-              />
-              <div className="flex-1 overflow-y-auto">{activeComponent()}</div>
-            </>
-          )}
-        </div>
+      {/* The sidebar + panel row lives in the body, so the Dialog header stays
+          full-width across the top on both mobile and desktop. */}
+      <div className="flex h-full min-h-0 flex-col md:flex-row">
+        <SettingsSideBar
+          section={section}
+          onSectionChange={setSection}
+          isAdmin={isAdmin}
+        />
+
+        <div className="min-h-0 flex-1 overflow-y-auto">{body}</div>
       </div>
-    </div>
+    </Dialog>
   );
 }

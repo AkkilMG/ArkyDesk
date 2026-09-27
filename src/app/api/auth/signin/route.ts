@@ -1,106 +1,122 @@
+import { cookies } from "next/headers";
+import { z } from "zod";
+
 import { encrypt, encryptCode } from "@/lib/crypto";
 import { getMongoClient } from "@/lib/mongodb";
-import { encryptSession } from "@/lib/session";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
+import { encryptSession, SESSION_TTL_MS, sessionCookieOptions } from "@/lib/session";
+import { checkRateLimit, clientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { logSecurityEvent } from "@/lib/security-log";
+import { apiJson } from "@/lib/api-auth";
+import type { Session } from "@/types/auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// export const runtime = "edge";
+const schema = z.object({
+  email: z.string().trim().toLowerCase().email().max(254),
+  password: z.string().min(8).max(128),
+});
 
-
-export async function GET(request: Request) {
-  return NextResponse.json({success: false, message: `Only POST Method is available!`}, {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
+export async function GET() {
+  return apiJson(
+    { success: false, message: "Method not allowed. Use POST." },
+    405
+  );
 }
 
-   
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    // simple login rate limiter
-    const RATE_WINDOW = 10 * 60 * 1000; // 10 min
-    const RATE_MAX = 8;
-    const globalAny = globalThis as any;
-    const loginMap = globalAny.__loginRateMap || new Map<string, { count: number; firstTs: number }>();
-    globalAny.__loginRateMap = loginMap;
-    const now = Date.now();
-    const le = loginMap.get(ip) || { count: 0, firstTs: now };
-    if (now - le.firstTs > RATE_WINDOW) { le.count = 0; le.firstTs = now; }
-    if (le.count >= RATE_MAX) return NextResponse.json({ success: false, message: 'Too many attempts, try later' }, { status: 429 });
+    const ip = clientIp(request);
 
-    const body = await request.json();
-    const schema = z.object({
-      email: z.string().email().max(254),
-      password: z.string().min(8).max(128),
-    });
-    const parsed = schema.safeParse(body);
+    // Two independent budgets: a coarse per-IP cap and a tight per-account cap,
+    // so neither a single noisy host nor a distributed botnet can brute force
+    // one mailbox (ISO 27001:2022 A.8.5 secure authentication).
+    const ipLimit = checkRateLimit(`signin:ip:${ip}`, RATE_LIMITS.signin);
+    if (!ipLimit.allowed) {
+      logSecurityEvent("auth.rate_limited", { flow: "signin", scope: "ip" });
+      return apiJson(
+        { success: false, message: "Too many attempts. Please try again later." },
+        429
+      );
+    }
+
+    const parsed = schema.safeParse(await request.json().catch(() => ({})));
     if (!parsed.success) {
-      return NextResponse.json({ success: false, message: 'Invalid input' }, { status: 400 });
+      return apiJson({ success: false, message: "Invalid input." }, 400);
     }
+
     const { email, password } = parsed.data;
-    const db = await getMongoClient();
-    const hashPassword = await encryptCode(password);
-    const result = await db.collection('users').findOne({
-      email: email,
+
+    const accountLimit = checkRateLimit(`signin:acct:${email}`, {
+      max: 10,
+      windowMs: 15 * 60 * 1000,
     });
-    
-    // Check if user exists but is a guest (no password set yet)
-    if (!result) {
-      le.count += 1;
-      loginMap.set(ip, le);
-      return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
+    if (!accountLimit.allowed) {
+      logSecurityEvent("auth.rate_limited", { flow: "signin", scope: "account" });
+      return apiJson(
+        { success: false, message: "Too many attempts. Please try again later." },
+        429
+      );
     }
 
-    // If guest account has no password, they can't sign in via email/password
-    if ((result.guest || result.temporary) && !result.password) {
-      le.count += 1;
-      loginMap.set(ip, le);
-      return NextResponse.json({ success: false, message: 'This email is registered as a guest. Please sign up to create a password.' }, { status: 401 });
+    const db = await getMongoClient();
+    const user = await db.collection("users").findOne({ email });
+
+    // Uniform failure for "unknown email" and "wrong password" so the response
+    // cannot be used to enumerate registered addresses.
+    if (!user || user.password !== (await encryptCode(password))) {
+      logSecurityEvent("auth.signin_failed", { email, reason: user ? "bad_password" : "unknown" });
+      return apiJson({ success: false, message: "Invalid credentials." }, 401);
     }
 
-    // Verify password
-    if (result.password !== hashPassword) {
-      le.count += 1;
-      loginMap.set(ip, le);
-      return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
+    // A guest record with no password can only be reached via its emailed link.
+    if ((user.guest || user.temporary) && !user.password) {
+      return apiJson(
+        {
+          success: false,
+          message: "This email is registered as a guest. Please sign up to create a password.",
+        },
+        401
+      );
     }
 
-    // If upgrading from guest, clear the flag
-    if (result.guest || result.temporary) {
-      await db.collection('users').updateOne(
-        { _id: result._id },
+    // Signing in with a password promotes a guest to a full account.
+    if (user.guest || user.temporary) {
+      await db.collection("users").updateOne(
+        { _id: user._id },
         { $set: { guest: false, temporary: false, upgradedAt: new Date() } }
       );
     }
-    // if (!result.verify) {
-    //   return NextResponse.json({ success: false, message: 'Email not verified.' }), {
-    //     status: 401,
-    //     headers: { 'Content-Type': 'application/json' }
-    //   });
-    // }
-    /** Session */
-    const encry = await encrypt(result._id.toString());
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const session = await encryptSession({ token: encry, expiresAt });
-    // Set secure cookie flags
-    try {
-      cookies().set({ name: 'session', value: session, path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires: expiresAt });
-    } catch (e) {
-      // Fallback for environments that don't support object-style cookie setter
-      cookies().set('session', session, { path: '/', httpOnly: true });
-    }
-    return NextResponse.json({ success: true, admin: result.admin ? result.admin : false }, { status: 200 });
-    // res.setHeader('Set-Cookie', `session=${session}; HttpOnly; Secure; Expires=${expiresAt.toUTCString()}; SameSite=Lax; Path=/`);
 
-  } catch (error) {
-    console.error('Error saving user data:', error);
-    return NextResponse.json({ success: false, message: `Something went wrong.` }, {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
+    const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+    const session = await encryptSession({
+      token: await encrypt(user._id.toString()),
+      expiresAt,
+    } as Session);
+
+    try {
+      cookies().set("session", session, sessionCookieOptions(expiresAt));
+    } catch {
+      // Some runtimes reject the extended attribute set.
+      cookies().set("session", session, { path: "/", httpOnly: true });
+    }
+
+    logSecurityEvent("auth.signin", {
+      userId: user._id.toString(),
+      admin: Boolean(user.admin),
+      upgraded: Boolean(user.guest || user.temporary),
     });
+
+    return apiJson(
+      {
+        success: true,
+        admin: Boolean(user.admin),
+        guest: false,
+        next: user.admin ? "/dashboard" : "/tickets",
+      },
+      200
+    );
+  } catch (error) {
+    console.error("Error during sign in:", error);
+    return apiJson({ success: false, message: "Something went wrong." }, 500);
   }
 }

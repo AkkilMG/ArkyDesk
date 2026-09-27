@@ -1,53 +1,34 @@
-import { decrypt } from "@/lib/crypto";
 import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession } from "@/lib/session";
-import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
-import { NextResponse } from 'next/server';
+import { requireApiAdmin, apiJson } from "@/lib/api-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
+/** Aggregate counters for the admin dashboard. */
 export async function GET() {
+  const auth = await requireApiAdmin();
+  if (!auth.ok) return auth.response;
+
   try {
-    const sessionCookie = cookies().get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
-    }
-
-    const decryptedSession = await decryptSession(sessionCookie.value);
-    if (!decryptedSession || typeof decryptedSession.token !== 'string') {
-      return NextResponse.json({ success: false, message: "Invalid session" }, { status: 401 });
-    }
-
-    const userId = await decrypt(decryptedSession.token);
-    if (!userId) {
-      return NextResponse.json({ success: false, message: "Invalid user token" }, { status: 401 });
-    }
-
     const db = await getMongoClient();
-    const currentUser = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-    if (!currentUser || !currentUser.admin) {
-      return NextResponse.json({ success: false, message: "Access denied" }, { status: 403 });
-    }
 
-    const totalUsers = await db.collection('users').countDocuments();
-    const totalTickets = await db.collection('tickets').countDocuments();
-    const openTickets = await db.collection('tickets').countDocuments({ status: 'open' });
-    const closedTickets = await db.collection('tickets').countDocuments({ status: 'closed' });
-    const pendingActions = await db.collection('userActions').countDocuments({ status: 'pending' });
+    const [totalUsers, totalTickets, openTickets, closedTickets, pendingActions] =
+      await Promise.all([
+        db.collection("users").countDocuments(),
+        db.collection("tickets").countDocuments(),
+        db.collection("tickets").countDocuments({ status: "open" }),
+        db.collection("tickets").countDocuments({ status: "closed" }),
+        db.collection("userActions").countDocuments({ status: "pending" }),
+      ]);
 
-    return NextResponse.json({
-      success: true,
-      stats: {
-        totalUsers,
-        totalTickets,
-        openTickets,
-        closedTickets,
-        pendingActions,
-      }
-    });
+    return apiJson(
+      {
+        success: true,
+        stats: { totalUsers, totalTickets, openTickets, closedTickets, pendingActions },
+      },
+      200
+    );
   } catch (error) {
-    console.error('Error fetching stats:', error);
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+    console.error("Error fetching stats:", error);
+    return apiJson({ success: false, message: "Internal server error" }, 500);
   }
 }

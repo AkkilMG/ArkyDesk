@@ -1,100 +1,138 @@
 "use client";
-import { owner } from '@/lib/constants';
-import React, { useEffect, useState } from 'react';
-import Completed from "@/assets/lottie/completed.json";
+
+import Link from "next/link";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 
-const Lottie = dynamic(
-  () => import("lottie-react"),
-  { ssr: false }
-);
+import AuthShell, { AuthHeading, AuthSubtitle } from "@/components/auth/AuthShell";
+import FormMessage from "@/components/auth/FormMessage";
+import Button, { buttonVariants } from "@/components/ui/Button";
+import Field from "@/components/ui/Field";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Completed from "@/assets/lottie/completed.json";
 
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export default function ForgotPasswordForm() {
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [video, setVideo] = useState(0);
-    const [email, setEmail] = useState("");
-    const [checkMail, setCheckMail] = useState(false);
-    useEffect(() => {
-        setVideo(Math.floor(Math.random() * owner.length));
-        const timer = setTimeout(() => {
-        setLoading(false);
-        }, 2000);
-        return () => clearTimeout(timer);
-    }, []);
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "submitting" | "sent">("idle");
+  const [error, setError] = useState("");
 
-    async function forgotPasswordForm() {
-        try {
-            const response = await fetch(`/api/auth/forgot/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: email }),
-            });
-            const responseData: any = await response.json();
-            if (response.ok && responseData.success) {
-                // Redirect to login page
-                setCheckMail(true);
-            } else {
-                setError(responseData.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+  async function forgotPasswordForm(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Enter a valid email address.");
+      return;
     }
 
+    setState("submitting");
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = (await response.json()) as { success: boolean; message?: string };
+
+      if (response.ok && data.success) {
+        setState("sent");
+      } else {
+        setState("idle");
+        setError(data.message ?? "We could not process that request.");
+      }
+    } catch {
+      setState("idle");
+      setError("We could not reach the server. Please try again.");
+    }
+  }
+
+  if (state === "sent") {
     return (
-        <>
-        { checkMail ? (
-            <div className="flex justify-center items-center h-screen flex-col relative">
-                <div className="lg:w-1/2">
-                    <Lottie loop={false} autoplay={true} animationData={Completed} />
-                </div>
-                <h1 className="mt-10 absolute top-3/4 transform -translate-y-1/2 text-xl font-bold text-center text-black">
-                    Check mail to change password
-                </h1>
-            </div>
-        ) : (
-            <main className="flex flex-col">
-                <header className="fixed top-0 z-50 hidden w-full text-gray-100 transition-all duration-300 ease-in-out lg:block lg:w-1/3 body-font">
-                    <div className="container flex flex-row flex-wrap items-center p-5 mx-auto">
-                        <a className="flex-grow font-semibold text-2x1" href="/"><img src='/logo/letter.png' className='w-40 no-drag' alt='Arkynox' /></a>
-                    </div>
-                </header>
-                <div className="flex flex-row flex-grow">
-                    <div className="hidden lg:block lg:w-1/3">
-                        <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-                            <video className="object-cover w-full h-full border-none no-drag" autoPlay muted loop>
-                            <source src={`/assets/video/${video}.mp4`} type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                            <a href={`https://dribbble.com/${owner[video]}`} className="font-bold text-center text-white" style={{ position: 'absolute', bottom: 0, width: '100%', marginBottom: '20px' }}>@{owner[video]}</a>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-center flex-grow p-6 lg:w-2/3 h-screen lg:h-auto pb-10">
-                        <div className="w-full max-w-md">
-                            <h2 className="flex flex-row mb-6 text-2xl font-bold">Forgot password <span className="ml-3"> </span><img src='/logo/letter-dark.png' className='h-7 no-drag hidden lg:block' alt='Arkynox' /></h2>
-                            <form action={forgotPasswordForm}>
-                                <div className="mb-4">
-                                    <label className="block mb-2 font-bold text-gray-700 text-sl"> Email </label>
-                                    <input required={true} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 leading-tight text-gray-700 border rounded-lg shadow appearance-none h-14 focus:border-indigo-500 focus:shadow-lg focus:outline-none focus:ring-2" id="email" type="email" />
-                                </div>
-                                { error && (<div className="mb-6">
-                                    <span className="flex items-center justify-between mb-2 font-sans text-lg font-bold text-red-700">
-                                    {error}
-                                    </span>
-                                </div> )}
-                                <div>
-                                    <button type="submit" className="focus:shadow-outline h-14 w-full rounded-3xl bg-[#0D0C22] px-4 py-2 font-sans font-bold text-white hover:bg-gray-800 focus:outline-none">Request</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        )}
-        </>
+      <AuthShell>
+        {/* `AuthHeading` is a flex container, so `text-center` on a wrapper
+            would not centre it — the anonymous flex item stays at flex-start.
+            `justify-center` is what actually centres these. */}
+        <div className="text-center">
+          <div className="mx-auto mb-2 w-40">
+            <Lottie loop={false} autoplay animationData={Completed} />
+          </div>
+          <AuthHeading className="justify-center">Check your inbox</AuthHeading>
+          <AuthSubtitle>
+            If an account exists for that address, a reset link is on its way.
+            The link expires in one hour.
+          </AuthSubtitle>
+        </div>
+
+        <Link
+          href="/signin"
+          className={buttonVariants({ variant: "brand", size: "lg", fullWidth: true })}
+        >
+          Back to sign in
+        </Link>
+      </AuthShell>
     );
-};
+  }
+
+  return (
+    <AuthShell>
+      <AuthHeading>Forgot your password?</AuthHeading>
+      <AuthSubtitle>
+        Enter the email address on your account and we will send a reset link.
+      </AuthSubtitle>
+
+      <form onSubmit={forgotPasswordForm} noValidate>
+        <Field
+          label="Email"
+          id="email"
+          name="email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          placeholder="you@arkynox.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          disabled={state === "submitting"}
+          required
+        />
+
+        {error ? (
+          <div className="mt-[var(--auth-block)]">
+            <FormMessage tone="error">{error}</FormMessage>
+          </div>
+        ) : null}
+
+        <div className="mt-[var(--auth-block)]">
+          <Button
+            type="submit"
+            variant="brand"
+            size="lg"
+            fullWidth
+            disabled={state === "submitting"}
+          >
+            {state === "submitting" ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Sending…
+              </>
+            ) : (
+              "Send reset link"
+            )}
+          </Button>
+        </div>
+
+        <p className="mt-[var(--auth-block)] text-center text-sm text-muted-foreground">
+          Remembered it?{" "}
+          <Link
+            href="/signin"
+            className="font-medium text-primary underline underline-offset-4"
+          >
+            Back to sign in
+          </Link>
+        </p>
+      </form>
+    </AuthShell>
+  );
+}
