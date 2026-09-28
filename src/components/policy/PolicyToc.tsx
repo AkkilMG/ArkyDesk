@@ -90,7 +90,7 @@ export default function PolicyToc({ items }: { items: TocItem[] }) {
                     {items.map((item) => (
                         <a key={item.id} href={`#${item.id}`} className={linkClass(item)}>
                             <span className={markerClass(item)}>{item.no}</span>
-                            <span>{item.label}</span>
+                            <span className="whitespace-nowrap">{item.label}</span>
                         </a>
                     ))}
                 </nav>
@@ -106,7 +106,7 @@ export default function PolicyToc({ items }: { items: TocItem[] }) {
                 </p>
                 <div
                     ref={listRef}
-                    className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain border-l border-border pr-4 [scrollbar-width:thin]"
+                    className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain border-border pr-4 [scrollbar-width:thin]"
                 >
                     {items.map((item) => (
                         <a
@@ -121,7 +121,7 @@ export default function PolicyToc({ items }: { items: TocItem[] }) {
                             }
                         >
                             <span className={markerClass(item)}>{item.no}</span>
-                            <span>{item.label}</span>
+                            <span className="whitespace-nowrap">{item.label}</span>
                         </a>
                     ))}
                 </div>

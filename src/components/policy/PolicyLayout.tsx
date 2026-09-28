@@ -41,7 +41,7 @@ export default function PolicyLayout({
             <PolicyHeader currentSlug={slug} />
 
             <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-                <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+                <div className="lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-12">
                     {/* Full-height pinned column. `self-start` is load-bearing: without
                         it the grid stretches this item to the article's height, the
                         explicit height is ignored and the TOC never scrolls internally.
