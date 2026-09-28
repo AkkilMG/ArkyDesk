@@ -111,20 +111,20 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
     return (
         <div className="flex-1 px-4 py-2 pt-5 md:px-8 md:py-4">  
             <div className="flex justify-between items-center mb-8 mt-8">
-                <h2 className="text-xl font-bold">Profile</h2>
+                <h2 className="text-xl font-bold text-foreground">Profile</h2>
                 <div className="flex flex-row gap-3 items-center">
                     {isEditing ? (
                         <>
                             <button 
                                 onClick={handleCancel}
-                                className="text-sm font-medium text-gray-600 hover:text-gray-800 px-3 py-2 sm:py-1 border border-gray-300 rounded"
+                                className="text-sm font-medium text-foreground hover:bg-muted px-3 py-2 sm:py-1 border border-border rounded-lg"
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleSave}
                                 disabled={isLoading}
-                                className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 px-3 py-2 sm:py-1 rounded"
+                                className="text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-60 px-3 py-2 sm:py-1 rounded-lg"
                             >
                                 {isLoading ? 'Saving...' : 'Save'}
                             </button>
@@ -132,7 +132,7 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
                     ) : (
                         <button 
                             onClick={handleEdit}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            className="text-sm font-medium text-muted-foreground hover:text-foreground"
                         >
                             Edit
                         </button>
@@ -142,28 +142,28 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
 
             {/* Message Display */}
             {message.text && (
-                <div className={`mb-4 p-3 rounded ${
+                <div className={`mb-4 p-3 rounded-lg ${
                     message.type === 'success' 
-                        ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : 'bg-red-100 text-red-700 border border-red-200'
+                        ? 'bg-success/10 text-success border border-success/30' 
+                        : 'bg-destructive/10 text-destructive border border-destructive/25'
                 }`}>
                     {message.text}
                 </div>
             )}
 
             <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                <div className="w-12 h-12 bg-foreground text-background rounded-full flex items-center justify-center text-lg font-semibold">
                     {details?.name ? details.name.charAt(0).toUpperCase() : '?'}
                 </div>
                 <div className="ml-4">
                     <h3 className="text-lg font-medium">{details?.name || 'User'}</h3>
-                    <p className="text-sm text-gray-500">
+<p className="text-sm text-muted-foreground">
                         {details?.tickets !== undefined ? `${details.tickets} tickets created` : 'No tickets yet'}
                     </p>
                 </div>
                 <button 
                     disabled 
-                    className="ml-auto bg-gray-200 text-gray-600 text-sm px-4 py-2 rounded cursor-not-allowed"
+                    className="ml-auto bg-muted text-muted-foreground text-sm px-4 py-2 rounded-lg cursor-not-allowed"
                     title="Avatar upload feature coming soon"
                 >
                     Upload Avatar
@@ -172,11 +172,11 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
 
             {/* Full Name */}
             <div className="mb-4">
-                <label className="block text-sm text-gray-600 mb-1">Full Name</label>
+                <label className="block text-sm text-muted-foreground mb-1">Full Name</label>
                 {isEditing ? (
                     <input 
                         type="text" 
-                        className="w-full mt-1 p-2 border rounded focus:border-blue-500 focus:outline-none" 
+                        className="w-full mt-1 p-2 border border-border rounded-lg bg-card text-foreground placeholder:text-muted-foreground focus:border-foreground/25 focus:ring-2 focus:ring-ring/30 focus:outline-none" 
                         value={editedName}
                         onChange={(e) => setEditedName(e.target.value)}
                         placeholder="Enter your full name"
@@ -185,7 +185,7 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
                 ) : (
                     <input 
                         type="text" 
-                        className="w-full mt-1 p-2 border rounded bg-gray-50" 
+className="w-full mt-1 p-2 border border-border rounded-lg bg-muted/50 text-foreground cursor-not-allowed"
                         value={details?.name || 'Not set'} 
                         readOnly 
                     />
@@ -194,31 +194,31 @@ export default function SettingsProfile({ details, settings, setSettings, isMobi
 
             {/* Additional Profile Info */}
             <div className="mb-4">
-                <label className="block text-sm text-gray-600 mb-1">Email</label>
+                <label className="block text-sm text-muted-foreground mb-2">Email</label>
                 <input 
                     type="email" 
-                    className="w-full mt-1 p-2 border rounded bg-gray-50" 
+                    className="w-full mt-1 p-2 border border-border rounded-lg bg-muted/50 text-foreground cursor-not-allowed" 
                     value={details?.email || 'Not available'} 
                     readOnly 
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                     Email cannot be changed. Contact administrator if needed.
                 </p>
             </div>
 
             {/* Statistics */}
             <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
+                <div className="bg-muted p-3 rounded-lg">
+                    <div className="text-2xl font-bold text-foreground">
                         {details?.tickets || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Total Tickets</div>
+                    <div className="text-sm text-muted-foreground">Total Tickets</div>
                 </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
+                <div className="bg-success/15 p-3 rounded-lg">
+                    <div className="text-2xl font-bold text-success">
                         {details?.closedTickets || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Closed Tickets</div>
+                    <div className="text-sm text-muted-foreground">Closed Tickets</div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export type SessionState = {
   id: string;
@@ -54,6 +55,12 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionState | null>(null);
   const [loading, setLoading] = useState(true);
   const inFlight = useRef<AbortController | null>(null);
+  // Fires at most once per guard mount: once the visitor is being sent to
+  // /signin the interval keeps polling and would otherwise spam the same
+  // redirect until the guard unmounts.
+  const redirecting = useRef(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const refresh = useCallback(async () => {
     inFlight.current?.abort();
@@ -68,20 +75,31 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
 
       if (response.status === 401) {
         setUser(null);
+        // A 401 while a session was (or should have been) established means it
+        // was revoked or expired. `SessionGuard` only mounts inside the `(app)`
+        // shell, so this navigates a genuinely live visitor back to sign-in
+        // instead of leaving a dead page up until their next navigation.
+        if (!redirecting.current) {
+          redirecting.current = true;
+          const next = pathname ? `&next=${encodeURIComponent(pathname)}` : "";
+          router.replace(`/signin?reason=session${next}`);
+        }
         return;
       }
 
       const data = (await response.json()) as { success?: boolean; user?: SessionState };
       setUser(data.success && data.user ? data.user : null);
     } catch (error) {
-      // An aborted request is a deliberate supersede, not a failure.
+      // An aborted request is a deliberate supersede, not a failure. Transient
+      // network errors just clear the user without redirecting — losing a live
+      // visitor over a blip would be worse than showing an empty state.
       if ((error as Error)?.name !== "AbortError") {
         setUser(null);
       }
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
-  }, []);
+  }, [router, pathname]);
 
   useEffect(() => {
     void refresh();

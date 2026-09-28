@@ -9,7 +9,7 @@ import AuthShell, { AuthHeading, AuthSubtitle } from "@/components/auth/AuthShel
 import FormMessage from "@/components/auth/FormMessage";
 import Button, { buttonVariants } from "@/components/ui/Button";
 import Field from "@/components/ui/Field";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import SpinnerIcon from "@/components/ui/SpinnerIcon";
 import Completed from "@/assets/lottie/completed.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
@@ -155,7 +155,7 @@ export default function ResetPasswordPage({
           >
             {state === "submitting" ? (
               <>
-                <LoadingSpinner size="sm" />
+                <SpinnerIcon className="size-4" />
                 Updating…
               </>
             ) : (

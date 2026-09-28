@@ -15,7 +15,7 @@
 //             </div>
 //             <div className="mb-4">
 //                 <label className="block text-sm text-gray-600">Email</label>
-//                 <input type="text" className="w-full mt-1 p-2 border rounded bg-gray-100 cursor-not-allowed" value="akkilcharanmg@gmail.com" readOnly />
+//                 <input type="text" className="w-full mt-1 p-2 border border-border rounded-lg bg-muted/50 cursor-not-allowed" value="akkilcharanmg@gmail.com" readOnly />
 //                 <p className="text-xs text-blue-600 mt-1">Please contact the administrator to change your email.</p>
 //             </div>
 //         </div>
@@ -127,12 +127,12 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
     return (
         <div className="flex-1 px-4 py-2 pt-5 md:px-8 md:py-4">  
             <div className="flex justify-between items-center mb-8 mt-8">
-                <h2 className="text-xl font-bold">Account</h2>
+                <h2 className="text-xl font-bold text-foreground">Account</h2>
                 <div className="flex flex-row gap-3 items-center">
                     {!isChangingPassword && (
                         <button 
                             onClick={handlePasswordChange}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800 px-3 py-2"
+                            className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2"
                         >
                             Change Password
                         </button>
@@ -142,10 +142,10 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
 
             {/* Message Display */}
             {message.text && (
-                <div className={`mb-4 p-3 rounded ${
+                <div className={`mb-4 p-3 rounded-lg ${
                     message.type === 'success' 
-                        ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : 'bg-red-100 text-red-700 border border-red-200'
+                        ? 'bg-success/10 text-success border border-success/30' 
+                        : 'bg-destructive/10 text-destructive border border-destructive/25'
                 }`}>
                     {message.text}
                 </div>
@@ -153,24 +153,24 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
 
             {/* Email */}
             <div className="mb-6">
-                <label className="block text-sm text-gray-600 mb-1">Email Address</label>
+                <label className="block text-sm text-muted-foreground mb-1">Email Address</label>
                 <input 
                     type="text" 
-                    className="w-full mt-1 p-2 border rounded bg-gray-100 cursor-not-allowed" 
+                    className="w-full mt-1 p-2 border border-border rounded-lg bg-muted/50 cursor-not-allowed" 
                     value={details?.email || 'Not available'} 
                     readOnly
                 />
-                <p className="text-xs text-blue-600 mt-1">
+<p className="text-xs text-muted-foreground mt-1">
                     Please contact the administrator to change your email address.
                 </p>
             </div>
 
             {/* Account Created */}
             <div className="mb-6">
-                <label className="block text-sm text-gray-600 mb-1">Account Created</label>
+                <label className="block text-sm text-muted-foreground mb-1">Account Created</label>
                 <input 
                     type="text" 
-                    className="w-full mt-1 p-2 border rounded bg-gray-100 cursor-not-allowed" 
+                    className="w-full mt-1 p-2 border border-border rounded-lg bg-muted/50 cursor-not-allowed" 
                     value={details?._id ? new Date(parseInt(details._id.toString().substring(0,8), 16)*1000).toLocaleDateString() : 'Unknown'} 
                     readOnly
                 />
@@ -178,22 +178,22 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
 
             {/* User ID */}
             <div className="mb-6">
-                <label className="block text-sm text-gray-600 mb-1">User ID</label>
+                <label className="block text-sm text-muted-foreground mb-1">User ID</label>
                 <input 
                     type="text" 
-                    className="w-full mt-1 p-2 border rounded bg-gray-100 cursor-not-allowed font-mono text-sm" 
+                    className="w-full mt-1 p-2 border border-border rounded-lg bg-muted/50 cursor-not-allowed font-mono text-sm" 
                     value={details?._id || 'Not available'} 
                     readOnly
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                     This is your unique identifier in the system.
                 </p>
             </div>
 
             {/* Password Change Section */}
             {isChangingPassword && (
-                <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                    <h3 className="text-lg font-medium mb-4">Change Password</h3>
+                <div className="bg-muted/40 border border-border p-4 rounded-lg mb-6">
+                    <h3 className="text-lg font-medium text-foreground mb-4">Change Password</h3>
                     <form onSubmit={handlePasswordSubmit}>
                         {/* These three were bare `<input>`s inside `<label>`s
                             with no `htmlFor`/`id` pairing, so they had no
@@ -252,14 +252,14 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
                             <button 
                                 type="button"
                                 onClick={handlePasswordCancel}
-                                className="px-4 py-3 sm:py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded"
+                                className="px-4 py-3 sm:py-2 text-sm font-medium text-foreground hover:bg-muted border border-border rounded-lg"
                             >
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
                                 disabled={isLoading}
-                                className="px-4 py-3 sm:py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded"
+                                className="px-4 py-3 sm:py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-60 rounded-lg"
                             >
                                 {isLoading ? 'Changing...' : 'Change Password'}
                             </button>
@@ -269,9 +269,9 @@ export default function SettingsAccount({ details, settings, setSettings, isMobi
             )}
 
             {/* Security Info */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-blue-800 mb-2">Security Tips</h3>
-                <ul className="text-xs text-blue-700 space-y-1">
+            <div className="bg-muted/40 border border-border p-4 rounded-lg">
+                <h3 className="text-sm font-medium text-foreground mb-2">Security Tips</h3>
+                <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• Use a strong password with at least 8 characters</li>
                     <li>• Include numbers, letters, and special characters</li>
                     <li>• Don&apos;t share your password with others</li>

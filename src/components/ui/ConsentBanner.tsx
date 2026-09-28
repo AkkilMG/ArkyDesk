@@ -81,7 +81,7 @@ export default function ConsentBanner() {
                                 Accept
                             </button>
                             <Link
-                                href="/policy"
+                                href="/policy/privacy-policy"
                                 className={`${statusInfo.buttonBg} px-2 py-1.5 rounded-md text-xs font-medium ${statusInfo.textColor} ${statusInfo.buttonHover} transition-colors`}
                             >
                                 Review Policies

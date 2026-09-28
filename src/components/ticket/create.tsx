@@ -5,6 +5,7 @@ import { allProducts } from "@/types/products";
 import { formatFileSize, truncateFilename, validateFile } from "@/lib/fileUtils";
 import ImagePopup from "./imagePop";
 import Dialog from "@/components/ui/Dialog";
+import Button from "@/components/ui/Button";
 import axios from "axios";
 import { useState } from "react";
 
@@ -244,31 +245,31 @@ export default function TicketCreate({ create, setCreate }: any) {
                 <div className="space-y-5 p-4 sm:p-6">
                     {/* Error Message */}
                     {error && (
-                        <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                            <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="p-3.5 bg-destructive/10 border border-destructive/25 rounded-xl flex items-start gap-3">
+                            <svg className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p className="text-sm text-red-700">{error}</p>
+                            <p className="text-sm text-destructive">{error}</p>
                         </div>
                     )}
 
                     {/* Success Message */}
                     {success && (
-                        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                            <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="p-3.5 bg-success/10 border border-success/30 rounded-xl flex items-start gap-3">
+                            <svg className="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p className="text-sm text-emerald-700">{success}</p>
+                            <p className="text-sm text-success">{success}</p>
                         </div>
                     )}
 
                     {/* Subject */}
                     <div className="space-y-1.5">
-                        <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
-                            Subject <span className="text-red-500">*</span>
+                        <label htmlFor="subject" className="block text-sm font-medium text-foreground">
+                            Subject <span className="text-destructive">*</span>
                         </label>
                         <div className="relative">
-                            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                             </svg>
                             <input
@@ -277,7 +278,7 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 value={subject}
                                 onChange={e => setSubject(e.target.value)}
                                 placeholder="Brief summary of the issue"
-                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-smooth"
+                                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground bg-background focus:ring-2 focus:ring-ring/30 focus:border-foreground/25 transition-smooth"
                             />
                         </div>
                     </div>
@@ -286,25 +287,25 @@ export default function TicketCreate({ create, setCreate }: any) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Problem Type */}
                         <div className="space-y-1.5">
-                            <label htmlFor="problem" className="block text-sm font-medium text-gray-700">
-                                Problem Type <span className="text-red-500">*</span>
+                            <label htmlFor="problem" className="block text-sm font-medium text-foreground">
+                                Problem Type <span className="text-destructive">*</span>
                             </label>
                             <div className="relative">
-                                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 <select
                                     id="problem"
                                     value={problem}
                                     onChange={e => setProblem(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-smooth"
+                                    className="w-full pl-10 pr-10 py-2.5 border border-border rounded-xl text-sm text-foreground bg-background appearance-none cursor-pointer focus:ring-2 focus:ring-ring/30 focus:border-foreground/25 transition-smooth"
                                 >
                                     <option value="">Select type...</option>
                                     {basicGrievances.map((grievance: string, index: number) => (
                                         <option key={index} value={grievance}>{grievance}</option>
                                     ))}
                                 </select>
-                                <svg className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
@@ -312,8 +313,8 @@ export default function TicketCreate({ create, setCreate }: any) {
 
                         {/* Product */}
                         <div className="space-y-1.5">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Product <span className="text-red-500">*</span>
+                            <label className="block text-sm font-medium text-foreground">
+                                Product <span className="text-destructive">*</span>
                             </label>
                             <div className="flex flex-wrap gap-1.5 pt-1">
                                 {allProducts.map((producto, index) => (
@@ -323,8 +324,8 @@ export default function TicketCreate({ create, setCreate }: any) {
                                         onClick={() => setProduct(producto)}
                                         className={`px-3 py-2 sm:py-1.5 rounded-lg text-sm font-medium border transition-smooth ${
                                             product === producto
-                                            ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm"
-                                            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                                            ? "border-transparent bg-primary text-primary-foreground shadow-card"
+                                            : "border-border bg-card text-muted-foreground hover:border-foreground/25 hover:bg-muted hover:text-foreground"
                                         }`}
                                     >
                                         {producto}
@@ -336,9 +337,9 @@ export default function TicketCreate({ create, setCreate }: any) {
 
                     {/* Attachments */}
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-foreground">
                             Attachments
-                            <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                            <span className="text-muted-foreground font-normal ml-1">(optional)</span>
                         </label>
 
                         {/* Drop zone hint when no files */}
@@ -347,29 +348,29 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 htmlFor="attachment"
                                 className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-smooth ${
                                     isDragOver
-                                    ? 'border-blue-400 bg-blue-50'
-                                    : 'border-gray-200 bg-gray-50/50 hover:border-gray-300 hover:bg-gray-50'
+                                    ? 'border-brand bg-brand/15'
+                                    : 'border-border bg-muted/40 hover:border-foreground/25 hover:bg-muted'
                                 }`}
                             >
-                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                                    <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                     </svg>
                                 </div>
-                                <p className="text-sm font-medium text-gray-600">Drop files here or click to browse</p>
-                                <p className="text-xs text-gray-400 mt-1">Max 10MB &middot; Images, PDF, DOC, TXT</p>
+                                <p className="text-sm font-medium text-muted-foreground">Drop files here or click to browse</p>
+                                <p className="text-xs text-muted-foreground mt-1">Max 10MB &middot; Images, PDF, DOC, TXT</p>
                             </label>
                         )}
 
                         {/* Uploading state */}
                         {uploading && attachment.length === 0 && (
-                            <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                            <div className="flex items-center justify-center p-6 border-2 border-dashed border-border rounded-xl bg-muted/40">
                                 <div className="flex items-center gap-3">
-                                    <svg className="w-5 h-5 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-brand animate-spin-cw" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
-                                    <span className="text-sm text-gray-500">Uploading file...</span>
+                                    <span className="text-sm text-muted-foreground">Uploading file...</span>
                                 </div>
                             </div>
                         )}
@@ -389,7 +390,7 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 {attachment.map((att: any, index: any) => (
                                     <div
                                         key={index}
-                                        className="group flex items-center gap-2.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 transition-smooth"
+                                        className="group flex items-center gap-2.5 px-3 py-2 bg-muted/50 border border-border rounded-xl hover:border-foreground/25 transition-smooth"
                                     >
                                         <button
                                             type="button"
@@ -399,8 +400,8 @@ export default function TicketCreate({ create, setCreate }: any) {
                                         >
                                             <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium ${
                                                 att.isImage || previewImages[att.name]
-                                                ? 'bg-blue-100 text-blue-600'
-                                                : 'bg-gray-200 text-gray-500'
+                                                ? 'bg-primary/10 text-primary'
+                                                : 'bg-muted text-muted-foreground'
                                             }`}>
                                                 {att.isImage || previewImages[att.name] ? (
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,18 +414,18 @@ export default function TicketCreate({ create, setCreate }: any) {
                                                 )}
                                             </span>
                                             <div className="flex flex-col items-start leading-tight">
-                                                <span className="text-xs font-medium text-gray-700 max-w-[120px] truncate">
+                                                <span className="text-xs font-medium text-foreground max-w-[120px] truncate">
                                                     {truncateFilename(att.name || 'Unknown file', 18)}
                                                 </span>
                                                 {att.formattedSize && (
-                                                    <span className="text-[10px] text-gray-400">{att.formattedSize}</span>
+                                                    <span className="text-[10px] text-muted-foreground">{att.formattedSize}</span>
                                                 )}
                                             </div>
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => removeAttachment(index)}
-                                            className="w-8 h-8 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-smooth flex-shrink-0"
+                                            className="w-8 h-8 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-smooth flex-shrink-0"
                                             title="Remove attachment"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -435,7 +436,7 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 ))}
                                 <label
                                     htmlFor="attachment"
-                                    className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 cursor-pointer transition-smooth text-xs font-medium"
+                                    className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-foreground/25 cursor-pointer transition-smooth text-xs font-medium"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -449,10 +450,10 @@ export default function TicketCreate({ create, setCreate }: any) {
                     {/* Description */}
                     <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                Description <span className="text-red-500">*</span>
+                            <label htmlFor="description" className="block text-sm font-medium text-foreground">
+                                Description <span className="text-destructive">*</span>
                             </label>
-                            <span className="text-xs text-gray-400">{description.length}/2000</span>
+                            <span className="text-xs text-muted-foreground">{description.length}/2000</span>
                         </div>
                         <div className="relative">
                             <textarea
@@ -463,21 +464,23 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 }}
                                 placeholder="Describe the issue in detail. Include steps to reproduce if applicable..."
                                 rows={5}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-smooth resize-none"
+                                className="w-full px-4 py-3 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground bg-background focus:ring-2 focus:ring-ring/30 focus:border-foreground/25 transition-smooth resize-none"
                             />
                         </div>
                     </div>
 
                     {/* Submit */}
-                    <button
+                    <Button
                         type="button"
                         onClick={createTicket}
                         disabled={!subject.trim() || !description.trim() || !problem || !product || uploading}
-                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-medium text-sm transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 disabled:shadow-none btn-hover"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
                     >
                         {uploading ? (
                             <span className="flex items-center justify-center gap-2">
-                                <svg className="w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 animate-spin-cw" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                 </svg>
@@ -491,7 +494,7 @@ export default function TicketCreate({ create, setCreate }: any) {
                                 <span>Create Ticket</span>
                             </>
                         )}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </Dialog>

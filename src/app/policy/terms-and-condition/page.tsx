@@ -1,379 +1,366 @@
-'use client';
-
+import type { Metadata } from 'next';
 import PolicyLayout from '@/components/policy/PolicyLayout';
-import {
-    FileTextIcon, KeyIcon, ScaleIcon, ShieldIcon,
-    GlobeIcon, CheckIcon, InfoIcon, AlertTriangleIcon,
-    MailIcon, ClockIcon, UsersIcon, LockIcon,
-    EyeIcon, BookIcon, LinkIcon
-} from '@/components/policy/Icons';
+import { H2, H3 } from '@/components/policy/PolicyHeading';
+import Note from '@/components/policy/Note';
+import DataTable from '@/components/policy/DataTable';
+import { POLICY_CONTACTS } from '@/lib/policy/policies';
+
+export const metadata: Metadata = {
+    title: 'Terms and Conditions',
+    description:
+        'The legal agreement between you and Arkynox for use of the ArkyDesk support platform, governed by the laws of India with per-country consumer protections preserved.',
+    alternates: { canonical: '/policy/terms-and-condition' },
+};
+
+const toc = [
+    { id: 'c1', no: '1.', label: 'Acceptance of Terms', level: 2 as const },
+    { id: 'c2', no: '2.', label: 'Service Description and Scope', level: 2 as const },
+    { id: 'c3', no: '3.', label: 'Accounts and Authority', level: 2 as const },
+    { id: 'c4', no: '4.', label: 'Charges, SLA and Related Policies', level: 2 as const },
+    { id: 'c5', no: '5.', label: 'Acceptable Use', level: 2 as const },
+    { id: 'c6', no: '6.', label: 'Customer Content and Licence', level: 2 as const },
+    { id: 'c7', no: '7.', label: 'Intellectual Property and Feedback', level: 2 as const },
+    { id: 'c8', no: '8.', label: 'Confidentiality', level: 2 as const },
+    { id: 'c9', no: '9.', label: 'Data Protection and Privacy', level: 2 as const },
+    { id: 'c10', no: '10.', label: 'Warranties and Disclaimers', level: 2 as const },
+    { id: 'c11', no: '11.', label: 'Indemnification', level: 2 as const },
+    { id: 'c12', no: '12.', label: 'Limitation of Liability', level: 2 as const },
+    { id: 'c13', no: '13.', label: 'Term, Suspension and Termination', level: 2 as const },
+    { id: 'c14', no: '14.', label: 'Governing Law and Dispute Resolution', level: 2 as const },
+    { id: 'c15', no: '15.', label: 'Eligibility and Age of Majority', level: 2 as const },
+    { id: 'c16', no: '16.', label: 'Changes to These Terms', level: 2 as const },
+    { id: 'c17', no: '17.', label: 'Notices and Contact', level: 2 as const },
+];
 
 export default function TermsAndCondition() {
     return (
         <PolicyLayout
+            slug="terms-and-condition"
             title="Terms and Conditions"
-            links={[
-                { href: '/dashboard', label: 'Return to Dashboard' },
-            ]}
+            description="The agreement between you and Arkynox that governs your access to and use of the ArkyDesk support platform."
+            toc={toc}
         >
-            {/* Quick Summary */}
-            <div className="not-prose bg-gradient-to-br from-slate-50 via-gray-50 to-slate-50 border border-slate-200/60 rounded-2xl p-6 sm:p-8 mb-10 shadow-sm">
-                <div className="flex items-start gap-4 mb-6">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-slate-400 to-gray-500 shadow-md shadow-slate-200 flex items-center justify-center">
-                        <FileTextIcon size={24} className="text-white" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-slate-900">Quick Summary</h3>
-                        <p className="text-sm text-slate-600 font-medium">The legal agreement between you and Arkynox when you use our support system</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-slate-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
-                            <KeyIcon size={16} className="text-slate-600" />
-                            <span>Your Responsibilities</span>
-                        </div>
-                        <ul className="text-slate-700 space-y-0.5">
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Provide accurate account info</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Keep your password secure</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Use the service legally and professionally</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Comply with all applicable laws</li>
-                        </ul>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-slate-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
-                            <ScaleIcon size={16} className="text-slate-600" />
-                            <span>Governing Law By Country</span>
-                        </div>
-                        <ul className="text-slate-700 space-y-0.5">
-                            <li><strong>India:</strong> Laws of India, courts in New Delhi</li>
-                            <li><strong>EU:</strong> Your country&rsquo;s law + consumer rights</li>
-                            <li><strong>US:</strong> Delaware law, binding arbitration</li>
-                            <li><strong>Brazil, Japan, Turkey, etc:</strong> Local law applies</li>
-                        </ul>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-slate-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
-                            <FileTextIcon size={16} className="text-slate-600" />
-                            <span>What We Provide</span>
-                        </div>
-                        <ul className="text-slate-700 space-y-0.5">
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Support ticket system with 99.9% uptime target</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Tiered response times (2-72 hours)</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Knowledge base and self-service</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Data protection per global privacy laws</li>
-                        </ul>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-slate-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
-                            <ShieldIcon size={16} className="text-slate-600" />
-                            <span>Your Consumer Rights</span>
-                        </div>
-                        <p className="text-slate-700"><strong>EU:</strong> 14-day cooling-off period. <strong>India:</strong> Consumer Protection Act 2019. <strong>Brazil:</strong> CDC reverse burden of proof. <strong>Australia:</strong> Statutory guarantees. <strong>UK:</strong> Reasonable care and skill.</p>
-                        <p className="text-slate-500 text-xs mt-1">Nothing in these Terms reduces your mandatory consumer rights.</p>
-                    </div>
-                </div>
-                <div className="mt-4 text-xs text-slate-400 text-center font-medium bg-slate-50/50 rounded-lg py-2">
-                    This summary is for understanding. The full Terms below is the legally binding document.
-                </div>
-            </div>
-
-            <section className="mb-10">
-                <h2>1. Acceptance of Terms</h2>
+            <section aria-labelledby="c1">
+                <H2 id="c1" no="1.">Acceptance of Terms</H2>
                 <p>
-                    By accessing and using ArkyDesk support system (&ldquo;Service&rdquo;), provided by Arkynox (&ldquo;Company,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;),
-                    you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions (&ldquo;Terms&rdquo;).
+                    These Terms and Conditions (&ldquo;Terms&rdquo;) form a legally binding agreement between you
+                    (&ldquo;you,&rdquo; &ldquo;your,&rdquo; or the &ldquo;Customer&rdquo;) and Arkynox
+                    (&ldquo;Arkynox,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;), a company
+                    incorporated in India. They govern your access to and use of the ArkyDesk customer support
+                    platform, including any related websites, applications, APIs and services (collectively, the
+                    &ldquo;Service&rdquo;).
                 </p>
                 <p>
-                    If you do not agree to these Terms, please do not use our Service.
+                    By creating an account, submitting a ticket, or otherwise accessing or using the Service, you
+                    confirm that you have read, understood and agree to be bound by these Terms, together with our
+                    Privacy Policy, Acceptable Use Policy, Data Retention Policy and Service Level Agreement, each
+                    of which is incorporated into these Terms by reference. If you do not agree to these Terms, you
+                    must not access or use the Service.
+                </p>
+                <p>
+                    If you use the Service on behalf of a company or other legal entity, you represent and warrant
+                    that you are authorised to accept these Terms on that entity&rsquo;s behalf, in which case
+                    &ldquo;you&rdquo; refers to that entity.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>2. Service Description</h2>
+            <section aria-labelledby="c2">
+                <H2 id="c2" no="2.">Service Description and Scope</H2>
                 <p>
-                    ArkyDesk is a customer support ticket management system that enables:
+                    ArkyDesk is a customer support ticket management platform. The Service enables you to:
                 </p>
                 <ul>
-                    <li>Creation and management of support tickets</li>
-                    <li>Communication between customers and support staff</li>
-                    <li>File sharing and attachment capabilities</li>
-                    <li>Ticket tracking and status updates</li>
-                    <li>Knowledge base and self-service options</li>
-                    <li>Administrative and reporting functions</li>
+                    <li>create, track and manage support tickets;</li>
+                    <li>communicate with support staff and, where you operate a workspace, with your own customers;</li>
+                    <li>exchange files and attachments relevant to a support request;</li>
+                    <li>receive status notifications and escalation updates;</li>
+                    <li>access knowledge base and self-service resources; and</li>
+                    <li>use administrative, reporting and audit functions made available on your plan.</li>
+                </ul>
+                <p>
+                    We may add, modify or discontinue features from time to time. Where a change materially reduces
+                    the functionality of a paid plan, Clause 16 (Changes to These Terms) applies.
+                </p>
+            </section>
+
+            <section aria-labelledby="c3">
+                <H2 id="c3" no="3.">Accounts and Authority</H2>
+                <H3 id="c3-1" no="3.1">Account registration</H3>
+                <p>
+                    You must provide accurate, current and complete information when registering, and keep that
+                    information up to date. You may not maintain more than one account per person without our prior
+                    written approval, and you may not register an account on behalf of another person without their
+                    authorisation.
+                </p>
+                <H3 id="c3-2" no="3.2">Credential security</H3>
+                <p>
+                    You are responsible for maintaining the confidentiality of your credentials and for all activity
+                    that occurs under your account. You must use a strong, unique password and enable two-factor
+                    authentication where offered. You must notify us immediately at{' '}
+                    <a href={`mailto:${POLICY_CONTACTS.security}`}>{POLICY_CONTACTS.security}</a> if you suspect
+                    unauthorised access to your account.
+                </p>
+                <H3 id="c3-3" no="3.3">Authority</H3>
+                <p>
+                    Where you accept these Terms for an organisation, you confirm you have the legal authority to
+                    bind that organisation. We may request evidence of that authority before granting
+                    administrative access.
+                </p>
+            </section>
+
+            <section aria-labelledby="c4">
+                <H2 id="c4" no="4.">Charges, SLA and Related Policies</H2>
+                <p>
+                    Parts of the Service are offered free of charge and parts under paid plans. Fees, billing cycles
+                    and plan limits are described at the point of purchase and are exclusive of applicable taxes,
+                    including GST where charged under Indian law. Service levels, response-time targets and service
+                    credits are set out in our <a href="/policy/sla">Service Level Agreement</a>, which forms part
+                    of these Terms. How we handle personal data is described in our{' '}
+                    <a href="/policy/privacy-policy">Privacy Policy</a>, and the rules of conduct for the platform
+                    in our <a href="/policy/acceptable-use">Acceptable Use Policy</a>.
+                </p>
+            </section>
+
+            <section aria-labelledby="c5">
+                <H2 id="c5" no="5.">Acceptable Use</H2>
+                <p>
+                    You may use the Service only for lawful purposes and in accordance with these Terms and the{' '}
+                    <a href="/policy/acceptable-use">Acceptable Use Policy</a>. In summary, and without limiting
+                    that policy, you agree not to:
+                </p>
+                <ul>
+                    <li>submit false, misleading, fraudulent or spam tickets;</li>
+                    <li>upload malware, viruses or other harmful code;</li>
+                    <li>attempt to gain unauthorised access to the Service or its underlying systems;</li>
+                    <li>harass, abuse, threaten or impersonate our staff or other users;</li>
+                    <li>scrape, crawl or bulk-extract data from the Service by automated means;</li>
+                    <li>reverse engineer or attempt to derive source code, except where such restriction is prohibited by applicable law;</li>
+                    <li>share credentials with unauthorised persons or resell access to the Service; or</li>
+                    <li>use the Service in any way that violates applicable law, including the Information Technology Act, 2000 (India) and the rules made under it.</li>
                 </ul>
             </section>
 
-            <section className="mb-10">
-                <h2>3. User Accounts and Registration</h2>
-
-                <h3>3.1 Account Creation</h3>
-                <ul>
-                    <li>You must provide accurate and complete information when creating an account</li>
-                    <li>You are responsible for maintaining the confidentiality of your account credentials</li>
-                    <li>You must notify us immediately of any unauthorized use of your account</li>
-                    <li>One person may not maintain multiple accounts without prior approval</li>
-                </ul>
-
-                <h3>3.2 Account Responsibilities</h3>
-                <ul>
-                    <li>You are responsible for all activities that occur under your account</li>
-                    <li>You must use strong passwords and enable two-factor authentication when available</li>
-                    <li>You must keep your contact information current and accurate</li>
-                    <li>You must comply with all applicable laws and regulations</li>
-                </ul>
-            </section>
-
-            <section className="mb-10">
-                <h2>4. Acceptable Use Policy</h2>
-
-                <h3>4.1 Permitted Uses</h3>
-                <p>You may use the Service to:</p>
-                <ul>
-                    <li>Submit legitimate support requests and technical issues</li>
-                    <li>Communicate with our support team professionally</li>
-                    <li>Share relevant files and information for troubleshooting</li>
-                    <li>Access knowledge base and self-help resources</li>
-                </ul>
-
-                <h3>4.2 Prohibited Activities</h3>
-                <p>You agree not to:</p>
-                <ul>
-                    <li>Submit false, misleading, or spam tickets</li>
-                    <li>Upload malicious software, viruses, or harmful content</li>
-                    <li>Attempt to gain unauthorized access to the system</li>
-                    <li>Harass, abuse, or threaten support staff or other users</li>
-                    <li>Use the Service for illegal activities or purposes</li>
-                    <li>Reverse engineer, modify, or create derivative works</li>
-                    <li>Share your account credentials with unauthorized persons</li>
-                    <li>Overload the system with excessive requests</li>
-                </ul>
-            </section>
-
-            <section className="mb-10">
-                <h2>5. Support Services</h2>
-
-                <h3>5.1 Service Levels</h3>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm mb-6">
-                    <ul className="text-sm text-gray-600 space-y-2">
-                        <li className="flex items-start gap-2"><ClockIcon size={14} className="text-blue-500 mt-0.5 flex-shrink-0" /><strong>Critical Issues:</strong> Response within 2 hours (business days)</li>
-                        <li className="flex items-start gap-2"><ClockIcon size={14} className="text-blue-500 mt-0.5 flex-shrink-0" /><strong>High Priority:</strong> Response within 4 hours (business days)</li>
-                        <li className="flex items-start gap-2"><ClockIcon size={14} className="text-blue-500 mt-0.5 flex-shrink-0" /><strong>Normal Priority:</strong> Response within 24 hours (business days)</li>
-                        <li className="flex items-start gap-2"><ClockIcon size={14} className="text-blue-500 mt-0.5 flex-shrink-0" /><strong>Low Priority:</strong> Response within 72 hours (business days)</li>
-                    </ul>
-                </div>
-
-                <h3>5.2 Business Hours</h3>
+            <section aria-labelledby="c6">
+                <H2 id="c6" no="6.">Customer Content and Licence</H2>
                 <p>
-                    Standard support is available Monday through Friday, 9:00 AM to 6:00 PM (local time).
-                    Emergency support may be available outside business hours for critical issues.
+                    You retain all ownership rights in the content you submit to the Service, including ticket text,
+                    attachments and account data (&ldquo;Customer Content&rdquo;). You grant Arkynox a
+                    non-exclusive, worldwide, royalty-free licence to host, store, process, transmit and display
+                    Customer Content solely to the extent necessary to operate, maintain, secure and improve the
+                    Service for you, and to comply with law.
                 </p>
-
-                <h3>5.3 Support Scope</h3>
-                <ul>
-                    <li>Technical assistance with our products and services</li>
-                    <li>Bug reports and resolution</li>
-                    <li>Feature requests and enhancement discussions</li>
-                    <li>Account and billing inquiries</li>
-                    <li>Training and documentation assistance</li>
-                </ul>
-            </section>
-
-            <section className="mb-10">
-                <h2>6. Intellectual Property</h2>
-
-                <h3>6.1 Our Rights</h3>
                 <p>
-                    The Service, including all content, features, and functionality, is owned by Arkynox
-                    and is protected by copyright, trademark, and other intellectual property laws.
-                </p>
-
-                <h3>6.2 Your Content</h3>
-                <p>
-                    You retain ownership of any content you submit through the Service. However, you grant
-                    us a non-exclusive license to use, store, and process your content for the purpose of
-                    providing support services.
-                </p>
-
-                <h3>6.3 Feedback</h3>
-                <p>
-                    Any feedback, suggestions, or ideas you provide may be used by us without obligation
-                    or compensation to you.
+                    You represent and warrant that you own or control the rights to your Customer Content, that it
+                    does not infringe any third party&rsquo;s rights, and that its submission to and processing by
+                    the Service complies with applicable law. Where Customer Content contains personal data of third
+                    parties, you confirm you have a lawful basis to share it with us.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>7. Privacy and Data Protection</h2>
+            <section aria-labelledby="c7">
+                <H2 id="c7" no="7.">Intellectual Property and Feedback</H2>
                 <p>
-                    Your privacy is important to us. Our collection and use of your personal information
-                    is governed by our Privacy Policy, which is incorporated into these Terms by reference.
+                    The Service, including its software, design, documentation, trademarks and all improvements, is
+                    and remains the exclusive property of Arkynox and its licensors, protected under the Copyright
+                    Act, 1957 (India), the Trade Marks Act, 1999 (India) and equivalent international laws. Except
+                    for the limited right to use the Service under these Terms, no rights are granted to you.
                 </p>
-                <div className="not-prose bg-gradient-to-br from-yellow-50 to-amber-50/50 border border-yellow-200 rounded-xl p-6 shadow-sm">
-                    <div className="flex items-start gap-3">
-                        <InfoIcon size={18} className="text-yellow-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-gray-600">
-                            <strong>Important:</strong> Please review our
-                            <a href="/policy/privacy-policy" className="text-blue-600 hover:text-blue-800 font-medium mx-1">
-                                Privacy Policy
-                            </a>
-                            to understand how we handle your information.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>8. Limitation of Liability</h2>
-                <div className="not-prose bg-gradient-to-br from-red-50 to-rose-50/50 border border-red-200 rounded-xl p-6 shadow-sm">
-                    <div className="flex items-start gap-3 mb-4">
-                        <AlertTriangleIcon size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-gray-600">
-                            <strong>IMPORTANT LIMITATION:</strong> To the maximum extent permitted by law,
-                            Arkynox shall not be liable for any indirect, incidental, special, consequential,
-                            or punitive damages, including but not limited to loss of profits, data, or business
-                            interruption.
-                        </p>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                        Our total liability for any claims related to the Service shall not exceed the
-                        amount you paid for the Service in the 12 months preceding the claim.
-                    </p>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>9. Service Availability</h2>
-                <ul>
-                    <li><strong>Uptime Target:</strong> We strive for 99.9% uptime availability</li>
-                    <li><strong>Maintenance:</strong> Scheduled maintenance will be announced in advance</li>
-                    <li><strong>Emergency Maintenance:</strong> May be performed without prior notice</li>
-                    <li><strong>Force Majeure:</strong> We are not responsible for outages due to circumstances beyond our control</li>
-                </ul>
-            </section>
-
-            <section className="mb-10">
-                <h2>10. Termination</h2>
-
-                <h3>10.1 Termination by You</h3>
                 <p>
-                    You may terminate your account at any time by contacting us or using the account
-                    deletion feature in your settings.
-                </p>
-
-                <h3>10.2 Termination by Us</h3>
-                <p>
-                    We may suspend or terminate your access to the Service if you violate these Terms
-                    or engage in prohibited activities.
-                </p>
-
-                <h3>10.3 Effect of Termination</h3>
-                <ul>
-                    <li>Your right to use the Service will cease immediately</li>
-                    <li>We may retain certain information as required by law or for legitimate business purposes</li>
-                    <li>Provisions that should survive termination will remain in effect</li>
-                </ul>
-            </section>
-
-            <section className="mb-10">
-                <h2>11. Changes to Terms</h2>
-                <p>
-                    We reserve the right to modify these Terms at any time. We will notify users of
-                    material changes by email or through the Service. Your continued use of the Service
-                    after changes constitutes acceptance of the new Terms.
+                    If you provide suggestions, ideas or feedback about the Service, you grant us a perpetual,
+                    irrevocable, royalty-free licence to use and incorporate that feedback without restriction or
+                    obligation to you.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>12. Governing Law and Dispute Resolution</h2>
-
-                <div className="not-prose bg-gradient-to-br from-yellow-50 to-amber-50/50 border border-yellow-200 rounded-xl p-5 shadow-sm mb-6">
-                    <div className="flex items-start gap-3">
-                        <InfoIcon size={18} className="text-yellow-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-yellow-800">
-                            <strong>Important:</strong> If you are a consumer in any jurisdiction, nothing in these Terms
-                            reduces your mandatory rights under applicable consumer protection laws. Where laws provide
-                            you with greater protections, those laws prevail.
-                        </p>
-                    </div>
-                </div>
-
-                <h3>12.1 Governing Law by Region</h3>
-                <div className="not-prose overflow-x-auto mb-6">
-                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden text-sm shadow-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Region</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Governing Law</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Dispute Resolution</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Global (default)</td><td className="px-4 py-3">Laws of England and Wales</td><td className="px-4 py-3">Arbitration under ICC Rules</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">EU/EEA Consumers</td><td className="px-4 py-3">Consumer&rsquo;s country of residence</td><td className="px-4 py-3">Consumer&rsquo;s local courts + Online Dispute Resolution (ODR)</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">United States</td><td className="px-4 py-3">State of Delaware, USA</td><td className="px-4 py-3">Binding arbitration (opt-out available within 30 days)</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">India</td><td className="px-4 py-3">Laws of India</td><td className="px-4 py-3">Courts in New Delhi, India</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Brazil</td><td className="px-4 py-3">Laws of Brazil</td><td className="px-4 py-3">Consumer&rsquo;s local courts in Brazil</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Russia</td><td className="px-4 py-3">Laws of the Russian Federation</td><td className="px-4 py-3">Courts in Moscow, Russia</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Japan</td><td className="px-4 py-3">Laws of Japan</td><td className="px-4 py-3">Tokyo District Court</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Turkey</td><td className="px-4 py-3">Laws of the Republic of Turkey</td><td className="px-4 py-3">Istanbul Courts and Execution Offices</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Australia</td><td className="px-4 py-3">Laws of New South Wales, Australia</td><td className="px-4 py-3">Courts of New South Wales</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">South Africa</td><td className="px-4 py-3">Laws of the Republic of South Africa</td><td className="px-4 py-3">Magistrate&rsquo;s Court / High Court depending on quantum</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Nigeria</td><td className="px-4 py-3">Laws of the Federal Republic of Nigeria</td><td className="px-4 py-3">High Court of Lagos State</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Kenya</td><td className="px-4 py-3">Laws of the Republic of Kenya</td><td className="px-4 py-3">High Court of Kenya at Nairobi</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Indonesia</td><td className="px-4 py-3">Laws of the Republic of Indonesia</td><td className="px-4 py-3">District Court of Central Jakarta</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Thailand</td><td className="px-4 py-3">Laws of Thailand</td><td className="px-4 py-3">Thai courts (consumer&rsquo;s domicile)</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Philippines</td><td className="px-4 py-3">Laws of the Philippines</td><td className="px-4 py-3">Courts of Makati City</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">South Korea</td><td className="px-4 py-3">Laws of the Republic of Korea</td><td className="px-4 py-3">Seoul Central District Court</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Sri Lanka</td><td className="px-4 py-3">Laws of Sri Lanka</td><td className="px-4 py-3">Colombo Commercial High Court</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Kazakhstan</td><td className="px-4 py-3">Laws of Kazakhstan</td><td className="px-4 py-3">Courts of Astana</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3>12.2 Consumer Protection</h3>
-                <ul>
-                    <li><strong>EU Consumers:</strong> Have the right to withdraw from service contracts within 14 days (Cooling-off period) under the Consumer Rights Directive</li>
-                    <li><strong>UK Consumers:</strong> Have rights under the Consumer Rights Act 2015, including that services must be provided with reasonable care and skill</li>
-                    <li><strong>India Consumers:</strong> Have rights under the Consumer Protection Act 2019, including the right to file complaints before the District/State/National Consumer Disputes Redressal Commission</li>
-                    <li><strong>Brazil Consumers:</strong> Have rights under the Brazilian Consumer Protection Code (CDC - Lei 8.078/90), including the right to reverse burden of proof</li>
-                    <li><strong>Australia Consumers:</strong> Have rights under the Australian Consumer Law, including statutory guarantees that cannot be excluded</li>
-                    <li><strong>South Africa Consumers:</strong> Have rights under the Consumer Protection Act 68 of 2008</li>
-                    <li><strong>Russia Consumers:</strong> Have rights under the Consumer Protection Law (Law No. 2300-1), including the right to demand quality service</li>
-                    <li><strong>Japan Consumers:</strong> Have rights under the Consumer Contract Act and Product Liability Act</li>
-                </ul>
-
-                <h3>12.3 Contractual Capacity (Age of Consent)</h3>
+            <section aria-labelledby="c8">
+                <H2 id="c8" no="8.">Confidentiality</H2>
                 <p>
-                    By agreeing to these Terms, you confirm that you have the legal capacity to enter into a
-                    binding contract in your country of residence. The minimum age to use our Service independently is:
-                </p>
-                <div className="not-prose grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-sm mb-4">
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 text-center shadow-sm"><span className="font-bold">No minimum</span><br/>UK, US</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 text-center shadow-sm"><span className="font-bold">14+</span><br/>Spain, South Korea</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 text-center shadow-sm"><span className="font-bold">15+</span><br/>Japan, France</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 text-center shadow-sm"><span className="font-bold">16+</span><br/>Germany, Netherlands</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 text-center shadow-sm"><span className="font-bold">18+</span><br/>India, Brazil, Turkey, Nigeria, Kenya, etc.</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 text-center shadow-sm"><span className="font-bold">20+</span><br/>Thailand</div>
-                </div>
-                <p className="text-sm text-gray-500">
-                    If you are below the age of majority in your jurisdiction, you may only use the Service with
-                    the involvement of a parent or legal guardian who agrees to these Terms on your behalf.
+                    Each party may receive non-public information from the other in connection with the Service.
+                    The receiving party will use that information only to perform under these Terms, will protect it
+                    with at least the degree of care it applies to its own confidential information (and no less
+                    than reasonable care), and will not disclose it to third parties except to personnel and
+                    professional advisers bound by equivalent obligations, or as required by law, regulation or a
+                    valid order of a court or authority — including, in India, directions issued under Section 69 or
+                    Section 69A of the Information Technology Act, 2000.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>13. Contact Information</h2>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm">
-                    <p className="text-sm text-gray-600 mb-4">
-                        If you have questions about these Terms, please contact us:
-                    </p>
-                    <ul className="text-sm text-gray-600 space-y-2">
-                        <li className="flex items-center gap-2"><MailIcon size={16} className="text-blue-500" /><strong>Email:</strong> legal@arkynox.com</li>
-                        <li className="flex items-center gap-2"><LinkIcon size={16} className="text-blue-500" /><strong>Support Portal:</strong> Create a ticket in ArkyDesk</li>
-                        <li className="flex items-center gap-2"><FileTextIcon size={16} className="text-blue-500" /><strong>Mail:</strong> Arkynox Legal Department</li>
-                        <li className="flex items-center gap-2"><ClockIcon size={16} className="text-blue-500" /><strong>Response Time:</strong> We will respond within 5 business days</li>
-                    </ul>
-                </div>
+            <section aria-labelledby="c9">
+                <H2 id="c9" no="9.">Data Protection and Privacy</H2>
+                <p>
+                    Each party will comply with the data protection laws applicable to it. For personal data
+                    processed through the Service, our <a href="/policy/privacy-policy">Privacy Policy</a>{' '}
+                    describes what we collect, why, and the rights available to you.
+                </p>
+                <p>
+                    Arkynox is incorporated in India and complies with the Digital Personal Data Protection Act,
+                    2023 and the Digital Personal Data Protection Rules, 2025 (notified on 13 November 2025), in
+                    each case to the extent the relevant provisions are in force, including the phased obligations
+                    that take full effect in November 2026. We additionally align our practices with the principal
+                    data protection regimes of the markets we serve, including the EU/UK GDPR, the California
+                    CCPA/CPRA, Japan&rsquo;s APPI, Australia&rsquo;s Privacy Act 1988, Canada&rsquo;s PIPEDA and
+                    Quebec Law 25, and Mexico&rsquo;s LFPDPPP (2025).
+                </p>
+                <Note tone="info" title="Cross-border processing">
+                    Where we process personal data outside your country of residence, we apply the transfer
+                    safeguards described in Clause 5 and Clause 9 of our Privacy Policy, and we honour the data
+                    localisation commitments recorded in that policy for jurisdictions that require them.
+                </Note>
+            </section>
+
+            <section aria-labelledby="c10">
+                <H2 id="c10" no="10.">Warranties and Disclaimers</H2>
+                <p>
+                    We warrant that the Service will materially conform to its published documentation and that we
+                    will provide it with reasonable skill and care. Except as expressly stated in these Terms or in
+                    the SLA, and to the maximum extent permitted by applicable law, the Service is provided
+                    &ldquo;as is&rdquo; and &ldquo;as available,&rdquo; and we disclaim all other warranties, whether
+                    express, implied or statutory, including implied warranties of merchantability, fitness for a
+                    particular purpose and non-infringement.
+                </p>
+                <Note tone="legal" title="Your statutory rights are not affected">
+                    Nothing in these Terms excludes, restricts or modifies any guarantee, warranty, term, right or
+                    remedy you have under the Consumer Protection Act, 2019 (India), the Australian Consumer Law,
+                    the UK Consumer Rights Act 2015, the EU Consumer Rights Directive, Japan&rsquo;s Consumer
+                    Contract Act, Brazil&rsquo;s Consumer Protection Code, Mexico&rsquo;s Federal Consumer Protection
+                    Law, or any other applicable consumer protection law that cannot lawfully be excluded.
+                </Note>
+            </section>
+
+            <section aria-labelledby="c11">
+                <H2 id="c11" no="11.">Indemnification</H2>
+                <p>
+                    You will indemnify, defend and hold harmless Arkynox, its officers, directors and employees from
+                    and against any third-party claims, damages, losses and expenses (including reasonable legal
+                    fees) arising out of or relating to: (a) your Customer Content; (b) your breach of these Terms
+                    or of the Acceptable Use Policy; or (c) your violation of any law or the rights of any third
+                    party. This obligation does not apply to the extent a claim results from our breach of these
+                    Terms, our negligence, or our wilful misconduct.
+                </p>
+            </section>
+
+            <section aria-labelledby="c12">
+                <H2 id="c12" no="12.">Limitation of Liability</H2>
+                <p>
+                    To the maximum extent permitted by applicable law: (a) neither party will be liable for any
+                    indirect, incidental, special, consequential or punitive damages, or for any loss of profits,
+                    revenue, data, goodwill or business opportunity, arising out of or related to these Terms; and
+                    (b) Arkynox&rsquo;s aggregate liability arising out of or related to the Service will not exceed
+                    the total fees you paid to us for the Service in the twelve (12) months immediately preceding
+                    the event giving rise to the claim.
+                </p>
+                <p>
+                    The limitations in this Clause 12 do not apply to: liability for death or personal injury caused
+                    by negligence; fraud or fraudulent misrepresentation; wilful misconduct or gross negligence;
+                    your payment obligations; or any liability that cannot be excluded or limited under applicable
+                    law, including under Section 14 of the Consumer Protection Act, 2019 (India) or mandatory
+                    consumer guarantees in your country of residence.
+                </p>
+            </section>
+
+            <section aria-labelledby="c13">
+                <H2 id="c13" no="13.">Term, Suspension and Termination</H2>
+                <H3 id="c13-1" no="13.1">Term</H3>
+                <p>
+                    These Terms apply from the date you first access the Service and continue until your account is
+                    closed or these Terms are terminated in accordance with this Clause.
+                </p>
+                <H3 id="c13-2" no="13.2">Termination by you</H3>
+                <p>
+                    You may close your account at any time from your account settings or by contacting us. Closing
+                    your account does not entitle you to a refund except where required by law or expressly stated
+                    in your plan.
+                </p>
+                <H3 id="c13-3" no="13.3">Suspension and termination by us</H3>
+                <p>
+                    We may suspend or restrict your access immediately if we reasonably believe you have breached
+                    these Terms or the Acceptable Use Policy, if your use poses a security or legal risk, or if we
+                    are required to do so by law or a lawful direction of a government authority. Where practicable
+                    and lawful, we will give you notice and an opportunity to cure the breach before suspension.
+                </p>
+                <H3 id="c13-4" no="13.4">Effect of termination; transition</H3>
+                <p>
+                    On termination, your right to use the Service ceases. For thirty (30) days following
+                    termination, you may request an export of your Customer Content in a commonly used,
+                    machine-readable format, after which it will be handled in accordance with our{' '}
+                    <a href="/policy/data-retention">Data Retention Policy</a>. Clauses that by their nature should
+                    survive termination — including Clauses 7, 8, 11, 12 and 14 — survive.
+                </p>
+            </section>
+
+            <section aria-labelledby="c14">
+                <H2 id="c14" no="14.">Governing Law and Dispute Resolution</H2>
+                <p>
+                    Arkynox is an Indian company. These Terms, and any dispute or claim arising out of or in
+                    connection with them, are governed by the laws of India, and the courts at New Delhi, India have
+                    exclusive jurisdiction — <strong>except</strong> where the law of your country of residence
+                    gives you, as a consumer, the right to rely on your local law or to bring proceedings in your
+                    local courts. The table below records how that works in the principal markets we serve.
+                </p>
+                <DataTable
+                    caption="Governing law and forum by region"
+                    head={['Region', 'Governing law', 'Forum / dispute resolution']}
+                    firstColHeader
+                    rows={[
+                        ['India (default)', 'Laws of India', 'Courts at New Delhi; consumer complaints may additionally be filed before the District/State/National Consumer Disputes Redressal Commissions under the Consumer Protection Act, 2019'],
+                        ['EU / EEA', 'Law of your country of residence (consumer)', 'Your local courts; Online Dispute Resolution platform where applicable'],
+                        ['United Kingdom', 'Laws of England and Wales (or your UK home nation)', 'Your local courts under the Consumer Rights Act 2015'],
+                        ['United States', 'State of Delaware', 'Binding individual arbitration; you may opt out in writing within 30 days of accepting these Terms'],
+                        ['Canada', 'Law of your province or territory', 'Your provincial courts; PIPEDA/Quebec Law 25 rights unaffected'],
+                        ['Mexico', 'Laws of Mexico (consumer)', 'Your local courts; PROFECO conciliation available'],
+                        ['Japan', 'Laws of Japan (consumer)', 'Tokyo District Court or your local court under the Consumer Contract Act'],
+                        ['Australia', 'Laws of New South Wales (consumer)', 'Your local courts; Australian Consumer Law guarantees unaffected'],
+                        ['Brazil', 'Laws of Brazil (consumer)', 'Courts of your domicile under the Consumer Protection Code'],
+                        ['All other countries', 'Laws of India', 'Courts at New Delhi, subject to non-excludable local consumer rights'],
+                    ]}
+                />
+                <p>
+                    Before commencing formal proceedings, the parties will attempt in good faith to resolve the
+                    dispute informally for at least thirty (30) days from written notice of the dispute. You may
+                    start that process by emailing{' '}
+                    <a href={`mailto:${POLICY_CONTACTS.legal}`}>{POLICY_CONTACTS.legal}</a>.
+                </p>
+            </section>
+
+            <section aria-labelledby="c15">
+                <H2 id="c15" no="15.">Eligibility and Age of Majority</H2>
+                <p>
+                    You must be at least 18 years old, or the age of majority in your jurisdiction, to use the
+                    Service independently. If you are below that age, you may use the Service only with the
+                    involvement and consent of a parent or legal guardian who accepts these Terms on your behalf.
+                    Representative thresholds: 16 in much of the EU/EEA, 14 in Spain and South Korea, 15 in Japan
+                    and France, 13 under COPPA in the United States, 14 in Quebec, and 18 in India, Brazil, Turkey,
+                    Nigeria and Kenya. Where a stricter local rule applies to you, that rule prevails.
+                </p>
+            </section>
+
+            <section aria-labelledby="c16">
+                <H2 id="c16" no="16.">Changes to These Terms</H2>
+                <p>
+                    We may update these Terms from time to time. For material changes, we will give at least thirty
+                    (30) days&rsquo; notice by email to the address on your account and by a prominent notice in the
+                    Service before the change takes effect. Non-material changes (such as clarifications or
+                    corrections) take effect when posted. If you do not agree with a change, you must stop using the
+                    Service and may close your account before the change takes effect; continued use after the
+                    effective date constitutes acceptance.
+                </p>
+            </section>
+
+            <section aria-labelledby="c17">
+                <H2 id="c17" no="17.">Notices and Contact</H2>
+                <p>
+                    Legal notices to Arkynox must be sent to{' '}
+                    <a href={`mailto:${POLICY_CONTACTS.legal}`}>{POLICY_CONTACTS.legal}</a> with the subject line
+                    &ldquo;Legal Notice — Terms and Conditions.&rdquo; Notices to you will be sent to the email
+                    address registered on your account. Notices are deemed given when delivered by email without a
+                    delivery failure notification.
+                </p>
+                <p>
+                    General questions about these Terms are welcome at the same address; we aim to respond within
+                    five (5) business days. For privacy-specific requests, see our{' '}
+                    <a href="/policy/privacy-policy">Privacy Policy</a>, which lists our Data Protection Officer and
+                    Grievance Officer contacts.
+                </p>
             </section>
         </PolicyLayout>
     );

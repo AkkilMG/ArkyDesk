@@ -2,9 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
+
+/**
+ * The legal documents are never gated behind a consent prompt.
+ *
+ * A user has to be able to read the policy that explains what is collected and
+ * what they are agreeing to *before* being asked to agree. Blocking /policy with
+ * a modal also locked <body> scroll while it was open (see useModalBehaviour),
+ * and an overflow-locked <body> becomes a scroll container, which silently
+ * defeats every `position: sticky` element on the page - the clause table of
+ * contents and the policy header both scrolled out of reach.
+ */
+const isLegalRoute = (pathname: string) =>
+    pathname === '/policy' || pathname.startsWith('/policy/');
 
 interface CookieConsentProps {
     onAccept?: () => void;
@@ -20,15 +34,24 @@ export default function CookieConsent({ onAccept, onDecline }: CookieConsentProp
         analytics: false,
         marketing: false
     });
+    const pathname = usePathname();
 
     useEffect(() => {
+        if (isLegalRoute(pathname)) {
+            // Also covers client-side navigation: following a policy link from
+            // inside the open dialog must dismiss it, not carry it across.
+            setIsVisible(false);
+            return;
+        }
+
         // Check if user has already made a choice
         const cookieConsent = localStorage.getItem('arkynox_cookie_consent');
         if (!cookieConsent) {
             // Show banner after a short delay
-            setTimeout(() => setIsVisible(true), 1000);
+            const timer = setTimeout(() => setIsVisible(true), 1000);
+            return () => clearTimeout(timer);
         }
-    }, []);
+    }, [pathname]);
 
     const handleAcceptAll = () => {
         const consentData = {
@@ -187,7 +210,10 @@ export default function CookieConsent({ onAccept, onDecline }: CookieConsentProp
                         Privacy Policy
                     </Link>{' '}
                     and{' '}
-                    <Link href="/policy" className="text-primary underline underline-offset-4">
+                    <Link
+                        href="/policy/privacy-policy"
+                        className="text-primary underline underline-offset-4"
+                    >
                         Cookie Policy
                     </Link>
                     .
@@ -240,8 +266,11 @@ export default function CookieConsent({ onAccept, onDecline }: CookieConsentProp
                         >
                             Terms of Service
                         </Link>
-                        <Link href="/policy" className="hover:text-foreground hover:underline">
-                            All Policies
+                        <Link
+                            href="/policy/data-retention"
+                            className="hover:text-foreground hover:underline"
+                        >
+                            Data Retention
                         </Link>
                     </div>
                 </div>

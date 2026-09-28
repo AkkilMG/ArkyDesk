@@ -1,524 +1,238 @@
-'use client';
-
+import type { Metadata } from 'next';
 import PolicyLayout from '@/components/policy/PolicyLayout';
-import {
-    ZapIcon, ClockIcon, AlertCircleIcon, AlertTriangleIcon,
-    InfoIcon, BarChartIcon, GlobeIcon, TrendingUpIcon,
-    RefreshCwIcon, FileTextIcon, RocketIcon, ArrowRightIcon,
-    CheckIcon, TargetIcon, HeartIcon, CreditCardIcon,
-    MailIcon, PhoneIcon, BookIcon, SearchIcon, UsersIcon,
-    ShieldIcon, LinkIcon
-} from '@/components/policy/Icons';
+import { H2, H3 } from '@/components/policy/PolicyHeading';
+import Note from '@/components/policy/Note';
+import DataTable from '@/components/policy/DataTable';
+import { POLICY_CONTACTS } from '@/lib/policy/policies';
 
-const SeverityDot = ({ color }: { color: string }) => (
-    <span className={`inline-block w-2.5 h-2.5 rounded-full ${color} mr-2 flex-shrink-0 mt-1`} />
-);
+export const metadata: Metadata = {
+    title: 'Service Level Agreement',
+    description:
+        'Arkynox commitments on ArkyDesk availability, support response and resolution targets, escalation and service credits.',
+    alternates: { canonical: '/policy/sla' },
+};
+
+const toc = [
+    { id: 'c1', no: '1.', label: 'Scope and Incorporation', level: 2 as const },
+    { id: 'c2', no: '2.', label: 'Definitions', level: 2 as const },
+    { id: 'c3', no: '3.', label: 'Support Hours and Channels', level: 2 as const },
+    { id: 'c4', no: '4.', label: 'Priority Levels and Response Targets', level: 2 as const },
+    { id: 'c5', no: '5.', label: 'Service Availability', level: 2 as const },
+    { id: 'c6', no: '6.', label: 'Maintenance', level: 2 as const },
+    { id: 'c7', no: '7.', label: 'Escalation', level: 2 as const },
+    { id: 'c8', no: '8.', label: 'Service Credits', level: 2 as const },
+    { id: 'c9', no: '9.', label: 'Security Incident Notification', level: 2 as const },
+    { id: 'c10', no: '10.', label: 'Exclusions', level: 2 as const },
+    { id: 'c11', no: '11.', label: 'Remedies and Consumer Rights', level: 2 as const },
+    { id: 'c12', no: '12.', label: 'Review, Changes and Contact', level: 2 as const },
+];
 
 export default function ServiceLevelAgreement() {
     return (
         <PolicyLayout
-            title="Service Level Agreement (SLA)"
-            links={[
-                { href: '/policy/terms-and-condition', label: 'Terms & Conditions' },
-                { href: '/policy/privacy-policy', label: 'Privacy Policy' },
-                { href: '/dashboard', label: 'Return to Dashboard' },
-            ]}
+            slug="sla"
+            title="Service Level Agreement"
+            description="Our measurable commitments for ArkyDesk availability and support responsiveness, and your remedies if we miss them."
+            toc={toc}
         >
-            {/* Quick Summary */}
-            <div className="not-prose bg-gradient-to-br from-green-50 via-emerald-50 to-green-50 border border-green-200/60 rounded-2xl p-6 sm:p-8 mb-10 shadow-sm">
-                <div className="flex items-start gap-4 mb-6">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 shadow-md shadow-green-200 flex items-center justify-center">
-                        <ZapIcon size={24} className="text-white" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-green-900">Quick Summary</h3>
-                        <p className="text-sm text-green-600 font-medium">What service levels you can expect from us</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-green-100 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-green-800 mb-2">
-                            <ClockIcon size={16} className="text-green-600" />
-                            <span>Response Times</span>
-                        </div>
-                        <ul className="text-green-700 space-y-1.5">
-                            <li className="flex items-start">
-                                <SeverityDot color="bg-red-500" />
-                                <span><strong>Critical</strong> (system down) &rarr; 2 hours</span>
-                            </li>
-                            <li className="flex items-start">
-                                <SeverityDot color="bg-orange-500" />
-                                <span><strong>High</strong> (major issue) &rarr; 4 hours</span>
-                            </li>
-                            <li className="flex items-start">
-                                <SeverityDot color="bg-yellow-500" />
-                                <span><strong>Normal</strong> (standard) &rarr; 24 hours</span>
-                            </li>
-                            <li className="flex items-start">
-                                <SeverityDot color="bg-blue-500" />
-                                <span><strong>Low</strong> (inquiry) &rarr; 72 hours</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-green-100 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-green-800 mb-2">
-                            <BarChartIcon size={16} className="text-green-600" />
-                            <span>Uptime Guarantee</span>
-                        </div>
-                        <p className="text-green-700">99.9% uptime (~43 min downtime/month). If we miss it, you get service credits (10-50% of monthly fee).</p>
-                        <div className="mt-3 h-2.5 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                            <div className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse" style={{ width: '99.9%' }} />
-                        </div>
-                        <p className="text-xs text-green-500 mt-1 font-medium">99.9% uptime target</p>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-green-100 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-green-800 mb-2">
-                            <GlobeIcon size={16} className="text-green-600" />
-                            <span>Global Coverage</span>
-                        </div>
-                        <p className="text-green-700">Support centers in Americas, Europe, Asia, and Australasia. Follow-the-sun model means someone is always awake to help you.</p>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-green-100 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-green-800 mb-2">
-                            <TrendingUpIcon size={16} className="text-green-600" />
-                            <span>Escalation Path</span>
-                        </div>
-                        <p className="text-green-700">Level 1 Agent &rarr; Level 2 Specialist &rarr; Level 3 Expert &rarr; Engineering &rarr; Management. We escalate automatically if response times are missed.</p>
-                    </div>
-                </div>
-                <div className="mt-4 text-xs text-green-500 text-center font-medium bg-green-50/50 rounded-lg py-2">
-                    This summary is for understanding. The full SLA below is the legally binding document.
-                </div>
-            </div>
-
-            {/* Escalation Flow Diagram */}
-            <div className="not-prose bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 rounded-2xl p-6 sm:p-8 mb-10 shadow-sm">
-                <div className="flex items-center gap-3 mb-6 justify-center">
-                    <RefreshCwIcon size={20} className="text-gray-700" />
-                    <h3 className="text-lg font-bold text-gray-800 text-center">Support Escalation Flow</h3>
-                </div>
-                <div className="flex flex-col md:flex-row items-center justify-center gap-3 text-xs">
-                    <div className="bg-white border-2 border-emerald-200 rounded-xl px-5 py-4 text-center min-w-[120px] shadow-sm">
-                        <FileTextIcon size={20} className="text-emerald-600 mx-auto mb-1" />
-                        <div className="font-bold text-emerald-800">Ticket</div>
-                        <div className="text-emerald-600">You submit</div>
-                    </div>
-                    <ArrowRightIcon size={20} className="text-emerald-400 flex-shrink-0" />
-                    <div className="bg-white border-2 border-blue-200 rounded-xl px-5 py-4 text-center min-w-[120px] shadow-sm">
-                        <UsersIcon size={20} className="text-blue-600 mx-auto mb-1" />
-                        <div className="font-bold text-blue-800">L1 Agent</div>
-                        <div className="text-blue-600">First response</div>
-                        <div className="text-blue-500 font-medium">2-72 hrs</div>
-                    </div>
-                    <ArrowRightIcon size={20} className="text-emerald-400 flex-shrink-0" />
-                    <div className="bg-white border-2 border-amber-200 rounded-xl px-5 py-4 text-center min-w-[120px] shadow-sm">
-                        <SearchIcon size={20} className="text-amber-600 mx-auto mb-1" />
-                        <div className="font-bold text-amber-800">L2 Specialist</div>
-                        <div className="text-amber-600">Deep tech</div>
-                        <div className="text-amber-500 font-medium">Auto-escalate</div>
-                    </div>
-                    <ArrowRightIcon size={20} className="text-emerald-400 flex-shrink-0" />
-                    <div className="bg-white border-2 border-orange-200 rounded-xl px-5 py-4 text-center min-w-[120px] shadow-sm">
-                        <ShieldIcon size={20} className="text-orange-600 mx-auto mb-1" />
-                        <div className="font-bold text-orange-800">L3 Expert</div>
-                        <div className="text-orange-600">SME</div>
-                    </div>
-                    <ArrowRightIcon size={20} className="text-emerald-400 flex-shrink-0" />
-                    <div className="bg-white border-2 border-red-200 rounded-xl px-5 py-4 text-center min-w-[120px] shadow-sm">
-                        <RocketIcon size={20} className="text-red-600 mx-auto mb-1" />
-                        <div className="font-bold text-red-800">Engineering</div>
-                        <div className="text-red-600">Code fix</div>
-                    </div>
-                </div>
-                <div className="text-center mt-4 text-xs text-gray-400 font-medium bg-white/50 rounded-lg py-2">
-                    If any level misses response time &rarr; auto-escalation to next level
-                </div>
-            </div>
-
-            <section className="mb-10">
-                <h2>1. Overview</h2>
+            <section aria-labelledby="c1">
+                <H2 id="c1" no="1.">Scope and Incorporation</H2>
                 <p>
-                    This Service Level Agreement (SLA) defines the performance standards and support commitments
-                    that Arkynox provides to users of the ArkyDesk support system. This SLA is part of our
-                    commitment to delivering reliable, high-quality technical support services.
+                    This Service Level Agreement (&ldquo;SLA&rdquo;) forms part of, and is incorporated into, the{' '}
+                    <a href="/policy/terms-and-condition">Terms and Conditions</a> between you and Arkynox. It sets
+                    out the service levels that apply to the ArkyDesk support platform (the &ldquo;Service&rdquo;),
+                    how we measure them, and the credits available if we fail to meet them.
+                </p>
+                <p>
+                    This SLA applies to all workspaces on paid plans. Free-tier workspaces receive best-efforts
+                    support and are not eligible for service credits, though we apply the same operational standards
+                    to them internally.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>2. Service Availability</h2>
-
-                <h3>2.1 Uptime Commitment</h3>
-                <div className="not-prose bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 mb-6 text-center shadow-sm">
-                    <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 mb-2">99.9%</div>
-                    <p className="text-gray-700 font-medium">Monthly Uptime Guarantee</p>
-                    <p className="text-sm text-gray-500 mt-1">Maximum downtime: 43 minutes per month</p>
-                </div>
-
-                <h3>2.2 Planned Maintenance</h3>
+            <section aria-labelledby="c2">
+                <H2 id="c2" no="2.">Definitions</H2>
                 <ul>
-                    <li><strong>Scheduled Windows:</strong> Sundays 2:00 AM - 4:00 AM (local time)</li>
-                    <li><strong>Advance Notice:</strong> 72 hours minimum for planned maintenance</li>
-                    <li><strong>Duration:</strong> Maximum 2 hours per maintenance window</li>
-                    <li><strong>Frequency:</strong> Monthly or as needed for critical updates</li>
-                </ul>
-
-                <h3>2.3 Emergency Maintenance</h3>
-                <p>
-                    Emergency maintenance may be performed without advance notice to address security
-                    vulnerabilities or critical system issues. We will make every effort to minimize
-                    disruption and communicate status updates during such events.
-                </p>
-            </section>
-
-            <section className="mb-10">
-                <h2>3. Response Time Standards</h2>
-
-                <div className="not-prose overflow-x-auto mb-6">
-                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Priority Level</th>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Definition</th>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Response Time</th>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Resolution Target</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                            <tr className="hover:bg-red-50/50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <AlertCircleIcon size={16} className="text-red-500" />
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">Critical</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-600">System down, complete service unavailable, security breach</td>
-                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">2 hours</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">8 hours</td>
-                            </tr>
-                            <tr className="hover:bg-orange-50/50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <AlertTriangleIcon size={16} className="text-orange-500" />
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">High</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Major functionality impaired, affects multiple users</td>
-                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">4 hours</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">24 hours</td>
-                            </tr>
-                            <tr className="hover:bg-yellow-50/50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <ClockIcon size={16} className="text-yellow-500" />
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Normal</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Standard questions, minor issues, feature requests</td>
-                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">24 hours</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">5 business days</td>
-                            </tr>
-                            <tr className="hover:bg-blue-50/50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <InfoIcon size={16} className="text-blue-500" />
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Low</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-600">General inquiries, documentation requests, enhancements</td>
-                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">72 hours</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">10 business days</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="not-prose bg-blue-50/80 border border-blue-100 rounded-xl p-5 mb-6">
-                    <div className="flex items-start gap-3">
-                        <InfoIcon size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-gray-600">
-                            <strong>Note:</strong> Response times are calculated during business hours (Monday-Friday, 9 AM - 6 PM local time).
-                            Resolution targets are estimates and may vary based on issue complexity.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>4. Support Channels</h2>
-
-                <div className="not-prose grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200 rounded-xl p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <MailIcon size={18} className="text-gray-600" />
-                            Primary Channels
-                        </h3>
-                        <ul className="space-y-3 text-sm text-gray-600">
-                            <li className="flex items-center gap-3">
-                                <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
-                                <span><strong>Support Portal:</strong> 24/7 ticket submission</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
-                                <span><strong>Email:</strong> support@arkynox.com</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0" />
-                                <span><strong>Knowledge Base:</strong> Self-service resources</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200 rounded-xl p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <PhoneIcon size={18} className="text-gray-600" />
-                            Emergency Contact
-                        </h3>
-                        <ul className="space-y-3 text-sm text-gray-600">
-                            <li className="flex items-center gap-3">
-                                <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
-                                <span><strong>Critical Issues:</strong> Mark ticket as &ldquo;Critical&rdquo;</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0" />
-                                <span><strong>After Hours:</strong> Emergency escalation available</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <span className="w-2 h-2 bg-gray-500 rounded-full flex-shrink-0" />
-                                <span><strong>Phone:</strong> Critical issues only</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>5. Performance Metrics</h2>
-
-                <h3>5.1 Key Performance Indicators</h3>
-                <div className="not-prose grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gradient-to-b from-green-50 to-green-100/50 border border-green-200 rounded-xl p-5 text-center shadow-sm">
-                        <div className="flex justify-center mb-2">
-                            <TargetIcon size={24} className="text-green-500" />
-                        </div>
-                        <div className="text-2xl font-bold text-green-600">&ge; 95%</div>
-                        <div className="text-sm text-gray-600 font-medium">First Response Target</div>
-                    </div>
-                    <div className="bg-gradient-to-b from-blue-50 to-blue-100/50 border border-blue-200 rounded-xl p-5 text-center shadow-sm">
-                        <div className="flex justify-center mb-2">
-                            <BarChartIcon size={24} className="text-blue-500" />
-                        </div>
-                        <div className="text-2xl font-bold text-blue-600">&ge; 90%</div>
-                        <div className="text-sm text-gray-600 font-medium">Resolution Target</div>
-                    </div>
-                    <div className="bg-gradient-to-b from-purple-50 to-purple-100/50 border border-purple-200 rounded-xl p-5 text-center shadow-sm">
-                        <div className="flex justify-center mb-2">
-                            <HeartIcon size={24} className="text-purple-500" />
-                        </div>
-                        <div className="text-2xl font-bold text-purple-600">&ge; 4.5</div>
-                        <div className="text-sm text-gray-600 font-medium">Customer Satisfaction</div>
-                    </div>
-                </div>
-
-                <h3>5.2 Monthly Reporting</h3>
-                <ul>
-                    <li>System uptime and availability statistics</li>
-                    <li>Response time performance by priority level</li>
-                    <li>Ticket volume and resolution rates</li>
-                    <li>Customer satisfaction survey results</li>
-                    <li>Service improvement recommendations</li>
+                    <li><strong>Business Hours</strong> means 09:00–18:00 India Standard Time (IST, UTC+5:30), Monday to Friday, excluding Indian public holidays notified on our status page.</li>
+                    <li><strong>Monthly Uptime Percentage</strong> means the total minutes in a calendar month, minus Unplanned Downtime, divided by the total minutes in that month, expressed as a percentage.</li>
+                    <li><strong>Unplanned Downtime</strong> means minutes in which the Service is unavailable to perform its core function (creating, viewing and updating tickets), excluding Excluded Downtime under Clause 10.</li>
+                    <li><strong>First Response</strong> means the first substantive, human reply to a ticket — automated acknowledgements do not count.</li>
+                    <li><strong>Resolution</strong> means the ticket is closed with a fix, a workaround accepted by you, or a documented answer to your question.</li>
                 </ul>
             </section>
 
-            <section className="mb-10">
-                <h2>6. Escalation Procedures</h2>
-
-                <h3>6.1 Automatic Escalation</h3>
+            <section aria-labelledby="c3">
+                <H2 id="c3" no="3.">Support Hours and Channels</H2>
+                <p>
+                    Standard support operates during Business Hours, anchored to IST. Follow-the-sun coverage across
+                    our support locations extends effective coverage to approximately 05:30–22:30 IST on business
+                    days. Critical (P1) issues are handled 24×7, including weekends and holidays, for paid
+                    plans.
+                </p>
+                <p>Support is provided through:</p>
                 <ul>
-                    <li><strong>Response Time Breach:</strong> Automatic escalation to supervisor</li>
-                    <li><strong>Critical Issues:</strong> Immediate escalation to senior staff</li>
-                    <li><strong>Customer Request:</strong> Manual escalation upon request</li>
-                </ul>
-
-                <h3>6.2 Escalation Levels</h3>
-                <div className="not-prose bg-gray-50/80 border border-gray-200 rounded-xl p-6 shadow-sm">
-                    <ol className="list-decimal pl-6 space-y-2 text-sm text-gray-600">
-                        <li><strong>Level 1:</strong> Front-line Support Technician</li>
-                        <li><strong>Level 2:</strong> Senior Support Specialist</li>
-                        <li><strong>Level 3:</strong> Technical Lead / Subject Matter Expert</li>
-                        <li><strong>Level 4:</strong> Engineering Team / Product Development</li>
-                        <li><strong>Management:</strong> Support Manager / Director</li>
-                    </ol>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>7. Service Credits</h2>
-
-                <h3>7.1 Availability Credits</h3>
-                <div className="not-prose overflow-x-auto mb-4">
-                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Monthly Uptime</th>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Service Credit</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                            <tr className="hover:bg-green-50/30 transition-colors">
-                                <td className="px-6 py-4 text-sm text-gray-700">99.0% - 99.9%</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">10% of monthly fee</td>
-                            </tr>
-                            <tr className="hover:bg-yellow-50/30 transition-colors">
-                                <td className="px-6 py-4 text-sm text-gray-700">95.0% - 98.9%</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">25% of monthly fee</td>
-                            </tr>
-                            <tr className="hover:bg-red-50/30 transition-colors">
-                                <td className="px-6 py-4 text-sm text-gray-700">&lt; 95.0%</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">50% of monthly fee</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3>7.2 Credit Claims</h3>
-                <ul>
-                    <li>Credits must be requested within 30 days of the incident</li>
-                    <li>Credits are applied to the next billing cycle</li>
-                    <li>Maximum credit of 100% of monthly fee per incident</li>
-                    <li>Credits do not apply to planned maintenance or force majeure events</li>
+                    <li>the in-product ticket system (primary channel, and the only channel to which the response targets in Clause 4 apply);</li>
+                    <li>the support email address displayed in your workspace, which is converted into a ticket; and</li>
+                    <li>the emergency contact route shown inside your workspace for Critical (P1) issues on enterprise plans.</li>
                 </ul>
             </section>
 
-            <section className="mb-10">
-                <h2>8. Exclusions</h2>
-                <p>This SLA does not apply to service interruptions caused by:</p>
+            <section aria-labelledby="c4">
+                <H2 id="c4" no="4.">Priority Levels and Response Targets</H2>
+                <p>
+                    Every ticket is assigned a priority by our support team based on the definitions below. Response
+                    targets are measured during Business Hours except for Critical issues, which are measured around
+                    the clock.
+                </p>
+                <DataTable
+                    caption="Priority matrix"
+                    head={['Priority', 'Definition', 'First response', 'Resolution target']}
+                    firstColHeader
+                    rows={[
+                        ['Critical (P1)', 'Service down or core function unusable for all users; no workaround; or a confirmed security incident affecting your data', '2 hours, 24×7', 'Continuous effort until resolved'],
+                        ['High (P2)', 'Core function severely degraded, or a major feature unusable, with no reasonable workaround', '4 Business Hours', '1 business day'],
+                        ['Normal (P3)', 'Standard product issue with a workaround; general product questions', '24 Business Hours', '5 business days'],
+                        ['Low (P4)', 'Minor issues, cosmetic defects, documentation requests, feature requests', '72 Business Hours', 'Scheduled with our product roadmap'],
+                    ]}
+                />
+                <Note tone="info" title="Measurement">
+                    &ldquo;Business Hours&rdquo; targets pause outside Business Hours and resume at the next
+                    Business Hour. With Business Hours defined as 09:00&ndash;18:00 IST, Monday to Friday, a
+                    Normal (P3) ticket with a 24 Business Hour first-response target raised at 17:00 IST on a
+                    Friday accrues one hour that day, then nine hours on each of Monday, Tuesday and Wednesday,
+                    so the response is due by 14:00 IST on the Wednesday of the following week.
+                </Note>
+            </section>
+
+            <section aria-labelledby="c5">
+                <H2 id="c5" no="5.">Service Availability</H2>
+                <p>
+                    We commit to a Monthly Uptime Percentage of at least <strong>99.9%</strong> for the Service,
+                    measured per calendar month and excluding Excluded Downtime. We publish real-time and historical
+                    availability on our status page, and we report the previous month&rsquo;s figures inside the
+                    Service.
+                </p>
+                <p>Our standing internal performance indicators are:</p>
                 <ul>
-                    <li>Scheduled maintenance (with proper notice)</li>
-                    <li>Acts of God, natural disasters, or force majeure events</li>
-                    <li>Internet service provider or network connectivity issues</li>
-                    <li>Customer equipment, software, or configuration issues</li>
-                    <li>Third-party service failures beyond our control</li>
-                    <li>Security incidents or cyber attacks</li>
-                    <li>Customer-requested changes or modifications</li>
+                    <li>at least 95% of first responses within the Clause 4 targets;</li>
+                    <li>at least 90% of tickets resolved within their resolution target; and</li>
+                    <li>a customer satisfaction score of at least 4.5 out of 5, measured on closed tickets.</li>
                 </ul>
             </section>
 
-            <section className="mb-10">
-                <h2>9. Global Support Coverage</h2>
+            <section aria-labelledby="c6">
+                <H2 id="c6" no="6.">Maintenance</H2>
+                <H3 id="c6-1" no="6.1">Planned maintenance</H3>
                 <p>
-                    Our support team operates across multiple time zones to provide coverage for users worldwide.
-                    Below are our regional support centers and their operating hours:
+                    We schedule planned maintenance outside Business Hours wherever practicable and give at least 72
+                    hours&rsquo; advance notice on the status page and, for disruptive maintenance, by email.
+                    Planned maintenance windows never exceed four (4) hours and are excluded from the uptime
+                    calculation.
                 </p>
-
-                <div className="not-prose overflow-x-auto mb-6">
-                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden text-sm shadow-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Region</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Coverage Timezone</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Business Hours</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Languages</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">24/7 Available</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">Americas</td><td className="px-4 py-3.5">EST/PST (UTC-5/-8)</td><td className="px-4 py-3.5">9 AM - 9 PM local</td><td className="px-4 py-3.5">English, Spanish, Portuguese</td><td className="px-4 py-3.5"><CheckIcon size={16} className="text-green-500" /></td></tr>
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">Europe & Africa</td><td className="px-4 py-3.5">CET/SAST (UTC+1/+2)</td><td className="px-4 py-3.5">8 AM - 8 PM local</td><td className="px-4 py-3.5">English, French, German, Spanish, Dutch, Turkish, Russian</td><td className="px-4 py-3.5"><CheckIcon size={16} className="text-green-500" /></td></tr>
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">Middle East & Central Asia</td><td className="px-4 py-3.5">GST/AQTT (UTC+4/+5)</td><td className="px-4 py-3.5">8 AM - 6 PM local</td><td className="px-4 py-3.5">Arabic, Turkish, Russian, English</td><td className="px-4 py-3.5 text-gray-400 text-xs font-medium">Critical only</td></tr>
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">South Asia</td><td className="px-4 py-3.5">IST/PKT (UTC+5/+5:30)</td><td className="px-4 py-3.5">8 AM - 10 PM local</td><td className="px-4 py-3.5">Hindi, English, Tamil, Sinhala</td><td className="px-4 py-3.5"><CheckIcon size={16} className="text-green-500" /></td></tr>
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">Southeast Asia</td><td className="px-4 py-3.5">ICT/WIB (UTC+7/+8)</td><td className="px-4 py-3.5">7 AM - 9 PM local</td><td className="px-4 py-3.5">Indonesian, Thai, English, Filipino</td><td className="px-4 py-3.5 text-gray-400 text-xs font-medium">Critical only</td></tr>
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">East Asia</td><td className="px-4 py-3.5">JST/KST (UTC+9)</td><td className="px-4 py-3.5">9 AM - 9 PM local</td><td className="px-4 py-3.5">Japanese, Korean, English</td><td className="px-4 py-3.5 text-gray-400 text-xs font-medium">Critical only</td></tr>
-                            <tr className="hover:bg-gray-50/50 transition-colors"><td className="px-4 py-3.5 font-medium">Australasia</td><td className="px-4 py-3.5">AEST (UTC+10)</td><td className="px-4 py-3.5">8 AM - 8 PM local</td><td className="px-4 py-3.5">English</td><td className="px-4 py-3.5 text-gray-400 text-xs font-medium">Critical only</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3>9.1 Follow-the-Sun Coverage</h3>
+                <H3 id="c6-2" no="6.2">Emergency maintenance</H3>
                 <p>
-                    Through our global support centers, we provide continuous coverage across all time zones.
-                    When a regional center closes, the next region takes over, ensuring that critical issues
-                    receive attention 24/7 regardless of your location.
-                </p>
-
-                <div className="not-prose grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gradient-to-b from-blue-50 to-blue-100/50 border border-blue-200 rounded-xl p-5 text-center shadow-sm">
-                        <GlobeIcon size={24} className="text-blue-500 mx-auto mb-2" />
-                        <div className="text-lg font-bold text-blue-700">8 AM - 4 PM UTC</div>
-                        <div className="text-sm text-blue-600 font-medium">Americas coverage</div>
-                    </div>
-                    <div className="bg-gradient-to-b from-green-50 to-green-100/50 border border-green-200 rounded-xl p-5 text-center shadow-sm">
-                        <GlobeIcon size={24} className="text-green-500 mx-auto mb-2" />
-                        <div className="text-lg font-bold text-green-700">4 PM - 12 AM UTC</div>
-                        <div className="text-sm text-green-600 font-medium">Europe/Africa coverage</div>
-                    </div>
-                    <div className="bg-gradient-to-b from-orange-50 to-orange-100/50 border border-orange-200 rounded-xl p-5 text-center shadow-sm">
-                        <GlobeIcon size={24} className="text-orange-500 mx-auto mb-2" />
-                        <div className="text-lg font-bold text-orange-700">12 AM - 8 AM UTC</div>
-                        <div className="text-sm text-orange-600 font-medium">Asia/Pacific coverage</div>
-                    </div>
-                </div>
-
-                <h3>9.2 Country-Specific Contact Channels</h3>
-                <div className="not-prose grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm mb-4">
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">US & Canada:</span> +1-555-SUPPORT (toll-free)</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">United Kingdom:</span> +44-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">India:</span> +91-555-SUPPORT (toll-free)</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Brazil:</span> +55-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Russia:</span> +7-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Japan:</span> +81-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Germany:</span> +49-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">France:</span> +33-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">South Africa:</span> +27-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Australia:</span> +61-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Nigeria:</span> +234-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Turkey:</span> +90-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Indonesia:</span> +62-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Thailand:</span> +66-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">South Korea:</span> +82-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Kenya:</span> +254-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Philippines:</span> +63-555-SUPPORT</div>
-                    <div className="bg-gray-50/80 border border-gray-200 rounded-lg p-3 hover:bg-gray-100/50 transition-colors"><PhoneIcon size={14} className="inline mr-1.5 text-gray-400" /><span className="font-medium">Sri Lanka:</span> +94-555-SUPPORT</div>
-                </div>
-                <p className="text-xs text-gray-400">
-                    Phone support is available for Critical and High priority issues. Normal and Low priority
-                    issues should be submitted via the support portal or email.
+                    Where urgent action is needed to protect the Service or your data — for example, deploying a
+                    security patch — we may perform maintenance without prior notice. We will notify you as soon as
+                    practicable and keep the disruption as short as possible.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>10. SLA Review and Updates</h2>
+            <section aria-labelledby="c7">
+                <H2 id="c7" no="7.">Escalation</H2>
+                <p>Tickets move through a defined escalation path:</p>
+                <ol>
+                    <li><strong>Level 1 — Support Agent:</strong> first response within the Clause 4 target; triage, known-issue resolution, documentation.</li>
+                    <li><strong>Level 2 — Support Specialist:</strong> engaged automatically when an L1 target is at risk, or on request; deeper technical investigation.</li>
+                    <li><strong>Level 3 — Subject-Matter Expert:</strong> product or infrastructure specialists for complex defects.</li>
+                    <li><strong>Engineering:</strong> code-level fixes, with a workaround provided wherever one exists while the fix is developed.</li>
+                </ol>
                 <p>
-                    This SLA is reviewed quarterly and may be updated to reflect changes in service
-                    capabilities, technology improvements, or customer requirements. Material changes
-                    will be communicated with 30 days advance notice.
+                    You may request escalation at any time by replying to the ticket. Escalation does not reset the
+                    applicable response or resolution clocks.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>11. Contact Information</h2>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm">
-                    <p className="text-sm text-gray-600 mb-4">
-                        For SLA-related questions or to report service level breaches:
-                    </p>
-                    <ul className="text-sm text-gray-600 space-y-2">
-                        <li className="flex items-center gap-2">
-                            <MailIcon size={16} className="text-blue-500 flex-shrink-0" />
-                            <span><strong>Email:</strong> sla@arkynox.com</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <LinkIcon size={16} className="text-blue-500 flex-shrink-0" />
-                            <span><strong>Support Portal:</strong> Create a ticket with &ldquo;SLA&rdquo; in the subject</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <TrendingUpIcon size={16} className="text-blue-500 flex-shrink-0" />
-                            <span><strong>Escalation:</strong> support-manager@arkynox.com</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <ClockIcon size={16} className="text-blue-500 flex-shrink-0" />
-                            <span><strong>Response Time:</strong> SLA inquiries responded to within 4 hours</span>
-                        </li>
-                    </ul>
-                </div>
+            <section aria-labelledby="c8">
+                <H2 id="c8" no="8.">Service Credits</H2>
+                <p>
+                    If Monthly Uptime Percentage falls below 99.9% in a calendar month, you are entitled to a credit
+                    against your next invoice, calculated as a percentage of the monthly fee for the affected
+                    workspace:
+                </p>
+                <DataTable
+                    caption="Availability service credits"
+                    head={['Monthly uptime', 'Service credit']}
+                    firstColHeader
+                    rows={[
+                        ['99.0% – 99.89%', '10% of the monthly fee'],
+                        ['95.0% – 98.99%', '25% of the monthly fee'],
+                        ['Below 95.0%', '50% of the monthly fee'],
+                    ]}
+                />
+                <p>
+                    To claim a credit, open a ticket referencing this SLA within thirty (30) days of the end of the
+                    affected month. Credits are verified against our monitoring records, are applied to future
+                    invoices, and are not redeemable for cash. Service credits are capped at 50% of the monthly fee
+                    for the affected workspace in any month.
+                </p>
+            </section>
+
+            <section aria-labelledby="c9">
+                <H2 id="c9" no="9.">Security Incident Notification</H2>
+                <p>
+                    If we confirm a personal data breach affecting your data, we will notify you without undue delay
+                    and, where the law of your jurisdiction sets a deadline, within that deadline — including the
+                    72-hour windows under the GDPR, UK GDPR and India&rsquo;s Digital Personal Data Protection
+                    Rules, 2025 (which additionally require us to give affected users at least 48 hours&rsquo;
+                    notice before erasure-related steps where applicable). Our handling of security events follows
+                    our ISO/IEC 27001:2022-aligned incident management process, as described in Clause 6 of the{' '}
+                    <a href="/policy/privacy-policy">Privacy Policy</a>.
+                </p>
+            </section>
+
+            <section aria-labelledby="c10">
+                <H2 id="c10" no="10.">Exclusions</H2>
+                <p>
+                    This SLA does not apply to, and no downtime or delay counts towards a breach of it, where caused
+                    by:
+                </p>
+                <ul>
+                    <li>planned or emergency maintenance carried out in accordance with Clause 6;</li>
+                    <li>factors outside our reasonable control, including internet backbone failures, force majeure events, war, epidemics, or government-ordered network restrictions;</li>
+                    <li>your equipment, software, network configuration or connectivity;</li>
+                    <li>third-party services or integrations not operated by Arkynox;</li>
+                    <li>your breach of the Terms or the Acceptable Use Policy, or suspension under Clause 13.3 of the Terms; or</li>
+                    <li>beta, preview or trial features identified as such.</li>
+                </ul>
+            </section>
+
+            <section aria-labelledby="c11">
+                <H2 id="c11" no="11.">Remedies and Consumer Rights</H2>
+                <p>
+                    Service credits under Clause 8 are your primary financial remedy for availability failures. Where
+                    uptime falls below 95.0% in three (3) consecutive months, you may additionally terminate the
+                    affected paid plan for material breach and receive a pro-rata refund of prepaid, unused fees.
+                </p>
+                <Note tone="legal" title="Statutory remedies preserved">
+                    Nothing in this SLA limits remedies you cannot lawfully be asked to give up — including, in
+                    India, relief under the Consumer Protection Act, 2019; in the United Kingdom, the requirement
+                    that services be performed with reasonable care and skill under the Consumer Rights Act 2015; in
+                    Australia, the consumer guarantees under the Australian Consumer Law; and equivalent mandatory
+                    rights in the EU, Japan, Canada, Mexico and Brazil.
+                </Note>
+            </section>
+
+            <section aria-labelledby="c12">
+                <H2 id="c12" no="12.">Review, Changes and Contact</H2>
+                <p>
+                    We review this SLA at least annually as part of our management review process. Changes follow
+                    the notice procedure in Clause 16 of the Terms and will never reduce the commitments applicable
+                    to a paid plan during its current billing term.
+                </p>
+                <p>
+                    Questions about this SLA, credit claims, or escalation requests: open a ticket in your workspace
+                    or email <a href={`mailto:${POLICY_CONTACTS.legal}`}>{POLICY_CONTACTS.legal}</a>.
+                </p>
             </section>
         </PolicyLayout>
     );

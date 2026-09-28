@@ -1,509 +1,325 @@
-'use client';
-
+import type { Metadata } from 'next';
 import PolicyLayout from '@/components/policy/PolicyLayout';
-import {
-    ShieldIcon, CheckIcon, XIcon, AlertTriangleIcon,
-    ScaleIcon, GlobeIcon, AlertCircleIcon, InfoIcon,
-    MailIcon, SearchIcon, LockIcon, UploadIcon,
-    DownloadIcon, FileTextIcon, UsersIcon, EyeIcon,
-    ClockIcon, ArrowRightIcon, BookIcon, FlagIcon,
-    FileIcon, ImageIcon, VideoIcon, FolderIcon,
-    MessageCircleIcon, BellIcon, CreditCardIcon
-} from '@/components/policy/Icons';
+import { H2, H3 } from '@/components/policy/PolicyHeading';
+import Note from '@/components/policy/Note';
+import DataTable from '@/components/policy/DataTable';
+import JurisdictionExplorer from '@/components/policy/JurisdictionExplorer';
+import { POLICY_CONTACTS } from '@/lib/policy/policies';
 
-const SeverityDot = ({ color }: { color: string }) => (
-    <span className={`inline-block w-2.5 h-2.5 rounded-full ${color} flex-shrink-0 mt-0.5`} />
-);
+export const metadata: Metadata = {
+    title: 'Acceptable Use Policy',
+    description:
+        'The rules for using ArkyDesk lawfully and safely: permitted use, prohibited conduct, content and takedown handling in India, security, and enforcement.',
+    alternates: { canonical: '/policy/acceptable-use' },
+};
+
+const toc = [
+    { id: 'c1', no: '1.', label: 'Purpose and Scope', level: 2 as const },
+    { id: 'c2', no: '2.', label: 'Permitted Use', level: 2 as const },
+    { id: 'c3', no: '3.', label: 'Prohibited Acts', level: 2 as const },
+    { id: 'c4', no: '4.', label: 'Content and Takedown in India', level: 2 as const },
+    { id: 'c5', no: '5.', label: 'Account and Credential Security', level: 2 as const },
+    { id: 'c6', no: '6.', label: 'Attachments and Files', level: 2 as const },
+    { id: 'c7', no: '7.', label: 'Automated Access and AI', level: 2 as const },
+    { id: 'c8', no: '8.', label: 'Monitoring and Security Investigations', level: 2 as const },
+    { id: 'c9', no: '9.', label: 'Enforcement', level: 2 as const },
+    { id: 'c10', no: '10.', label: 'Suspension, Termination and Appeal', level: 2 as const },
+    { id: 'c11', no: '11.', label: 'Jurisdictional Requirements', level: 2 as const },
+    { id: 'c12', no: '12.', label: 'Changes to This Policy', level: 2 as const },
+    { id: 'c13', no: '13.', label: 'Reporting and Contact', level: 2 as const },
+];
 
 export default function AcceptableUsePolicy() {
     return (
         <PolicyLayout
+            slug="acceptable-use"
             title="Acceptable Use Policy"
-            links={[
-                { href: '/policy/terms-and-condition', label: 'Terms & Conditions' },
-                { href: '/policy/privacy-policy', label: 'Privacy Policy' },
-                { href: '/dashboard', label: 'Return to Dashboard' },
-            ]}
+            description="What you may and may not do on ArkyDesk, how we handle complaints and takedown requests, and how we enforce these rules."
+            toc={toc}
         >
-            {/* Quick Summary */}
-            <div className="not-prose bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50 border border-purple-200/60 rounded-2xl p-6 sm:p-8 mb-10 shadow-sm">
-                <div className="flex items-start gap-4 mb-6">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 shadow-md shadow-purple-200 flex items-center justify-center">
-                        <ShieldIcon size={24} className="text-white" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-purple-900">Quick Summary</h3>
-                        <p className="text-sm text-purple-600 font-medium">What is okay and what is not okay when using our support system</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-green-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-green-800 mb-2">
-                            <CheckIcon size={16} className="text-green-600" />
-                            <span>Allowed</span>
-                        </div>
-                        <ul className="text-green-700 space-y-0.5">
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Submit real support requests</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Upload relevant files for troubleshooting</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Communicate professionally</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Report bugs & security issues responsibly</li>
-                            <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Give constructive feedback</li>
-                        </ul>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-red-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-red-800 mb-2">
-                            <XIcon size={16} className="text-red-600" />
-                            <span>Not Allowed</span>
-                        </div>
-                        <ul className="text-red-700 space-y-0.5">
-                            <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Illegal activities, fraud, hacking</li>
-                            <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Harassment, threats, hate speech</li>
-                            <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Malware, viruses, malicious code</li>
-                            <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Spam, fake tickets, account sharing</li>
-                            <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Uploading copyrighted/inappropriate content</li>
-                        </ul>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-orange-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-orange-800 mb-2">
-                            <AlertTriangleIcon size={16} className="text-orange-600" />
-                            <span>What Happens If You Violate</span>
-                        </div>
-                        <div className="space-y-1 text-orange-700">
-                            <div className="flex items-center gap-2">
-                                <SeverityDot color="bg-green-500" />
-                                <span>Minor: Warning</span>
-                                <SeverityDot color="bg-yellow-500" />
-                                <span>Moderate: Suspension</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <SeverityDot color="bg-red-500" />
-                                <span>Severe: Account terminated</span>
-                                <SeverityDot color="bg-gray-800" />
-                                <span>Critical: Legal action</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-4 border border-blue-200 shadow-sm">
-                        <div className="flex items-center gap-2 font-semibold text-blue-800 mb-2">
-                            <ScaleIcon size={16} className="text-blue-600" />
-                            <span>Legal Consequences</span>
-                        </div>
-                        <p className="text-blue-700">Violations may lead to prosecution under cybercrime laws in 25+ countries (including India IT Act, US CFAA, EU Cybercrime Directive, UK Computer Misuse Act). We cooperate with law enforcement worldwide.</p>
-                    </div>
-                </div>
-                <div className="mt-4 text-xs text-purple-500 text-center font-medium bg-purple-50/50 rounded-lg py-2">
-                    This summary is for understanding. The full AUP below is the legally binding document.
-                </div>
-            </div>
-
-            <section className="mb-10">
-                <h2>1. Purpose and Scope</h2>
+            <section aria-labelledby="c1">
+                <H2 id="c1" no="1.">Purpose and Scope</H2>
                 <p>
-                    This Acceptable Use Policy (&ldquo;AUP&rdquo;) governs the use of ArkyDesk support system and
-                    related services provided by Arkynox. This policy is designed to protect Arkynox, our
-                    customers, and the internet community from irresponsible or illegal activities.
+                    This Acceptable Use Policy (the &ldquo;AUP&rdquo;) governs your use of the ArkyDesk support
+                    platform, including your account, the tickets you open, the content you submit, and your
+                    interactions with our agents and other customers. It forms part of your{' '}
+                    <a href="/policy/terms-and-condition">Terms and Conditions</a>.
                 </p>
                 <p>
-                    By using our services, you agree to comply with this AUP and our Terms of Service.
-                    Violations may result in service suspension or termination.
+                    These rules exist so that ArkyDesk remains lawful, secure, and available. They apply to every
+                    user of the Service, including individual users, business accounts, administrators, and any
+                    party you authorise to act on your behalf. A business account administrator is responsible for
+                    the conduct of the users it provisions.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>2. Permitted Uses</h2>
-
-                <div className="not-prose bg-gradient-to-br from-green-50 to-emerald-50/50 border border-green-200 rounded-xl p-6 shadow-sm mb-6">
-                    <h3 className="text-lg font-bold text-green-800 mb-4 flex items-center gap-2">
-                        <CheckIcon size={20} className="text-green-600" />
-                        Acceptable Activities
-                    </h3>
-                    <ul className="text-sm text-gray-600 space-y-2">
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Submit legitimate support requests and technical issues</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Communicate professionally with support staff</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Share relevant files and information for troubleshooting</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Access knowledge base and self-help resources</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Provide constructive feedback and suggestions</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Report bugs and security vulnerabilities responsibly</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Use the system for its intended business purposes</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" />Follow up on ticket status and updates</li>
-                    </ul>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>3. Prohibited Activities</h2>
-
-                <div className="not-prose bg-gradient-to-br from-red-50 to-rose-50/50 border border-red-200 rounded-xl p-6 shadow-sm mb-6">
-                    <h3 className="text-lg font-bold text-red-800 mb-2 flex items-center gap-2">
-                        <XIcon size={20} className="text-red-600" />
-                        Strictly Forbidden
-                    </h3>
-                    <p className="text-sm text-gray-600">The following activities are strictly prohibited:</p>
-                </div>
-
-                <h3>3.1 Illegal Activities</h3>
+            <section aria-labelledby="c2">
+                <H2 id="c2" no="2.">Permitted Use</H2>
+                <p>You may use the Service to:</p>
                 <ul>
-                    <li>Any activity that violates local, state, federal, or international laws</li>
-                    <li>Copyright infringement or intellectual property violations</li>
-                    <li>Fraud, identity theft, or financial crimes</li>
-                    <li>Distribution of illegal content or materials</li>
-                    <li>Money laundering or terrorist financing</li>
-                </ul>
-
-                <h3>3.2 Security Violations</h3>
-                <ul>
-                    <li>Attempting to gain unauthorized access to systems or accounts</li>
-                    <li>Distributing viruses, malware, or malicious code</li>
-                    <li>Port scanning, vulnerability scanning, or penetration testing</li>
-                    <li>Password cracking or brute force attacks</li>
-                    <li>Social engineering or phishing attempts</li>
-                    <li>Bypassing security measures or access controls</li>
-                </ul>
-
-                <h3>3.3 Abuse and Harassment</h3>
-                <ul>
-                    <li>Harassment, threats, or intimidation of staff or other users</li>
-                    <li>Hate speech, discriminatory language, or offensive content</li>
-                    <li>Bullying, stalking, or persistent unwanted contact</li>
-                    <li>Impersonation of other individuals or organizations</li>
-                    <li>Defamatory, libelous, or slanderous statements</li>
-                </ul>
-
-                <h3>3.4 System Abuse</h3>
-                <ul>
-                    <li>Submitting false, misleading, or spam tickets</li>
-                    <li>Excessive use of system resources or bandwidth</li>
-                    <li>Automated ticket creation or system interactions</li>
-                    <li>Reverse engineering or attempting to access source code</li>
-                    <li>Creating multiple accounts to circumvent restrictions</li>
-                    <li>Sharing account credentials with unauthorized persons</li>
-                </ul>
-
-                <h3>3.5 Content Violations</h3>
-                <ul>
-                    <li>Uploading inappropriate, offensive, or explicit content</li>
-                    <li>Sharing confidential information of third parties</li>
-                    <li>Distribution of spam, advertisements, or promotional content</li>
-                    <li>Posting content that violates privacy rights</li>
-                    <li>Sharing trade secrets or proprietary information without authorization</li>
+                    <li>raise, manage and track legitimate support requests relating to your products or account;</li>
+                    <li>exchange correspondence and files with Arkynox and, where enabled, with other authorised participants;</li>
+                    <li>upload materials you are entitled to share, subject to Clause 6;</li>
+                    <li>export your own tickets, communications and attachments; and</li>
+                    <li>use the Service in accordance with applicable law, your subscription tier, and your agreement with us.</li>
                 </ul>
             </section>
 
-            <section className="mb-10">
-                <h2>4. File Upload Guidelines</h2>
-
-                <h3>4.1 Acceptable File Types</h3>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <p className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                <FileTextIcon size={18} className="text-blue-500" />
-                                Documents
-                            </p>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                                <li className="flex items-center gap-2"><FileIcon size={14} className="text-gray-400" />PDF, DOC, DOCX, TXT</li>
-                                <li className="flex items-center gap-2"><FileIcon size={14} className="text-gray-400" />XLS, XLSX, CSV</li>
-                                <li className="flex items-center gap-2"><FileIcon size={14} className="text-gray-400" />PPT, PPTX</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <p className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                <ImageIcon size={18} className="text-blue-500" />
-                                Media
-                            </p>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                                <li className="flex items-center gap-2"><ImageIcon size={14} className="text-gray-400" />JPG, PNG, GIF (screenshots)</li>
-                                <li className="flex items-center gap-2"><VideoIcon size={14} className="text-gray-400" />MP4, AVI (screen recordings)</li>
-                                <li className="flex items-center gap-2"><FolderIcon size={14} className="text-gray-400" />ZIP, RAR (compressed files)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <h3>4.2 File Size Limits</h3>
+            <section aria-labelledby="c3">
+                <H2 id="c3" no="3.">Prohibited Acts</H2>
+                <p>You must not, and must not permit anyone to:</p>
+                <H3 id="c3-1" no="3.1">Prohibited content</H3>
                 <ul>
-                    <li><strong>Individual File:</strong> Maximum 25 MB per file</li>
-                    <li><strong>Total Attachments:</strong> Maximum 100 MB per ticket</li>
-                    <li><strong>File Count:</strong> Maximum 10 files per ticket</li>
-                    <li><strong>Storage Quota:</strong> 1 GB total per user account</li>
+                    <li>
+                        submit content that is false, misleading, or knowingly inaccurate about a defect, invoice,
+                        or incident;
+                    </li>
+                    <li>
+                        upload or request the storage of content that is obscene, sexually explicit, or exploitative of
+                        minors, or that glorifies, incites, or threatens violence;
+                    </li>
+                    <li>
+                        upload content that is hateful, harassing, defamatory, or that incites discrimination,
+                        enmity, or offence on the basis of caste, religion, race, sex, place of birth, disability,
+                        or any other protected characteristic, in each case as understood under applicable law
+                        including Sections 66A and 67 of India&rsquo;s Information Technology Act, 2000 and the
+                        Bharatiya Nyaya Sanhita, 2023;
+                    </li>
+                    <li>upload content that infringes the intellectual property or other rights of a third party;</li>
+                    <li>
+                        upload &ldquo;malware&rdquo; meaning malicious code, ransomware, keyloggers, or anything
+                        intended to compromise, damage, or gain unauthorised access to any system or data; or
+                    </li>
+                    <li>upload regulated data that you are not lawfully entitled to disclose to us, or that we are not lawfully entitled to process.</li>
                 </ul>
-
-                <h3>4.3 Prohibited File Content</h3>
-                <div className="not-prose bg-gradient-to-br from-red-50 to-rose-50/50 border border-red-200 rounded-xl p-6 shadow-sm">
-                    <ul className="text-sm text-gray-600 space-y-1.5">
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Executable files (.exe, .bat, .cmd, .scr)</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Scripts and code files (.js, .vbs, .ps1) unless specifically requested</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Files containing malware, viruses, or malicious code</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Copyrighted content without permission</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Personal information of third parties</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Encrypted or password-protected files without providing access</li>
-                    </ul>
-                </div>
+                <H3 id="c3-2" no="3.2">Prohibited conduct</H3>
+                <ul>
+                    <li>use the Service for any unlawful purpose, or in breach of any applicable law, including applicable sanctions and export-control regimes;</li>
+                    <li>access or attempt to access the Service, another account, or our infrastructure without authorisation, or circumvent any access control;</li>
+                    <li>probe, scan, load-test, or conduct vulnerability research against the Service without our written authorisation, and in violation of our safe-harbour terms in Clause 7.3;</li>
+                    <li>resell, sublicense, or provide the Service to third parties as a standalone offering;</li>
+                    <li>interfere with or disrupt the Service, its infrastructure, or other users&rsquo; access, or attempt to degrade performance;</li>
+                    <li>
+                        use the Service to harass, intimidate, or impersonate any person, or to misrepresent your
+                        identity or the origin of content; or
+                    </li>
+                    <li>
+                        collect, harvest, or extract personal data about other users or customers from the Service,
+                        or use personal data received through the Service for direct marketing unrelated to the
+                        support relationship; or
+                    </li>
+                    <li>
+                        use the Service in breach of any additional usage limits we communicate, or to build or
+                        train a competing product.
+                    </li>
+                </ul>
             </section>
 
-            <section className="mb-10">
-                <h2>5. Communication Standards</h2>
-
-                <h3>5.1 Professional Communication</h3>
-                <div className="not-prose bg-gradient-to-br from-green-50 to-emerald-50/50 border border-green-200 rounded-xl p-6 shadow-sm mb-6">
-                    <ul className="text-sm text-gray-600 space-y-2">
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" /><strong>Be Clear:</strong> Provide detailed, specific descriptions of issues</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" /><strong>Be Respectful:</strong> Use professional and courteous language</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" /><strong>Be Patient:</strong> Allow reasonable time for responses</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" /><strong>Be Accurate:</strong> Provide truthful and complete information</li>
-                        <li className="flex items-start gap-2"><CheckIcon size={14} className="text-green-500 mt-0.5 flex-shrink-0" /><strong>Be Constructive:</strong> Focus on problem-solving</li>
-                    </ul>
-                </div>
-
-                <h3>5.2 Response Expectations</h3>
-                <ul>
-                    <li><strong>Business Hours:</strong> Monday-Friday, 9 AM - 6 PM (local time)</li>
-                    <li><strong>Response Times:</strong> As outlined in our Service Level Agreement</li>
-                    <li><strong>Follow-up:</strong> Reasonable follow-up is acceptable after response time</li>
-                    <li><strong>Escalation:</strong> Use proper escalation procedures if needed</li>
-                </ul>
-
-                <h3>5.3 Communication Violations</h3>
-                <div className="not-prose bg-gradient-to-br from-red-50 to-rose-50/50 border border-red-200 rounded-xl p-6 shadow-sm">
-                    <p className="text-sm text-gray-700 mb-3"><strong>The following communication behaviors are prohibited:</strong></p>
-                    <ul className="text-sm text-gray-600 space-y-1.5">
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Abusive, threatening, or disrespectful language</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Excessive or repetitive messaging (spam)</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Inappropriate personal comments or topics</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Attempts to manipulate or pressure staff</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />False or misleading information</li>
-                        <li className="flex items-start gap-2"><XIcon size={14} className="text-red-500 mt-0.5 flex-shrink-0" />Off-topic discussions unrelated to support</li>
-                    </ul>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>6. Privacy and Confidentiality</h2>
-
-                <h3>6.1 Information Protection</h3>
-                <ul>
-                    <li><strong>Your Information:</strong> We protect your data according to our Privacy Policy</li>
-                    <li><strong>Third-Party Information:</strong> Do not share others&rsquo; confidential information</li>
-                    <li><strong>Company Information:</strong> Do not request or attempt to access unauthorized information</li>
-                    <li><strong>Support Information:</strong> Support conversations are confidential</li>
-                </ul>
-
-                <h3>6.2 Data Sensitivity</h3>
-                <div className="not-prose bg-gradient-to-br from-yellow-50 to-amber-50/50 border border-yellow-200 rounded-xl p-6 shadow-sm">
-                    <p className="text-sm text-gray-700 mb-3 flex items-center gap-2">
-                        <AlertTriangleIcon size={16} className="text-yellow-500" />
-                        <strong>Exercise caution when sharing:</strong>
-                    </p>
-                    <ul className="text-sm text-gray-600 space-y-1.5">
-                        <li className="flex items-start gap-2"><LockIcon size={14} className="text-yellow-500 mt-0.5 flex-shrink-0" />Passwords, API keys, or authentication tokens</li>
-                        <li className="flex items-start gap-2"><EyeIcon size={14} className="text-yellow-500 mt-0.5 flex-shrink-0" />Personal information of customers or employees</li>
-                        <li className="flex items-start gap-2"><CreditCardIcon size={14} className="text-yellow-500 mt-0.5 flex-shrink-0" />Financial or payment information</li>
-                        <li className="flex items-start gap-2"><FileTextIcon size={14} className="text-yellow-500 mt-0.5 flex-shrink-0" />Trade secrets or proprietary business information</li>
-                        <li className="flex items-start gap-2"><ScaleIcon size={14} className="text-yellow-500 mt-0.5 flex-shrink-0" />Legal or compliance-related documents</li>
-                    </ul>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>7. Monitoring and Enforcement</h2>
-
-                <h3>7.1 Monitoring Activities</h3>
+            <section aria-labelledby="c4">
+                <H2 id="c4" no="4.">Content and Takedown in India</H2>
                 <p>
-                    Arkynox reserves the right to monitor use of our services to ensure compliance with
-                    this AUP. Monitoring may include:
+                    Because the Service is operated for users in India, we comply with the obligations applicable
+                    to us as an intermediary under the Information Technology Act, 2000 and the IT (Intermediary
+                    Guidelines and Digital Media Ethics Code) Rules, 2021.
                 </p>
-                <ul>
-                    <li>Automated scanning for prohibited content</li>
-                    <li>Review of reported violations</li>
-                    <li>Investigation of suspicious activities</li>
-                    <li>Analysis of usage patterns and system performance</li>
-                </ul>
-
-                <h3>7.2 Violation Reporting</h3>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm mb-6">
-                    <p className="text-sm text-gray-700 mb-3"><strong>Report violations to:</strong></p>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                        <li className="flex items-center gap-2"><MailIcon size={16} className="text-blue-500" /><strong>Email:</strong> abuse@arkynox.com</li>
-                        <li className="flex items-center gap-2"><FileTextIcon size={16} className="text-blue-500" /><strong>Subject Line:</strong> &ldquo;AUP Violation Report&rdquo;</li>
-                        <li className="flex items-center gap-2"><SearchIcon size={16} className="text-blue-500" /><strong>Include:</strong> Details, evidence, and affected parties</li>
-                    </ul>
-                </div>
-
-                <h3>7.3 Investigation Process</h3>
-                <ol>
-                    <li>Receipt and acknowledgment of violation report</li>
-                    <li>Initial assessment and evidence gathering</li>
-                    <li>Investigation and fact-finding process</li>
-                    <li>Determination of violation severity</li>
-                    <li>Implementation of appropriate enforcement action</li>
-                    <li>Communication of results to affected parties</li>
-                </ol>
-            </section>
-
-            <section className="mb-10">
-                <h2>8. Enforcement Actions</h2>
-
-                <h3>8.1 Progressive Discipline</h3>
-                <div className="not-prose overflow-x-auto mb-6">
-                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Violation Level</th>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">First Offense</th>
-                                <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Repeat Offense</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                            <tr className="hover:bg-green-50/30 transition-colors">
-                                <td className="px-6 py-4 font-medium text-gray-900">Minor</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Warning + Education</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Temporary restrictions</td>
-                            </tr>
-                            <tr className="hover:bg-yellow-50/30 transition-colors">
-                                <td className="px-6 py-4 font-medium text-gray-900">Moderate</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Temporary suspension</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Extended suspension</td>
-                            </tr>
-                            <tr className="hover:bg-orange-50/30 transition-colors">
-                                <td className="px-6 py-4 font-medium text-gray-900">Severe</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Account suspension</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Account termination</td>
-                            </tr>
-                            <tr className="hover:bg-red-50/30 transition-colors">
-                                <td className="px-6 py-4 font-medium text-gray-900">Critical</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Immediate termination</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">Legal action</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3>8.2 Emergency Actions</h3>
+                <H3 id="c4-1" no="4.1">Grievance handling</H3>
                 <p>
-                    For violations that pose immediate risk to security, safety, or legal compliance,
-                    Arkynox may take immediate action including:
+                    We have appointed a Grievance Officer in accordance with Rule 4 of the IT Rules. Complaints
+                    about content on the Service, or about a user&rsquo;s conduct, are handled as follows:
                 </p>
-                <ul>
-                    <li>Immediate account suspension or termination</li>
-                    <li>Content removal or quarantine</li>
-                    <li>System access restrictions</li>
-                    <li>Law enforcement notification</li>
-                    <li>Legal proceedings initiation</li>
-                </ul>
-
-                <h3>8.3 Appeal Process</h3>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm">
-                    <p className="text-sm text-gray-700 mb-3"><strong>To appeal an enforcement action:</strong></p>
-                    <ol className="text-sm text-gray-600 space-y-1">
-                        <li>Submit appeal within 30 days of action</li>
-                        <li>Provide detailed explanation and evidence</li>
-                        <li>Appeal reviewed by senior management</li>
-                        <li>Decision communicated within 15 business days</li>
-                    </ol>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>9. Legal Consequences</h2>
-
-                <div className="not-prose bg-gradient-to-br from-red-50 to-rose-50/50 border border-red-200 rounded-xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-red-800 mb-4 flex items-center gap-2">
-                        <ScaleIcon size={20} className="text-red-600" />
-                        Legal Action
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                        Serious violations of this AUP may result in civil or criminal legal action.
-                        Arkynox will cooperate with law enforcement agencies in investigating violations
-                        that may constitute criminal activity.
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        Users may be held liable for damages resulting from their violations, including
-                        attorney fees, court costs, and other expenses incurred by Arkynox.
-                    </p>
-                </div>
-            </section>
-
-            <section className="mb-10">
-                <h2>10. Applicable Cybercrime Laws by Jurisdiction</h2>
+                <DataTable
+                    caption="India grievance timelines"
+                    head={['Type of complaint', 'Acknowledgement', 'Resolution time']}
+                    firstColHeader
+                    colClassName={[undefined, 'whitespace-nowrap', 'whitespace-nowrap']}
+                    rows={[
+                        ['Complaint about content that was removed in the preceding 36 months', '24 hours', '72 hours'],
+                        ['Any other complaint regarding content or conduct', '24 hours', '15 days'],
+                        ['Court or government order requiring removal, or restriction on access', '—', '36 hours'],
+                    ]}
+                />
+                <H3 id="c4-2" no="4.2">Government and court orders</H3>
                 <p>
-                    Violations of this Acceptable Use Policy may also constitute violations of cybercrime and
-                    computer misuse laws in multiple jurisdictions. We cooperate with law enforcement worldwide.
-                    Below are key laws applicable to prohibited activities:
+                    Where we receive a court order or a government order requiring removal of content, or
+                    restriction of access to it, we comply within the time prescribed by law, including the
+                    thirty-six (36) hour period in Rule 3(1)(b)(iv) of the IT Rules and orders under Section 69A
+                    of the Information Technology Act, 2000. We keep records of such orders and the action taken.
                 </p>
-
-                <div className="not-prose overflow-x-auto mb-6">
-                    <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden text-sm shadow-sm">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Country</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Key Cybercrime Laws</th>
-                                <th className="px-4 py-3.5 text-left font-semibold text-gray-700">Scope</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">International</td><td className="px-4 py-3">Budapest Convention on Cybercrime</td><td className="px-4 py-3 text-xs">Council of Europe treaty (ratified by 60+ countries including US, Japan, EU members, South Africa, Sri Lanka)</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">EU</td><td className="px-4 py-3">Directive 2013/40/EU (Cybercrime Directive)</td><td className="px-4 py-3 text-xs">Illegal access, system interference, data interference, interception</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">United States</td><td className="px-4 py-3">CFAA (Computer Fraud and Abuse Act), ECPA, CAN-SPAM Act</td><td className="px-4 py-3 text-xs">Unauthorized access, computer fraud, wiretapping, spam</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">United Kingdom</td><td className="px-4 py-3">Computer Misuse Act 1990, Fraud Act 2006</td><td className="px-4 py-3 text-xs">Unauthorized access, modification, making/supplying tools for hacking</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">India</td><td className="px-4 py-3">IT Act 2000 (amended 2008) &mdash; Sections 43, 66, 66C-66F</td><td className="px-4 py-3 text-xs">Hacking, identity theft, cyber fraud, cyberstalking, phishing, child pornography</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Brazil</td><td className="px-4 py-3">Lei 12.737/2012 (Carolina Dieckmann Law), Lei 12.965/2014 (Marco Civil)</td><td className="px-4 py-3 text-xs">Invasion of devices, unauthorized access, data breach</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Japan</td><td className="px-4 py-3">Unauthorized Computer Access Law (Act No. 128 of 1999)</td><td className="px-4 py-3 text-xs">Unauthorized access, hacking tools possession</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Russia</td><td className="px-4 py-3">Criminal Code Chapter 28 (Arts. 272-274)</td><td className="px-4 py-3 text-xs">Unauthorized access, malicious software, data interference</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Germany</td><td className="px-4 py-3">German Criminal Code (StGB) &sect;&sect; 202a-202d, 303a-303c</td><td className="px-4 py-3 text-xs">Data espionage, hacking, computer sabotage, data suppression</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">France</td><td className="px-4 py-3">French Penal Code Arts. 323-1 to 323-8</td><td className="px-4 py-3 text-xs">Unauthorized access, interference with automated systems</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Spain</td><td className="px-4 py-3">Spanish Penal Code Arts. 197-201, 264-270</td><td className="px-4 py-3 text-xs">Data discovery, computer damage, hacking</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Netherlands</td><td className="px-4 py-3">Dutch Criminal Code Arts. 138ab-138d, 161sexies, 350a-350d</td><td className="px-4 py-3 text-xs">Computer trespass, hacking tools, data breach</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Australia</td><td className="px-4 py-3">Criminal Code Act 1995 (Cth) Div 477-478</td><td className="px-4 py-3 text-xs">Unauthorized access, modification, impairment of electronic communications</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">South Africa</td><td className="px-4 py-3">Cybercrimes Act 19 of 2020</td><td className="px-4 py-3 text-xs">Hacking, ransomware, data interference, cyber fraud, malicious communications</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Nigeria</td><td className="px-4 py-3">Cybercrimes (Prohibition, Prevention, etc.) Act 2015</td><td className="px-4 py-3 text-xs">Hacking, identity theft, cyberstalking, child pornography, phishing</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Kenya</td><td className="px-4 py-3">Computer Misuse and Cybercrimes Act No. 5 of 2018</td><td className="px-4 py-3 text-xs">Unauthorized access, cyber espionage, cyber harassment, identity theft</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Turkey</td><td className="px-4 py-3">Turkish Penal Code Arts. 243-246 (Cybercrime provisions)</td><td className="px-4 py-3 text-xs">Hacking, data destruction, blocking access, misuse of systems</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Indonesia</td><td className="px-4 py-3">Law No. 11/2008 (ITE Law, amended 2016)</td><td className="px-4 py-3 text-xs">Unauthorized access, electronic fraud, defamation, hate speech</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Thailand</td><td className="px-4 py-3">Computer Crime Act B.E. 2550 (2007, amended 2017)</td><td className="px-4 py-3 text-xs">Unauthorized access, data interference, computer-related fraud</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Philippines</td><td className="px-4 py-3">Cybercrime Prevention Act of 2012 (RA 10175)</td><td className="px-4 py-3 text-xs">Hacking, identity theft, cybersquatting, child pornography, libel</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">South Korea</td><td className="px-4 py-3">Act on Promotion of Information and Communications Network Utilization</td><td className="px-4 py-3 text-xs">Hacking, spam, personal information breach, defamation</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Sri Lanka</td><td className="px-4 py-3">Computer Crimes Act No. 24 of 2007</td><td className="px-4 py-3 text-xs">Unauthorized access, data interference, device misuse</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Kazakhstan</td><td className="px-4 py-3">Criminal Code Arts. 205-211 (cybercrime provisions)</td><td className="px-4 py-3 text-xs">Hacking, data theft, illegal access to information systems</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Yemen</td><td className="px-4 py-3">Cybercrime Law No. 5 of 2015</td><td className="px-4 py-3 text-xs">Hacking, fraud, copyright infringement, system interference</td></tr>
-                            <tr className="hover:bg-gray-50/30 transition-colors"><td className="px-4 py-3 font-medium">Iran</td><td className="px-4 py-3">Computer Crimes Law (ratified 2009)</td><td className="px-4 py-3 text-xs">Hacking, data theft, system disruption, cyber fraud</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="not-prose bg-gradient-to-br from-red-50 to-rose-50/50 border border-red-200 rounded-xl p-5 shadow-sm">
-                    <div className="flex items-start gap-3">
-                        <AlertTriangleIcon size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-red-800">
-                            <strong>Important:</strong> If you engage in any activity prohibited under Section 3 of this
-                            policy, you may be subject to criminal prosecution under one or more of the above laws.
-                            We will fully cooperate with law enforcement authorities in investigating such violations.
-                        </p>
-                    </div>
-                </div>
+                <Note tone="legal" title="No editorial control of your content">
+                    We do not pre-screen or edit your support content. Where you are a business customer, you are
+                    responsible for the content your users upload to the Service. Removal of content is
+                    discretionary except where a lawful order requires it, and we may remove content that breaches
+                    this AUP or applicable law.
+                </Note>
             </section>
 
-            <section className="mb-10">
-                <h2>11. Policy Updates</h2>
+            <section aria-labelledby="c5">
+                <H2 id="c5" no="5.">Account and Credential Security</H2>
+                <ul>
+                    <li>You must provide accurate registration information and keep it current.</li>
+                    <li>
+                        You are responsible for all activity under your account and for keeping your credentials
+                        confidential. Use a strong, unique password and enable multi-factor authentication where
+                        offered.
+                    </li>
+                    <li>
+                        You must notify us promptly at{' '}
+                        <a href={`mailto:${POLICY_CONTACTS.security}`}>{POLICY_CONTACTS.security}</a> if you
+                        suspect unauthorised access to your account, credentials, or any of your data.
+                    </li>
+                    <li>
+                        Do not share credentials between users. Where a business account has multiple users, create
+                        named accounts so activity is attributable.
+                    </li>
+                </ul>
+            </section>
+
+            <section aria-labelledby="c6">
+                <H2 id="c6" no="6.">Attachments and Files</H2>
                 <p>
-                    This AUP may be updated periodically to address new technologies, threats, or
-                    regulatory requirements. Users will be notified of material changes, and continued
-                    use of the service constitutes acceptance of the updated policy.
+                    To protect the Service and other users, the following limits apply to attachments on tickets.
+                    You must scan and review any file before uploading it.
+                </p>
+                <DataTable
+                    caption="Attachment limits"
+                    head={['Limit', 'Value']}
+                    firstColHeader
+                    colClassName={[undefined, 'whitespace-nowrap']}
+                    rows={[
+                        ['Maximum size per file', '25 MB'],
+                        ['Maximum total attachments per ticket', '100 MB'],
+                        ['Accepted types', 'Common documents, images, archives, and plain text'],
+                        ['Prohibited', 'Executables, scripts, and any file containing malicious code'],
+                    ]}
+                />
+                <p>
+                    Attachments are retained for the period in Clause 3 of the{' '}
+                    <a href="/policy/data-retention">Data Retention Policy</a>. Do not include passwords, keys, or
+                    other secrets in a ticket. Uploaded files are scanned for malware and are accessible only to the
+                    agents and administrators assigned to the relevant request.
                 </p>
             </section>
 
-            <section className="mb-10">
-                <h2>12. Contact Information</h2>
-                <div className="not-prose bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200 rounded-xl p-6 shadow-sm">
-                    <p className="text-sm text-gray-600 mb-4">
-                        For questions about this Acceptable Use Policy:
-                    </p>
-                    <ul className="text-sm text-gray-600 space-y-2">
-                        <li className="flex items-center gap-2"><MailIcon size={16} className="text-blue-500" /><strong>Policy Questions:</strong> policy@arkynox.com</li>
-                        <li className="flex items-center gap-2"><AlertTriangleIcon size={16} className="text-blue-500" /><strong>Violation Reports:</strong> abuse@arkynox.com</li>
-                        <li className="flex items-center gap-2"><ShieldIcon size={16} className="text-blue-500" /><strong>Appeals:</strong> appeals@arkynox.com</li>
-                        <li className="flex items-center gap-2"><ScaleIcon size={16} className="text-blue-500" /><strong>Legal Team:</strong> legal@arkynox.com</li>
-                    </ul>
-                </div>
+            <section aria-labelledby="c7">
+                <H2 id="c7" no="7.">Automated Access and AI</H2>
+                <H3 id="c7-1" no="7.1">Automation and scraping</H3>
+                <p>
+                    You may access the Service programmatically only through a documented integration interface
+                    we have made available to you, and within its published rate limits. Crawling, scraping, or
+                    bulk-extracting the Service outside such an interface is prohibited.
+                </p>
+                <H3 id="c7-2" no="7.2">Machine processing of ticket content</H3>
+                <p>
+                    We may process ticket content using automated systems, including for triage, classification,
+                    summarisation, translation, and quality assurance, as described in the{' '}
+                    <a href="/policy/privacy-policy">Privacy Policy</a>. You may object to automated decision-making
+                    that produces legal or similarly significant effects by contacting us, and we will route your
+                    request to a human reviewer.
+                </p>
+                <H3 id="c7-3" no="7.3">Vulnerability research</H3>
+                <Note tone="info" title="Safe harbour">
+                    If you are a qualified security researcher acting in good faith, testing for vulnerabilities is
+                    authorised by Arkynox where all of the following apply: you do not access data beyond the
+                    minimum necessary to demonstrate the issue; you do not degrade the Service; you do not
+                    exfiltrate or retain data beyond proof of concept; you do not threaten or extort; you give us a
+                    reasonable opportunity to fix the issue; and you do not publicly disclose the issue until we
+                    have had 90 days to remediate, or until we have already fixed it. Contact{' '}
+                    <a href={`mailto:${POLICY_CONTACTS.security}`}>{POLICY_CONTACTS.security}</a> before
+                    commencing.
+                </Note>
+            </section>
+
+            <section aria-labelledby="c8">
+                <H2 id="c8" no="8.">Monitoring and Security Investigations</H2>
+                <p>
+                    To protect the Service, its users, and the wider internet, we may monitor the Service for
+                    security-relevant events such as authentication failures, abuse patterns, and vulnerability
+                    indicators, in line with ISO/IEC 27001:2022 Annex A Control 8.16 (monitoring activities). We
+                    retain and access logs only for the periods set out in the Data Retention Policy, and only for
+                    legitimate purposes such as investigating abuse, enforcing this AUP, or responding to legal
+                    process.
+                </p>
+                <p>
+                    We do not review the substantive content of your support correspondence for editorial
+                    purposes, and we do not sell data to third parties.
+                </p>
+            </section>
+
+            <section aria-labelledby="c9">
+                <H2 id="c9" no="9.">Enforcement</H2>
+                <p>
+                    We enforce this AUP by a proportionate ladder. Where we take action, we will normally tell you
+                    what triggered it, unless doing so would compromise a security investigation or a third
+                    party&rsquo;s rights.
+                </p>
+                <DataTable
+                    caption="Enforcement ladder"
+                    head={['Action', 'When it applies']}
+                    firstColHeader
+                    rows={[
+                        ['Guidance or a request to correct', 'First-time minor breach, or a breach we can remediate by you'],
+                        ['Warning, or temporary rate limits', 'Repeated or moderate breach'],
+                        ['Restriction of specific features', 'Serious or sustained breach with limited service impact'],
+                        ['Suspension pending investigation', 'Suspected serious breach, abuse, or a security issue'],
+                        ['Termination of the account', 'Material or repeated breach, or breach that cannot be remedied'],
+                    ]}
+                />
+                <p>
+                    Where we suspend or terminate an account, we refund any prepaid fees only for the unused
+                    portion of the term, except where termination results from your material breach, in which
+                    case no refund is due.
+                </p>
+            </section>
+
+            <section aria-labelledby="c10">
+                <H2 id="c10" no="10.">Suspension, Termination and Appeal</H2>
+                <p>
+                    We may suspend your access immediately, without notice, where we reasonably believe there is
+                    an imminent risk to the security of the Service or its users, or where a law or lawful order
+                    requires it. Otherwise, we provide notice and a reasonable opportunity to remedy the breach
+                    before termination.
+                </p>
+                <p>
+                    If you believe we have acted in error, you may appeal by emailing{' '}
+                    <a href={`mailto:${POLICY_CONTACTS.legal}`}>{POLICY_CONTACTS.legal}</a> with the subject
+                    &ldquo;AUP appeal&rdquo;. We acknowledge appeals within five (5) business days and aim to
+                    reach a decision within fifteen (15) business days. Appeals are reviewed by an Arkynox manager
+                    who was not involved in the original decision.
+                </p>
+            </section>
+
+            <section aria-labelledby="c11">
+                <H2 id="c11" no="11.">Jurisdictional Requirements</H2>
+                <p>
+                    This AUP is written to be workable in every market we serve. In some jurisdictions,
+                    additional local rules apply to online content, intermediary liability, or
+                    government access. The table below is a general summary, current as of the effective date of
+                    this policy; it is not legal advice, and the applicable rule in your own jurisdiction takes
+                    precedence.
+                </p>
+                <JurisdictionExplorer showRights />
+            </section>
+
+            <section aria-labelledby="c12">
+                <H2 id="c12" no="12.">Changes to This Policy</H2>
+                <p>
+                    We may revise this AUP to reflect changes in the Service, our security posture, or the law.
+                    Material changes are notified in writing at least fifteen (15) days before they take effect,
+                    and the revised version is published at{' '}
+                    <a href="/policy/acceptable-use">/policy/acceptable-use</a> with an updated effective date.
+                    Continuing to use the Service after the effective date means you accept the revised policy.
+                </p>
+            </section>
+
+            <section aria-labelledby="c13">
+                <H2 id="c13" no="13.">Reporting and Contact</H2>
+                <p>
+                    To report a violation by another user, report unlawful or infringing content, or ask a
+                    question about this policy, contact our Grievance Officer by email at{' '}
+                    <a href={`mailto:${POLICY_CONTACTS.grievance}`}>{POLICY_CONTACTS.grievance}</a>, or by post to
+                    the registered office address in our Terms and Conditions. We aim to acknowledge reports within
+                    twenty-four (24) hours and to resolve them within the timelines in Clause 4.
+                </p>
             </section>
         </PolicyLayout>
     );

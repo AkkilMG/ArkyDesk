@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 import AuthShell, { AuthTitle } from "@/components/auth/AuthShell";
 import FormMessage from "@/components/auth/FormMessage";
 import Button from "@/components/ui/Button";
 import Field from "@/components/ui/Field";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Shimmer from "@/components/ui/Shimmer";
+import SpinnerIcon from "@/components/ui/SpinnerIcon";
 import TermsAcceptance from "@/components/ui/TermsAcceptance";
 import { useConsent } from "@/lib/ConsentContext";
 
@@ -45,6 +47,34 @@ export default function Signup() {
   // one to plain text while the other stayed masked would be misleading.
   const [revealed, setRevealed] = useState(false);
   const { hasValidConsent } = useConsent();
+  const [checkingSession, setCheckingSession] = useState(true);
+  const router = useRouter();
+
+  /** Send an already-signed-in visitor to the surface their role allows. */
+  const redirectIfSignedIn = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/verify", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.success) {
+        router.push(data.admin ? "/dashboard" : "/tickets");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking session:", error);
+    }
+    setCheckingSession(false);
+  }, [router]);
+
+  useEffect(() => {
+    if (document.cookie) {
+      void redirectIfSignedIn();
+    } else {
+      setCheckingSession(false);
+    }
+  }, [redirectIfSignedIn]);
 
   const update = (key: keyof FormData) => (value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -132,6 +162,28 @@ export default function Signup() {
       setShowTermsModal(true);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <AuthShell>
+        <div className="auth-stack" aria-busy="true" aria-label="Loading sign up">
+          <Shimmer className="h-8 w-48 rounded" variant="card" />
+          <div className="auth-stack">
+            <Shimmer className="h-4 w-16 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-lg" variant="card" />
+            <Shimmer className="h-4 w-16 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-lg" variant="card" />
+            <Shimmer className="h-4 w-16 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-lg" variant="card" />
+            <Shimmer className="h-4 w-16 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-lg" variant="card" />
+            <Shimmer className="h-5 w-64 rounded" variant="list" />
+            <Shimmer className="h-11 w-full rounded-3xl" variant="card" />
+          </div>
+        </div>
+      </AuthShell>
+    );
+  }
 
   return (
     <>
@@ -262,7 +314,7 @@ export default function Signup() {
             >
               {isLoading ? (
                 <>
-                  <LoadingSpinner size="sm" />
+                  <SpinnerIcon className="size-4" />
                   Creating account…
                 </>
               ) : (

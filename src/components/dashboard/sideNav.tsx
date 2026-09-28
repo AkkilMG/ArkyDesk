@@ -172,20 +172,24 @@ export default function SideNav({
           className="min-w-0 flex-1"
           onClick={closeMobile}
         >
-          <img
-            src="/logo/light.webp"
-            alt="Arkynox"
-            className="h-6 dark:hidden"
-            width={120}
-            height={24}
-          />
-          <img
-            src="/logo/dark.webp"
-            alt="Arkynox"
-            className="hidden h-6 dark:block"
-            width={120}
-            height={24}
-          />
+          <span className="flex items-center gap-2.5">
+            {/* Theme-specific artwork. Mirrors the pattern in PolicyHeader. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo/logo-light-128.png"
+              alt=""
+              className="h-7 w-7 dark:hidden"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo/logo-dark-128.png"
+              alt=""
+              className="hidden h-7 w-7 dark:block"
+            />
+            <span className="text-sm font-bold tracking-tight text-foreground">
+              ArkyDesk
+            </span>
+          </span>
         </Link>
         <ThemeToggle />
       </div>

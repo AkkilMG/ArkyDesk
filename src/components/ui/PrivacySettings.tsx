@@ -314,7 +314,7 @@ export default function PrivacySettings() {
                             <AgreementRow
                                 label="Data processing"
                                 accepted={consentSettings?.dataProcessingAccepted}
-                                href="/policy"
+                                href="/policy/privacy-policy"
                                 cta="View all"
                             />
                         </div>

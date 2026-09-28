@@ -1,217 +1,524 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Shimmer from '@/components/ui/Shimmer';
-import Link from "next/link";
-import ConsentBanner from '../ui/ConsentBanner';
+import { useEffect, useMemo, useState } from "react";
 
-export default function MainLayout({ isMobileMenuOpen, setIsMobileMenuOpen }: any) {
-    const [stats, setStats] = useState<any[]>([
-        { label: 'Total Users', count: 0, suffix: '' },
-        { label: 'Opened Tickets', count: 0, suffix: '' },
-        { label: 'Resolved', count: 0, suffix: '' },
-        { label: 'Pending', count: 0, suffix: '' },
-    ]);
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import Card, {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import ConsentBanner from "@/components/ui/ConsentBanner";
+import Shimmer from "@/components/ui/Shimmer";
+import { cn } from "@/lib/cn";
 
-    const [displayCounts, setDisplayCounts] = useState<number[]>(Array(4).fill(0));
-    const [loadingStats, setLoadingStats] = useState(true);
+type Props = {
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (value: boolean) => void;
+  onNewTicket: () => void;
+};
 
-    useEffect(() => {
-        fetch('/api/admin/stats')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const realStats = [
-                        { label: 'Total Users', count: data.stats.totalUsers, suffix: '' },
-                        { label: 'Opened Tickets', count: data.stats.openTickets, suffix: '' },
-                        { label: 'Resolved', count: data.stats.closedTickets, suffix: '' },
-                        { label: 'Pending', count: data.stats.pendingActions, suffix: '' },
-                    ];
-                    setStats(realStats);
-                }
-            })
-            .catch(console.error)
-            .finally(() => {
-                setLoadingStats(false);
-                animateCounts();
-            });
-    }, []);
+type AdminStats = {
+  totalUsers: number;
+  totalTickets: number;
+  openTickets: number;
+  closedTickets: number;
+  pendingActions: number;
+};
 
-    const animateCounts = () => {
-        setDisplayCounts(Array(stats.length).fill(0));
-        const targetCounts = [...stats.map(s => s.count)];
-        const intervals: NodeJS.Timeout[] = [];
-        const maxCount = Math.max(...targetCounts, 1);
+type AdminTicket = {
+  _id: string;
+  user: string;
+  email?: string;
+  subject?: string;
+  createdAt?: unknown;
+  status?: string;
+};
 
-        targetCounts.forEach((target, index) => {
-            const increment = Math.max(1, Math.ceil(target / 40));
-            let current = 0;
-            const interval = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    current = target;
-                    clearInterval(interval);
-                }
-                setDisplayCounts((prev) => {
-                    const updated = [...prev];
-                    updated[index] = current;
-                    return updated;
-                });
-            }, 25);
-            intervals.push(interval);
-        });
+type Stat = {
+  id: keyof Omit<AdminStats, "totalTickets">;
+  label: string;
+  chip: string;
+  icon: React.ReactNode;
+};
 
-        setTimeout(() => {
-            intervals.forEach(i => clearInterval(i));
-            setDisplayCounts(targetCounts);
-        }, 1500);
+const EMPTY_STATS: AdminStats = {
+  totalUsers: 0,
+  totalTickets: 0,
+  openTickets: 0,
+  closedTickets: 0,
+  pendingActions: 0,
+};
+
+const STAT_CARDS: Stat[] = [
+  {
+    id: "totalUsers",
+    label: "Total Users",
+    chip: "bg-muted text-muted-foreground",
+    icon: (
+      <svg className="size-4 sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.75}
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "openTickets",
+    label: "Open Tickets",
+    chip: "bg-info/15 text-info",
+    icon: (
+      <svg className="size-4 sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.75}
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "closedTickets",
+    label: "Resolved",
+    chip: "bg-success/15 text-success",
+    icon: (
+      <svg className="size-4 sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.75}
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: "pendingActions",
+    label: "Pending Actions",
+    chip: "bg-warning/15 text-warning",
+    icon: (
+      <svg className="size-4 sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.75}
+          d="M12 8v4l2.5 2.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+  },
+];
+
+const localKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+const formatDay = (key: string) => {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const timeAgo = (value: unknown) => {
+  if (!value) return "";
+  const date = new Date(value as string | number | Date);
+  if (Number.isNaN(date.getTime())) return "";
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
+const statusLabel = (status?: string) => {
+  const value = (status ?? "").trim();
+  if (!value) return "Unknown";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+const statusTone = (
+  status?: string
+): "success" | "info" | "muted" => {
+  const value = (status ?? "").toLowerCase();
+  if (value === "closed") return "success";
+  if (value === "open") return "info";
+  return "muted";
+};
+
+const initials = (name?: string) => (name ?? "?").trim().charAt(0).toUpperCase();
+
+export default function MainLayout({
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  onNewTicket,
+}: Props) {
+  const [stats, setStats] = useState<AdminStats>(EMPTY_STATS);
+  const [tickets, setTickets] = useState<AdminTicket[]>([]);
+  const [displayCounts, setDisplayCounts] = useState<Record<string, number>>({});
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timers: ReturnType<typeof setInterval>[] = [];
+
+    const animateCounts = (next: AdminStats) => {
+      const targets: Record<string, number> = {
+        totalUsers: next.totalUsers,
+        openTickets: next.openTickets,
+        closedTickets: next.closedTickets,
+        pendingActions: next.pendingActions,
+      };
+
+      Object.entries(targets).forEach(([key, target]) => {
+        const increment = Math.max(1, Math.ceil(target / 40));
+        let current = 0;
+        const interval = setInterval(() => {
+          current = Math.min(target, current + increment);
+          setDisplayCounts((prev) => ({ ...prev, [key]: current }));
+          if (current >= target) clearInterval(interval);
+        }, 25);
+        timers.push(interval);
+      });
+
+      // Guarantee the final values land exactly, even if a tick is dropped.
+      setTimeout(() => {
+        setDisplayCounts(targets);
+      }, 1500);
     };
 
-    return (
-        <div className="flex-1 p-4 sm:p-6 overflow-auto">
-            <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
-                <div className="w-full sm:w-auto">
-                    <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 fade-in">Welcome to ArkyDesk</h1>
-                    <p className="text-gray-500 mt-1 text-sm sm:text-base">Manage your tickets and track progress</p>
-                </div>
-                <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-                    <button className="focus:outline-none p-2 pl-3 border border-gray-300 rounded-lg sm:hidden hover:bg-gray-50 transition-smooth" onClick={(e) => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"} aria-expanded={isMobileMenuOpen}>
-                        <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="" aria-hidden="true" className="h-6 w-6" />
-                    </button>
-                    <div className="relative flex-1 sm:flex-initial">
-                        <label htmlFor="dashboard-search" className="sr-only">Search dashboard</label>
-                        <input
-                            id="dashboard-search"
-                            type="text"
-                            className="bg-gray-100 border border-gray-300 rounded-full py-2 px-4 pr-10 w-full sm:w-64 focus:ring-2 focus:ring-blue-300 focus:ring-blue-400 transition-smooth text-sm sm:text-base"
-                            placeholder="Search Dashboard"
-                        />
-                        <img src="/icons/search.svg" className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" alt="" aria-hidden="true" />
-                    </div>
-                </div>
-            </header>
+    Promise.all([
+      fetch("/api/admin/stats")
+        .then((res) => res.json())
+        .catch(() => ({ success: false })),
+      fetch("/api/admin-dashboard/tickets")
+        .then((res) => res.json())
+        .catch(() => ({ success: false })),
+    ]).then(([statsRes, ticketRes]) => {
+      if (cancelled) return;
+      setStats(statsRes?.stats ?? EMPTY_STATS);
+      setTickets(ticketRes?.tickets ?? []);
+      animateCounts(statsRes?.stats ?? EMPTY_STATS);
+    }).finally(() => {
+      if (!cancelled) setLoadingStats(false);
+    });
 
-            <ConsentBanner />
+    return () => {
+      cancelled = true;
+      timers.forEach((timer) => clearInterval(timer));
+    };
+  }, []);
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {stats.map((stat, index) => (
-                    <div key={index} className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-                        {loadingStats ? (
-                            <div className="space-y-3 py-1">
-                                <Shimmer className="h-8 w-20 rounded" variant="card" />
-                                <Shimmer className="h-3 w-16 rounded" variant="list" />
-                            </div>
-                        ) : (
-                            <>
-                                <span className="text-2xl sm:text-3xl font-bold text-gray-900 block">
-                                    {displayCounts[index]}
-                                    <span className="text-sm sm:text-base text-gray-500 ml-0.5">{stat.suffix}</span>
-                                </span>
-                                <span className="text-xs sm:text-sm text-gray-500 mt-1 block">{stat.label}</span>
-                            </>
-                        )}
-                    </div>
-                ))}
+  const activity = useMemo(() => {
+    const now = new Date();
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i));
+      return { key: localKey(date), count: 0 };
+    });
+    const index = new Map(days.map((day, i) => [day.key, i]));
+
+    for (const ticket of tickets) {
+      if (!ticket.createdAt) continue;
+      const date = new Date(ticket.createdAt as string | number | Date);
+      if (Number.isNaN(date.getTime())) continue;
+      const i = index.get(localKey(date));
+      if (i !== undefined) days[i].count += 1;
+    }
+
+    return days;
+  }, [tickets]);
+
+  const maxActivity = Math.max(...activity.map((day) => day.count), 1);
+
+  const status = useMemo(() => {
+    const total = stats.totalTickets;
+    const open = stats.openTickets;
+    const closed = stats.closedTickets;
+    return {
+      total,
+      open,
+      closed,
+      other: Math.max(0, total - open - closed),
+      pendingActions: stats.pendingActions,
+    };
+  }, [stats]);
+
+  const resolutionRate = status.total > 0
+    ? Math.round((status.closed / status.total) * 100)
+    : 0;
+
+  const pct = (value: number) => (status.total > 0 ? Math.round((value / status.total) * 100) : 0);
+
+  const recentTickets = tickets.slice(0, 5);
+
+  const statRows = [
+    { key: "open", label: "Open", value: status.open, tone: "info" },
+    { key: "resolved", label: "Resolved", value: status.closed, tone: "success" },
+    { key: "other", label: "Other", value: status.other, tone: "muted" },
+  ] as const;
+
+  return (
+    <div className="flex-1 overflow-auto">
+      <div className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground animate-fade-in sm:text-3xl">
+              Welcome to ArkyDesk
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+              Manage your tickets and track progress
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={isMobileMenuOpen ? "/icons/close.svg" : "/icons/menu.svg"} alt="" aria-hidden="true" className="size-6" />
+            </Button>
+
+            <div className="relative flex-1 sm:flex-initial">
+              <label htmlFor="dashboard-search" className="sr-only">Search dashboard</label>
+              <input
+                id="dashboard-search"
+                type="text"
+                className="w-full rounded-full border border-border bg-muted/50 py-2 pl-4 pr-10 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-foreground/25 focus:outline-none focus:ring-2 focus:ring-ring/30 sm:w-64"
+                placeholder="Search Dashboard"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icons/search.svg"
+                className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground sm:size-5"
+                alt=""
+                aria-hidden="true"
+              />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {/* Team Section */}
-                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 card-hover transition-smooth fade-in">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Support Team
-                    </h3>
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                        {[1, 2, 3, 4].map((member, index) => (
-                            <div key={index} className="relative">
-                                {/* Rendered locally: the previous `ui-avatars.com`
-                                    request leaked page visits to a third party. */}
-                                <span
-                                    aria-hidden="true"
-                                    className="flex w-10 h-10 sm:w-12 sm:h-12 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground ring-1 ring-border"
-                                >
-                                    M{index + 1}
-                                </span>
-                                <span className="sr-only">Team member {member}</span>
-                                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-success border-2 border-card rounded-full"></div>
-                            </div>
-                        ))}
-                        <button className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-semibold text-base sm:text-lg transition-smooth btn-hover flex items-center justify-center">
-                            +
-                        </button>
-                    </div>
-                </div>
+            <Button variant="primary" onClick={onNewTicket}>
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              New Ticket
+            </Button>
+          </div>
+        </header>
 
-                {/* Quick Stats */}
-                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 card-hover transition-smooth fade-in">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        Statistics Overview
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                        {stats.map((stat, index) => (
-                            <div key={index} className="text-center bg-gray-50 p-2 sm:p-3 rounded-lg hover:bg-gray-100 transition-all">
-                                {loadingStats ? (
-                                    <div className="space-y-2 py-2">
-                                        <Shimmer className="h-8 w-24 mx-auto rounded" />
-                                        <Shimmer className="h-3 w-16 mx-auto rounded" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <span className="text-lg sm:text-2xl font-bold text-blue-600 block">
-                                            {displayCounts[index]}
-                                            <span className="text-sm sm:text-lg">{stat.suffix}</span>
-                                        </span>
-                                        <span className="text-xs sm:text-sm text-gray-600 mt-1 block">{stat.label}</span>
-                                    </>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+        <ConsentBanner />
 
-            {/* Quick Actions */}
-            <div className="mt-4 sm:mt-6 bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 card-hover transition-smooth fade-in">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Quick Actions
-                </h3>
-                <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                    <Link href="/tickets" className="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-smooth btn-hover text-blue-700 font-medium text-sm sm:text-base">
-                        <svg className="h-5 w-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span className="text-center">View Tickets</span>
-                    </Link>
-                    <button className="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-smooth btn-hover text-green-700 font-medium text-sm sm:text-base">
-                        <svg className="h-5 w-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span className="text-center">New Ticket</span>
-                    </button>
-                    <a href="/profile" className="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-smooth btn-hover text-purple-700 font-medium text-sm sm:text-base">
-                        <svg className="h-5 w-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span className="text-center">Profile</span>
-                    </a>
-                    <button className="flex flex-col sm:flex-row items-center justify-center p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-smooth btn-hover text-gray-700 font-medium text-sm sm:text-base">
-                        <svg className="h-5 w-5 mb-1 sm:mb-0 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span className="text-center">Settings</span>
-                    </button>
+        {/* Stat tiles */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {STAT_CARDS.map((stat) => (
+            <Card key={stat.id} className="p-4 sm:p-5">
+              {loadingStats ? (
+                <div className="space-y-3 py-1">
+                  <Shimmer className="h-8 w-20 rounded" variant="card" />
+                  <Shimmer className="h-3 w-16 rounded" variant="list" />
                 </div>
-            </div>
+              ) : (
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="block text-2xl font-bold tabular-nums text-foreground animate-fade-in sm:text-3xl">
+                      {displayCounts[stat.id] ?? 0}
+                    </span>
+                    <span className="mt-1 block text-xs font-medium text-muted-foreground sm:text-sm">
+                      {stat.label}
+                    </span>
+                  </div>
+                  <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-10", stat.chip)}>
+                    {stat.icon}
+                  </span>
+                </div>
+              )}
+            </Card>
+          ))}
         </div>
-    );
+
+        {/* Analytics row one */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ticket Activity</CardTitle>
+              <CardDescription>Tickets opened in the last 7 days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingStats ? (
+                <div className="space-y-3">
+                  <Shimmer className="h-36 w-full rounded-xl" variant="card" />
+                  <Shimmer className="h-3 w-40 rounded" variant="list" />
+                </div>
+              ) : (
+                <div>
+                  <div className="flex h-40 items-end gap-2 sm:gap-3">
+                    {activity.map((day, i) => (
+                      <div
+                        key={day.key}
+                        role="img"
+                        aria-label={`${formatDay(day.key)}: ${day.count} ticket${day.count === 1 ? "" : "s"}`}
+                        className="group/bar relative flex h-full flex-1 flex-col items-center justify-end"
+                      >
+                        <span className="pointer-events-none absolute bottom-full z-10 mb-2 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 text-xs font-semibold text-background opacity-0 shadow-pill transition-opacity group-hover/bar:opacity-100">
+                          {formatDay(day.key)} · {day.count}
+                        </span>
+                        <div
+                          className={cn(
+                            "w-full max-w-10 rounded-t-md",
+                            i === activity.length - 1
+                              ? "bg-brand group-hover/bar:bg-brand-hover"
+                              : "bg-muted group-hover/bar:bg-foreground/60"
+                          )}
+                          style={{ height: `${(day.count / maxActivity) * 96 + 4}%` }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex gap-2 sm:gap-3">
+                    {activity.map((day) => (
+                      <span key={day.key} className="flex-1 text-center text-micro uppercase tracking-wide text-muted-foreground">
+                        {new Date(`${day.key}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" })}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ticket Status</CardTitle>
+              <CardDescription>Distribution of the current backlog</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {loadingStats ? (
+                <div className="space-y-3">
+                  <Shimmer className="h-2.5 w-full rounded-full" variant="card" />
+                  <Shimmer className="h-20 w-full rounded-xl" variant="card" />
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/60"
+                    role="img"
+                    aria-label={`${status.open} open, ${status.closed} resolved, ${status.other} other of ${status.total} tickets`}
+                  >
+                    <div className="h-full bg-info transition-all" style={{ width: `${pct(status.open)}%` }} />
+                    <div className="h-full bg-success transition-all" style={{ width: `${pct(status.closed)}%` }} />
+                    {status.other > 0 && (
+                      <div className="h-full bg-muted-foreground/40 transition-all" style={{ width: `${pct(status.other)}%` }} />
+                    )}
+                  </div>
+                  <ul className="space-y-3">
+                    {statRows.map((row) => (
+                      <li key={row.key} className="flex items-center justify-between gap-3 text-sm">
+                        <span className="flex items-center gap-2 font-medium text-foreground">
+                          <span
+                            className={cn(
+                              "size-2.5 rounded-full",
+                              row.tone === "info" && "bg-info",
+                              row.tone === "success" && "bg-success",
+                              row.tone === "muted" && "bg-muted-foreground/40"
+                            )}
+                            aria-hidden="true"
+                          />
+                          {row.label}
+                        </span>
+                        <span className="flex items-baseline gap-2 text-muted-foreground">
+                          <span className="font-semibold tabular-nums text-foreground">{row.value}</span>
+                          <span className="w-10 text-right tabular-nums">{pct(row.value)}%</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Analytics row two */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Resolution Rate</CardTitle>
+              <CardDescription>Share of tickets currently resolved</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {loadingStats ? (
+                <Shimmer className="h-24 w-full rounded-xl" variant="card" />
+              ) : (
+                <>
+                  <div className="flex items-end justify-between gap-4">
+                    <span className="text-3xl font-bold tabular-nums text-foreground">{resolutionRate}%</span>
+                    <Badge tone="brand">{status.closed} closed</Badge>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted/60" role="img" aria-label={`${resolutionRate} percent resolution rate`}>
+                    <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${resolutionRate}%` }} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {status.closed} of {status.total} tickets resolved
+                    {status.pendingActions > 0 && (
+                      <> · {status.pendingActions} pending action{status.pendingActions === 1 ? "" : "s"}</>
+                    )}
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Tickets</CardTitle>
+              <CardDescription>Latest activity across the helpdesk</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingStats ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Shimmer key={i} className="h-10 w-full rounded-xl" variant="list" />
+                  ))}
+                </div>
+              ) : recentTickets.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">No tickets yet.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {recentTickets.map((ticket) => (
+                    <li key={ticket._id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground ring-1 ring-border">
+                        {initials(ticket.user)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {ticket.subject?.trim() || "Untitled ticket"}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {ticket.user} · {timeAgo(ticket.createdAt)}
+                        </p>
+                      </div>
+                      <Badge tone={statusTone(ticket.status)}>{statusLabel(ticket.status)}</Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import SpinnerIcon from "./SpinnerIcon";
 
 type LoadingSpinnerProps = {
   size?: "sm" | "md" | "lg";
@@ -16,13 +17,17 @@ const SIZES: Record<NonNullable<LoadingSpinnerProps["size"]>, string> = {
 };
 
 /**
- * Centred loading state.
+ * Centred, page-level loading state.
  *
  * A real spinner rather than a skeleton: used where the shape of the content
  * that is coming is unknown, while `Shimmer` is for when it is predictable.
  * `sizeClasses` was previously typed `any`; it is now a `Record` keyed by the
  * same union as `size`, so a typo is a type error rather than a silent `NaN`
  * class.
+ *
+ * This owns `p-8`, a default `Loading…` label and a `role="status"` live
+ * region, so it is for whole-viewport states ONLY. Inside a button use
+ * `SpinnerIcon` — nesting this there adds its padding and label to the button.
  */
 export default function LoadingSpinner({
   size = "md",
@@ -39,14 +44,7 @@ export default function LoadingSpinner({
         className
       )}
     >
-      <span
-        className={cn(
-          "mb-4 inline-block rounded-full border-2 border-border border-t-foreground/70",
-          "motion-safe:animate-spin",
-          SIZES[size]
-        )}
-        aria-hidden="true"
-      />
+      <SpinnerIcon className={cn("mb-4", SIZES[size])} />
       {text ? <p className="mb-2 font-medium text-foreground">{text}</p> : null}
       {subText ? (
         <p className="max-w-xs text-sm text-muted-foreground">{subText}</p>
