@@ -4,7 +4,7 @@
 
 Arkydesk is an open-source customer engagement platform designed to support AvianInTek's suite of products. Built with modern web technologies, it aims to provide seamless interaction and support for users. Yet a lot to work on!
 
----
+--- 
 
 ## 🛠️ Tech Stack
 
