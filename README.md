@@ -14,7 +14,7 @@ Arkydesk is an open-source customer engagement platform designed to support Avia
 - **Package Manager**: [npm](https://www.npmjs.com/)
 
 ---
-
+ 
 ## 🎨 Design References
 
 The design inspiration for Arkydesk is drawn from the following resources:
