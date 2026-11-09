@@ -46,6 +46,7 @@ export async function GET() {
         guest: user.guest,
         temporary: user.temporary,
         verify: user.verify,
+        externalId: user.externalId,
         createdAt: user.createdAt,
         tickets: ticketStats[0]?.totalTickets || 0,
         closedTickets: ticketStats[0]?.closedTickets || 0,

@@ -80,6 +80,7 @@ export async function getApiUser(): Promise<ApiUser | null> {
     guest: Boolean(user.guest),
     temporary: Boolean(user.temporary),
     verify: Boolean(user.verify),
+    externalId: user.externalId ?? null,
     createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : null,
   };
 }

@@ -16,12 +16,16 @@ import { NextResponse, type NextRequest } from "next/server";
  *                     they allowed to see this route?
  * Layer 3 (client) -> `SessionGuard` re-checks on tab focus so a session that
  *                     expires mid-use is handled gracefully.
+ *
+ * Authentication is delegated to auth.arkynox.com. Unauthenticated visitors are
+ * redirected to the auth server's authorize endpoint, which handles sign-in,
+ * sign-up, and consent before redirecting back with an authorization code.
  */
 
 /** Routes that require any valid session. */
 const PROTECTED = ["/dashboard", "/admin", "/tickets", "/profile"] as const;
 
-/** Routes that are pointless (and misleading) to show to a signed-in visitor. */
+/** Auth pages that now redirect to the external auth server. */
 const AUTH_PAGES = ["/signin", "/signup"] as const;
 
 /** Where a signed-in user lands by default. */
@@ -70,6 +74,31 @@ function isAuthPage(pathname: string) {
   );
 }
 
+/**
+ * Build the auth server authorize URL. Carries the original destination as
+ * `state` so the callback can redirect back after authentication.
+ */
+function buildAuthServerUrl(request: NextRequest, nextPath: string | null): URL {
+  const authServerUrl = process.env.AUTH_SERVER_URL || "https://auth.arkynox.com";
+  const clientId = process.env.AUTH_CLIENT_ID || "arkdesk";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.BASE_URL ||
+    request.nextUrl.origin;
+  const redirectUri = `${baseUrl}/api/auth/callback`;
+
+  const authorizeUrl = new URL("/api/auth/authorize", authServerUrl);
+  authorizeUrl.searchParams.set("client_id", clientId);
+  authorizeUrl.searchParams.set("redirect_uri", redirectUri);
+  authorizeUrl.searchParams.set("response_type", "code");
+
+  if (nextPath) {
+    authorizeUrl.searchParams.set("state", nextPath);
+  }
+
+  return authorizeUrl;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
@@ -82,17 +111,21 @@ export async function middleware(request: NextRequest) {
   const authenticated = await hasValidSession(request);
 
   if (isProtectedPath(pathname) && !authenticated) {
-    const signIn = new URL("/signin", request.url);
     const next = safeNextPath(`${pathname}${search}`);
-    if (next) signIn.searchParams.set("next", next);
-    signIn.searchParams.set("reason", "session");
-    return NextResponse.redirect(signIn);
+    const authorizeUrl = buildAuthServerUrl(request, next);
+    return NextResponse.redirect(authorizeUrl);
   }
 
-  // A signed-in visitor has no business on /signin or /signup.
-  if (isAuthPage(pathname) && authenticated) {
-    const next = safeNextPath(request.nextUrl.searchParams.get("next"));
-    return NextResponse.redirect(new URL(next ?? DEFAULT_APP_ROUTE, request.url));
+  // Auth pages (/signin, /signup) redirect to the auth server.
+  if (isAuthPage(pathname)) {
+    if (authenticated) {
+      // A signed-in visitor has no business on /signin or /signup.
+      const next = safeNextPath(request.nextUrl.searchParams.get("next"));
+      return NextResponse.redirect(new URL(next ?? DEFAULT_APP_ROUTE, request.url));
+    }
+    // Unauthenticated visitor on an auth page — redirect to auth server.
+    const authorizeUrl = buildAuthServerUrl(request, null);
+    return NextResponse.redirect(authorizeUrl);
   }
 
   const requestHeaders = new Headers(request.headers);

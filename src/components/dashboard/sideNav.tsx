@@ -146,15 +146,35 @@ export default function SideNav({
   /**
    * Sign out is POST-only: the route refuses GET so a cross-site `<img src>` or
    * `<link>` cannot end someone's session (CSRF).
+   *
+   * After clearing the local session, the route returns a redirectUrl pointing
+   * to the auth server's global-logout endpoint. We navigate the browser there
+   * so the auth-domain cookie is sent automatically, revoking all refresh
+   * tokens across every Arkynox platform.
+   *
+   * IMPORTANT: We must NOT use a finally block here. If we get a redirectUrl,
+   * we navigate to the auth server for global logout. Any router.replace() or
+   * router.refresh() calls would interfere with that navigation and could
+   * trigger a new authorize flow before the global logout completes.
    */
   async function signOut() {
     if (signingOut) return;
     setSigningOut(true);
+    let globalRedirect = false;
     try {
-      await fetch("/api/auth/signout", { method: "POST" });
+      const res = await fetch("/api/auth/signout", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data?.redirectUrl) {
+        globalRedirect = true;
+        // Redirect browser to auth server for global logout.
+        // The auth server will redirect back to ArkyDesk after clearing sessions.
+        window.location.href = data.redirectUrl;
+      }
     } catch {
       // Even a network failure should land the user on the sign-in page.
-    } finally {
+    }
+    // Only fallback if we didn't get a global logout redirect
+    if (!globalRedirect) {
       router.replace("/signin");
       router.refresh();
     }

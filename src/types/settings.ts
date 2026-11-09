@@ -4,6 +4,8 @@ export interface UserDetails {
   email?: string;
   admin?: boolean;
   flagged?: boolean;
+  /** Set when the account is provisioned/managed by auth.arkynox.com. */
+  externalId?: string | null;
   tickets?: number;
   closedTickets?: number;
   createdAt?: Date;

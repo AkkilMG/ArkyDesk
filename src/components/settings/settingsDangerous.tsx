@@ -1,20 +1,25 @@
 
 // settingsDangerous
 import { useState } from "react";
-import type { Message } from "@/types/settings";
+import type { Message, UserDetails } from "@/types/settings";
 
 interface SettingsDangerousProps {
+  details?: UserDetails | null;
   settings: boolean;
   setSettings: (value: boolean) => void;
   isMobile: boolean;
 }
 
-export default function SettingsDangerous({ settings, setSettings, isMobile }: SettingsDangerousProps) {
+export default function SettingsDangerous({ details, settings, setSettings, isMobile }: SettingsDangerousProps) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<Message>({ type: '', text: '' });
+
+    // Arkynox-Auth-provisioned accounts have no local password; deletion is
+    // completed on the central auth server.
+    const isCentralAccount = Boolean(details?.externalId);
 
     const handleDeleteRequest = () => {
         setShowDeleteConfirm(true);
@@ -31,14 +36,18 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
     };
 
     const handleDeleteConfirm = async () => {
-        if (deleteConfirmText !== 'DELETE') {
-            setMessage({ type: 'error', text: 'Please type "DELETE" to confirm account deletion' });
-            return;
-        }
+        // Externally-managed accounts have no local password: the server
+        // returns a redirect to the central deletion page instead.
+        if (!isCentralAccount) {
+            if (deleteConfirmText !== 'DELETE') {
+                setMessage({ type: 'error', text: 'Please type "DELETE" to confirm account deletion' });
+                return;
+            }
 
-        if (password.length < 8) {
-            setMessage({ type: 'error', text: 'Enter your current password to confirm.' });
-            return;
+            if (password.length < 8) {
+                setMessage({ type: 'error', text: 'Enter your current password to confirm.' });
+                return;
+            }
         }
 
         setIsLoading(true);
@@ -50,8 +59,13 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // The server re-authenticates with this before deleting anything.
-                body: JSON.stringify({ password, confirm: password }),
+                // The server re-authenticates with this before deleting anything,
+                // unless the account is managed by Arkynox Auth.
+                body: JSON.stringify(
+                    isCentralAccount
+                        ? { password: '', confirm: '' }
+                        : { password, confirm: password },
+                ),
             });
 
             const data = await response.json();
@@ -59,11 +73,15 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
             if (data.success) {
                 setMessage({ type: 'success', text: 'Account deleted. You will be logged out shortly.' });
                 setPassword('');
-                
+
                 // Redirect to login after a delay
                 setTimeout(() => {
                     window.location.href = '/signin';
                 }, 2000);
+            } else if (data.redirectTo) {
+                // The account is managed centrally — finish deletion there.
+                setMessage({ type: 'error', text: data.message || 'Redirecting to Arkynox Auth…' });
+                window.location.href = data.redirectTo;
             } else {
                 setMessage({ type: 'error', text: data.message || 'Failed to delete account' });
             }
@@ -133,27 +151,36 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                     </button>
                 ) : (
                     <div className="bg-muted/40 p-4 rounded-lg border border-border">
-                        <p className="text-sm text-foreground mb-3">
-                            This action cannot be undone. Type <strong>DELETE</strong> and enter your current
-                            password to confirm:
-                        </p>
-                        <input 
-                            type="text"
-                            value={deleteConfirmText}
-                            onChange={(e) => setDeleteConfirmText(e.target.value)}
-                            className="w-full p-2 border border-border rounded-lg mb-3 bg-card text-foreground placeholder:text-muted-foreground focus:border-destructive/60 focus:ring-2 focus:ring-destructive/30 focus:outline-none"
-                            placeholder="Type DELETE to confirm"
-                            aria-label="Type DELETE to confirm"
-                        />
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-2 border border-border rounded-lg mb-3 bg-card text-foreground placeholder:text-muted-foreground focus:border-destructive/60 focus:ring-2 focus:ring-destructive/30 focus:outline-none"
-                            placeholder="Your current password"
-                            aria-label="Your current password"
-                            autoComplete="current-password"
-                        />
+                        {isCentralAccount ? (
+                            <p className="text-sm text-foreground mb-3">
+                                Your account is managed by Arkynox Auth. You&apos;ll be taken to the
+                                central account page to finish deleting it.
+                            </p>
+                        ) : (
+                            <>
+                                <p className="text-sm text-foreground mb-3">
+                                    This action cannot be undone. Type <strong>DELETE</strong> and enter your current
+                                    password to confirm:
+                                </p>
+                                <input
+                                    type="text"
+                                    value={deleteConfirmText}
+                                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                                    className="w-full p-2 border border-border rounded-lg mb-3 bg-card text-foreground placeholder:text-muted-foreground focus:border-destructive/60 focus:ring-2 focus:ring-destructive/30 focus:outline-none"
+                                    placeholder="Type DELETE to confirm"
+                                    aria-label="Type DELETE to confirm"
+                                />
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full p-2 border border-border rounded-lg mb-3 bg-card text-foreground placeholder:text-muted-foreground focus:border-destructive/60 focus:ring-2 focus:ring-destructive/30 focus:outline-none"
+                                    placeholder="Your current password"
+                                    aria-label="Your current password"
+                                    autoComplete="current-password"
+                                />
+                            </>
+                        )}
                         <div className="flex gap-3">
                             <button 
                                 onClick={handleDeleteCancel}
@@ -163,7 +190,11 @@ export default function SettingsDangerous({ settings, setSettings, isMobile }: S
                             </button>
                             <button 
                                 onClick={handleDeleteConfirm}
-                                disabled={isLoading || deleteConfirmText !== 'DELETE' || password.length < 8}
+                                disabled={
+                                    isLoading ||
+                                    (!isCentralAccount &&
+                                        (deleteConfirmText !== 'DELETE' || password.length < 8))
+                                }
                                 className="px-4 py-3 sm:py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 disabled:opacity-60 rounded-lg"
                             >
                                 {isLoading ? 'Deleting...' : 'Confirm Deletion'}

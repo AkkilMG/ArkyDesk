@@ -67,6 +67,7 @@ export default function AccountSettings({ details, settings, setSettings }: Sett
       />
     ) : (
       <SettingsDangerous
+        details={details}
         settings={settings}
         setSettings={setSettings}
         isMobile={isMobile}

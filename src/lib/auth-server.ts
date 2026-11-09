@@ -32,6 +32,7 @@ export const USER_PROJECTION = {
   guest: 1,
   temporary: 1,
   verify: 1,
+  externalId: 1,
   createdAt: 1,
 } as const;
 
@@ -44,6 +45,8 @@ export type SessionUser = {
   guest: boolean;
   temporary: boolean;
   verify: boolean;
+  /** The user's ID on auth.arkynox.com, set during the OAuth callback (JIT provisioning). */
+  externalId: string | null;
   createdAt: string | null;
 };
 
@@ -95,6 +98,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     guest: Boolean(user.guest),
     temporary: Boolean(user.temporary),
     verify: Boolean(user.verify),
+    externalId: user.externalId ?? null,
     createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : null,
   };
 });
@@ -137,14 +141,24 @@ export const getPageAccess = cache(
 );
 
 /**
- * Hard requirement of a valid session. Redirects to /signin when absent.
+ * Hard requirement of a valid session. Redirects to the auth server when absent.
  * Use in Server Components only.
  */
 export async function requireUser(nextPath = "/"): Promise<SessionUser> {
   const user = await getSessionUser();
   if (!user) {
     const target = nextPath.startsWith("/") ? nextPath : "/";
-    redirect(`/signin?next=${encodeURIComponent(target)}&reason=session`);
+    const authServerUrl = process.env.AUTH_SERVER_URL || "https://auth.arkynox.com";
+    const clientId = process.env.AUTH_CLIENT_ID || "arkdesk";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || "http://localhost:3000";
+    const redirectUri = `${baseUrl}/api/auth/callback`;
+    const authorizeUrl = new URL("/api/auth/authorize", authServerUrl);
+    authorizeUrl.searchParams.set("client_id", clientId);
+    authorizeUrl.searchParams.set("redirect_uri", redirectUri);
+    authorizeUrl.searchParams.set("response_type", "code");
+    authorizeUrl.searchParams.set("state", target);
+    redirect(authorizeUrl.toString());
   }
   return user;
 }
@@ -153,7 +167,16 @@ export async function requireUser(nextPath = "/"): Promise<SessionUser> {
 export async function requireAdmin(): Promise<SessionUser> {
   const access = await getPageAccess("admin");
   if (access.status === "unauthenticated") {
-    redirect("/signin?reason=session");
+    const authServerUrl = process.env.AUTH_SERVER_URL || "https://auth.arkynox.com";
+    const clientId = process.env.AUTH_CLIENT_ID || "arkdesk";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || "http://localhost:3000";
+    const redirectUri = `${baseUrl}/api/auth/callback`;
+    const authorizeUrl = new URL("/api/auth/authorize", authServerUrl);
+    authorizeUrl.searchParams.set("client_id", clientId);
+    authorizeUrl.searchParams.set("redirect_uri", redirectUri);
+    authorizeUrl.searchParams.set("response_type", "code");
+    redirect(authorizeUrl.toString());
   }
   if (access.status === "forbidden") {
     // Deliberately not a redirect: the page renders <AccessRestricted /> so the

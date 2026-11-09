@@ -1,9 +1,5 @@
-import { getMongoClient } from "@/lib/mongodb";
-import { decryptSession, updateSession } from "@/lib/session";
+import { updateSession } from "@/lib/session";
 import { getApiUser, apiJson } from "@/lib/api-auth";
-import { logSecurityEvent } from "@/lib/security-log";
-import { ObjectId } from "mongodb";
-import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -12,16 +8,14 @@ export const dynamic = "force-dynamic";
  *
  * This is the single endpoint the client uses to answer "am I signed in, as
  * what, and may I go where?". It returns a self-contained payload so callers no
- * longer need to chain it with `/api/auth/details` (which used to leak the
- * password hash to the browser).
+ * longer need to chain it with `/api/auth/details`.
+ *
+ * The session cookie is minted by the OAuth callback route
+ * (`/api/auth/callback`) after a successful code exchange with auth.arkynox.com.
  *
  * Contract:
  *   401 — no cookie, or the cookie does not resolve to a live user.
  *   200 — { success: true, user: {...} }
- *
- * The previous implementation returned HTTP 200 with `success: false` when no
- * cookie was present, which made status-based guarding impossible to write
- * correctly on the client.
  */
 export async function GET() {
   try {

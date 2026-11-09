@@ -17,6 +17,8 @@ type SecurityEventName =
   | "auth.signin_failed"
   | "auth.signout"
   | "auth.signup"
+  | "auth.oauth_linked"
+  | "auth.oauth_provisioned"
   | "auth.guest_link_issued"
   | "auth.guest_link_consumed"
   | "auth.rate_limited"

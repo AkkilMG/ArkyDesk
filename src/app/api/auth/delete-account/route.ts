@@ -48,20 +48,14 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const parsed = schema.safeParse(await request.json().catch(() => ({})));
-    if (!parsed.success) {
-      return apiJson(
-        { success: false, message: parsed.error.issues[0]?.message ?? "Invalid input." },
-        400
-      );
-    }
+    const body = await request.json().catch(() => ({}));
 
     const db = await getMongoClient();
     const user = await db
       .collection("users")
       .findOne(
         { _id: new ObjectId(auth.user.id) },
-        { projection: { admin: 1, password: 1 } }
+        { projection: { admin: 1, password: 1, externalId: 1 } }
       );
 
     if (!user) {
@@ -72,6 +66,30 @@ export async function DELETE(request: Request) {
       return apiJson(
         { success: false, message: "Admin accounts cannot be self-deleted." },
         403
+      );
+    }
+
+    // OAuth users (provisioned via auth.arkynox.com) don't have local passwords.
+    // They must delete their account through the centralized auth server. This
+    // check runs before password validation so an externally-managed client can
+    // submit without a password and be routed to the central deletion flow.
+    if (user.externalId) {
+      const authServerUrl = process.env.AUTH_SERVER_URL || "https://auth.arkynox.com";
+      return apiJson(
+        {
+          success: false,
+          message: "Your account is managed by Arkynox Auth. Please delete it there.",
+          redirectTo: `${authServerUrl}/account?action=delete`,
+        },
+        400
+      );
+    }
+
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return apiJson(
+        { success: false, message: parsed.error.issues[0]?.message ?? "Invalid input." },
+        400
       );
     }
 
